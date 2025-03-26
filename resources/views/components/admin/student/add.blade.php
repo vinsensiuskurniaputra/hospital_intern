@@ -22,29 +22,40 @@
             <!-- Profile Picture Upload -->
             <div x-data="imageUpload()" class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
-                <div class="flex flex-col items-center justify-center">
-                    <!-- Image Preview -->
-                    <div x-show="imageUrl" class="mb-4">
-                        <img :src="imageUrl"
-                            class="w-32 h-32 rounded-full object-cover border-4 border-[#F5F7F0]">
-                    </div>
 
-                    <!-- Upload Area -->
-                    <div class="w-full">
-                        <label
-                            class="flex flex-col items-center w-full px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-                            <i class="bi bi-cloud-arrow-up text-3xl text-gray-400"></i>
-                            <span class="mt-2 text-sm text-gray-500">Drag and drop your photo here, or</span>
-                            <span class="mt-1 text-sm font-medium text-[#637F26]">Browse Files</span>
-                            <input type="file" name="photo_profile_url" class="hidden" @change="handleFileSelect"
-                                accept="image/*">
-                        </label>
-                    </div>
-                    @error('photo_profile_url')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                <!-- Upload Area -->
+                <div class="w-full border-2 border-dashed rounded-lg p-4 relative flex flex-col items-center justify-center"
+                    :class="{ 'border-gray-300 bg-gray-50': !imageUrl, 'border-green-500 bg-white': imageUrl }">
+
+                    <!-- Image Preview (di dalam area upload) -->
+                    <template x-if="imageUrl">
+                        <div class="relative flex flex-col items-center">
+                            <img :src="imageUrl"
+                                class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow">
+                            <!-- Remove Image Button -->
+                            <button type="button" @click="removeImage"
+                                class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:bg-red-600">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Label Upload (hanya muncul jika belum ada gambar) -->
+                    <label x-show="!imageUrl"
+                        class="flex flex-col items-center w-full p-6 cursor-pointer hover:bg-gray-100 transition rounded-lg">
+                        <i class="bi bi-cloud-arrow-up text-3xl text-gray-400"></i>
+                        <span class="mt-2 text-sm text-gray-500">Drag and drop your photo here, or</span>
+                        <span class="mt-1 text-sm font-medium text-green-700">Browse Files</span>
+                        <input type="file" name="photo_profile" class="hidden" x-ref="fileInput"
+                            @change="handleFileSelect" accept="image/*">
+                    </label>
+
+                    @error('photo_profile')
+                        <span class="text-red-500 text-sm mt-2">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
+
 
             <!-- Other Form Fields -->
             <div class="space-y-4">
@@ -164,29 +175,23 @@
 </div>
 
 <script>
-    function imageUpload() {
+    function imageUpload(initialUrl = '') {
         return {
-            dragActive: false,
-            imageUrl: null,
-            fileName: null,
-            handleDrop(e) {
-                const file = e.dataTransfer.files[0];
-                this.handleFile(file);
-            },
-            handleFileSelect(e) {
-                const file = e.target.files[0];
-                this.handleFile(file);
-            },
-            handleFile(file) {
-                if (file && file.type.startsWith('image/')) {
-                    this.fileName = file.name;
+            imageUrl: initialUrl || null,
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         this.imageUrl = e.target.result;
                     };
                     reader.readAsDataURL(file);
                 }
+            },
+            removeImage() {
+                this.imageUrl = null;
+                this.$refs.fileInput.value = null; // Reset input file
             }
-        }
+        };
     }
 </script>

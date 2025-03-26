@@ -11,7 +11,10 @@
         allProgramStudies: {{ json_encode($campuses->mapWithKeys(fn($campus) => [$campus->id => $campus->studyPrograms])) }},
         allInternshipClasses: {{ json_encode($classYears->mapWithKeys(fn($classYear) => [$classYear->id => $classYear->internshipClasses])) }}
     }">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Edit Student</h2>
+        <div class="flex items-center mb-6">
+            <a href="{{ route('admin.students.index') }}"><i class="bi bi-chevron-left mr-4  fw-bold"></i></a>
+            <h2 class="text-2xl font-semibold text-gray-800">Edit Student</h2>
+        </div>
 
         <!-- Error Summary -->
         @if ($errors->any())
@@ -35,23 +38,39 @@
             @method('PUT')
 
             <!-- Profile Picture Upload -->
-            <div class="mb-6">
+            <div x-data="imageUpload('{{ $student->user->photo_profile_url ? asset('storage/' . $student->user->photo_profile_url) : '' }}')" class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
-                <div class="flex flex-col items-center justify-center">
-                    <div id="imagePreviewContainer" class="mb-4 {{ $student->photo_profile_url ? '' : 'hidden' }}">
-                        <img id="imagePreview"
-                            src="{{ $student->photo_profile_url ? asset('storage/' . $student->photo_profile_url) : '' }}"
-                            class="w-32 h-32 rounded-full object-cover border-4 border-gray-300">
-                    </div>
-                    <div class="w-full">
-                        <label
-                            class="flex flex-col items-center w-full px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
-                            <i class="bi bi-cloud-arrow-up text-3xl text-gray-400"></i>
-                            <span class="mt-2 text-sm text-gray-500">Drag and drop your photo here, or</span>
-                            <span class="mt-1 text-sm font-medium text-green-700">Browse Files</span>
-                            <input type="file" name="photo_profile_url" id="imageInput" class="hidden" accept="image/*">
-                        </label>
-                    </div>
+
+                <!-- Upload Area -->
+                <div class="w-full border-2 border-dashed rounded-lg p-4 relative flex flex-col items-center justify-center"
+                    :class="{ 'border-gray-300 bg-gray-50': !imageUrl, 'border-green-500 bg-white': imageUrl }">
+
+                    <!-- Image Preview (di dalam area upload) -->
+                    <template x-if="imageUrl">
+                        <div class="relative flex flex-col items-center">
+                            <img :src="imageUrl"
+                                class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow">
+                            <!-- Remove Image Button -->
+                            <button type="button" @click="removeImage"
+                                class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:bg-red-600">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Label Upload (hanya muncul jika belum ada gambar) -->
+                    <label x-show="!imageUrl"
+                        class="flex flex-col items-center w-full p-6 cursor-pointer hover:bg-gray-100 transition rounded-lg">
+                        <i class="bi bi-cloud-arrow-up text-3xl text-gray-400"></i>
+                        <span class="mt-2 text-sm text-gray-500">Drag and drop your photo here, or</span>
+                        <span class="mt-1 text-sm font-medium text-green-700">Browse Files</span>
+                        <input type="file" name="photo_profile" class="hidden" x-ref="fileInput"
+                            @change="handleFileSelect" accept="image/*">
+                    </label>
+
+                    @error('photo_profile')
+                        <span class="text-red-500 text-sm mt-2">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
@@ -167,4 +186,26 @@
             </div>
         </form>
     </div>
+
+    <script>
+        function imageUpload(initialUrl = '') {
+            return {
+                imageUrl: initialUrl || null,
+                handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.imageUrl = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+                removeImage() {
+                    this.imageUrl = null;
+                    this.$refs.fileInput.value = null; // Reset input file
+                }
+            };
+        }
+    </script>
 @endsection

@@ -2,7 +2,9 @@
     <tr class="hover:bg-gray-50">
         <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
-                <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=John+Doe" alt="">
+                <img class="h-8 w-8 rounded-full"
+                    src="{{ $student->user->photo_profile_url ? asset('storage/' . $student->user->photo_profile_url) : 'https://ui-avatars.com/api/?name=' . urlencode($student->user->name) }}"
+                    alt="">
                 <div class="ml-4 ">
                     <div class="text-sm font-medium text-gray-900">{{ $student->user->name }}
                     </div>

@@ -82,7 +82,7 @@ class User extends Authenticatable
             'name' => $data['name'] ?? $user->name,
             'email' => $data['email'] ?? $user->email,
             'password' => isset($data['password']) ? Hash::make($data['password']) : $user->password, // Hash jika ada perubahan password
-            'photo_profile_url' => $data['photo_profile_url'] ?? $user->photo_profile_url,
+            'photo_profile_url' => $data['photo_profile_url'] ,
         ]);
 
         return $user;
