@@ -40,7 +40,7 @@ class AdminStudentController extends Controller
      */
     public function store(Request $request)
     {
-         $validatedData = $request->validate([
+        $validatedData = $request->validate([
             'username' => 'required|string|unique:users,username',
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email',
@@ -85,12 +85,7 @@ class AdminStudentController extends Controller
      */
     public function show(Student $student)
     {
-        $student = $student;
-        $studyPrograms = StudyProgram::all();
-        $campuses = Campus::all();
-        $classYears = ClassYear::all();
-        
-        return view('pages.admin.student.edit', compact('student', 'studyPrograms','campuses','classYears'));
+
     }
 
     /**
@@ -98,7 +93,12 @@ class AdminStudentController extends Controller
      */
     public function edit(Student $student)
     {
-        //
+        $student = $student;
+        $studyPrograms = StudyProgram::all();
+        $campuses = Campus::all();
+        $classYears = ClassYear::all();
+        
+        return view('pages.admin.student.edit', compact('student', 'studyPrograms','campuses','classYears'));
     }
 
     /**

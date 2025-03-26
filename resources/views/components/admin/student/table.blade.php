@@ -30,7 +30,7 @@
             </span>
         </td>
         <td class="px-6 py-4 flex whitespace-nowrap text-right text-sm font-medium space-x-2">
-            <a href="{{ route('admin.students.show', $student->id) }}" class="text-[#637F26] hover:text-[#85A832]">
+            <a href="{{ route('admin.students.edit', $student->id) }}" class="text-[#637F26] hover:text-[#85A832]">
                 <i class="bi bi-pencil"></i>
             </a>
             <form id="delete-student-{{ $student->id }}" action="{{ route('admin.students.destroy', $student->id) }}"
