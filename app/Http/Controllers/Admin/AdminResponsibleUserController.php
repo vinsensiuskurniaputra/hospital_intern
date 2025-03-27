@@ -5,18 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use App\Models\ResponsibleUser;
 use App\Http\Controllers\Controller;
 
-class AdminUserAdminController extends Controller
+class AdminResponsibleUserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users = Role::where('name', 'admin')->first()->users()->paginate(10);
-        return view('pages.admin.admin.index', compact('users'));
+        $responsibles = ResponsibleUser::with(['user'])->paginate(10);
+        return view('pages.admin.responsible.index', compact('responsibles'));
     }
 
     /**
@@ -37,8 +37,7 @@ class AdminUserAdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email',
             'photo_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'password' => 'required|string|max:255|min:8',
-            'password_confirmation' => 'required|string|same:password',
+            'telp' => 'required|string',
         ]);
 
         $photoPath = null;
@@ -51,21 +50,26 @@ class AdminUserAdminController extends Controller
             'username' => $validatedData['username'],
             'name' => $validatedData['name'],
             'email' => $validatedData['email'] ?? null,
-            'password' => $validatedData['password'],
+            'password' => 'password',
             'photo_profile_url' => $photoPath,
         ]);
 
-        $adminRole = Role::where('name', 'admin')->first();
+        $responsibleRole = Role::where('name', 'responsible')->first();
 
-        $user->roles()->attach($adminRole);
+        $user->roles()->attach($responsibleRole);
 
-        return redirect()->route('admin.admins.index')->with('success', 'Admin created successfully');
+        $responsible = ResponsibleUser::createResponsibleUser([
+            'user_id' => $user->id,
+            'telp' => $validatedData['telp'],
+        ]);
+
+        return redirect()->route('admin.responsibles.index')->with('success', 'Responsible user created successfully');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(ResponsibleUser $responsibleUser)
     {
         //
     }
@@ -73,36 +77,27 @@ class AdminUserAdminController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $admin)
+    public function edit(ResponsibleUser $responsible)
     {
-        $user = $admin;
+        $responsible = $responsible;
         
-        return view('pages.admin.admin.edit', compact('user'));
+        return view('pages.admin.responsible.edit', compact('responsible'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $admin)
+    public function update(Request $request, ResponsibleUser $responsible)
     {
         $validatedData = $request->validate([
-            'username' => [
-                'required',
-                'string',
-                Rule::unique('users', 'username')->ignore($admin->id, 'id'),
-            ],
+            'username' => 'required|string|unique:users,username,' . $responsible->user->id,
             'name' => 'required|string|max:255',
-            'email' => [
-                'nullable',
-                'email',
-                Rule::unique('users', 'email')->ignore($admin->id, 'id'),
-            ],
+            'email' => 'nullable|email|unique:users,email,' . $responsible->user->id,
             'photo_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'password' => 'nullable|string|min:8|max:255',
-            'password_confirmation' => 'nullable|string|same:password',
+            'telp' => 'required|string',
         ]);
 
-        $photoPath = $admin->photo_profile_url;
+        $photoPath = $responsible->user->photo_profile_url;
 
         if ($request->hasFile('photo_profile')) {
             if ($photoPath) {
@@ -114,48 +109,49 @@ class AdminUserAdminController extends Controller
 
 
 
-        User::updateUser($admin->id, [
+        User::updateUser($responsible->user_id, [
             'username' => $validatedData['username'],
             'name' => $validatedData['name'],
-            'password' => $validatedData['password'],
             'email' => $validatedData['email'] ?? null,
             'photo_profile_url' => $photoPath,
         ]);
 
-        return redirect()->route('admin.admins.index')->with('success', 'Admin updated successfully');
+        ResponsibleUser::updateResponsibleUser($responsible->id, [
+            'telp' => $validatedData['telp'],
+        ]);
+
+        return redirect()->route('admin.responsibles.index')->with('success', 'Responsible User updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $admin)
+    public function destroy(ResponsibleUser $responsible)
     {
-        $userId = $admin->id;
-
-        if($admin->id == auth()->user()->id){
-            return redirect()->route('admin.admins.index')->with('error', 'You cannot delete yourself');
-        }
+        $userId = $responsible->user_id;
+        $responsibleUserId = $responsible->id;
 
         // Hapus data setelah ID tersimpan
         User::deleteUser($userId);
+        ResponsibleUser::deleteResponsibleUser($responsibleUserId);
 
-        return redirect()->route('admin.admins.index')->with('success', 'Admin deleted successfully');
+        return redirect()->route('admin.responsibles.index')->with('success', 'Responsible User deleted successfully');
     }
 
     public function filter(Request $request)
     {
-        $query = Role::where('name', 'admin')->first()->users();
+        $query = ResponsibleUser::query();
 
         if ($request->has('search') && $request->search != '') {
-            $query->where(function ($q) use ($request) {
+            $query->whereHas('user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                 ->orWhere('email', 'like', '%' . $request->search . '%')
                 ->orWhere('username', 'like', '%' . $request->search . '%');
             });
         }
 
-        $users = $query->paginate(10);
+        $responsibles = $query->paginate(10);
 
-        return view('components.admin.admin.table', compact('users'))->render();
+        return view('components.admin.responsible.table', compact('responsibles'))->render();
     }
 }

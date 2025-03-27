@@ -125,12 +125,7 @@ class AdminStudentController extends Controller
             }
 
             $photoPath = $request->file('photo_profile')->store('profile_pictures', 'public');
-        } else {
-            if ($photoPath) {
-                Storage::disk('public')->delete($photoPath);
-            }
-            $photoPath = null;
-        }
+        } 
 
 
 
@@ -158,6 +153,7 @@ class AdminStudentController extends Controller
     {
         $userId = $student->user_id;
         $studentId = $student->id;
+
 
         // Hapus data setelah ID tersimpan
         User::deleteUser($userId);
