@@ -31,6 +31,14 @@ class MenuSeeder extends Seeder
             'order' => 2,
         ]);
 
+        $permissionManagement = Menu::create([
+            'name' => 'Permission',
+            'url' => '/permissions',
+            'icon' => 'bi bi-shield-lock',
+            'parent_id' => null,
+            'order' => 3,
+        ]);
+
         // Submenu
         Menu::create([
             'name' => 'Admins',
@@ -56,6 +64,29 @@ class MenuSeeder extends Seeder
             'order' => 3,
         ]);
 
+        Menu::create([
+            'name' => 'User Authorization ',
+            'url' => '/permissions/users',
+            'icon' => 'bi bi-person-lock', // Ikon lebih sesuai untuk admin
+            'parent_id' => $permissionManagement->id,
+            'order' => 1,
+        ]);
+
+        Menu::create([
+            'name' => 'Roles',
+            'url' => '/permissions/roles',
+            'icon' => 'bi bi-person-gear', // Lebih cocok untuk peran/role
+            'parent_id' => $permissionManagement->id,
+            'order' => 2,
+        ]);
+
+        Menu::create([
+            'name' => 'Menus',
+            'url' => '/permissions/menus',
+            'icon' => 'bi bi-list', // Lebih cocok untuk menu
+            'parent_id' => $permissionManagement->id,
+            'order' => 3,
+        ]);
 
         $adminRole = Role::where('name', 'admin')->first();
 

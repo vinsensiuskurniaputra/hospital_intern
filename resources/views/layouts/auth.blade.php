@@ -4,7 +4,7 @@
     <div class="flex" x-data="{ sidebarOpen: true, open: {}, userDropdownOpen: false }">
         <!-- Sidebar -->
         <aside :class="{ 'w-64': sidebarOpen, 'w-20': !sidebarOpen }"
-            class="w-64 relative min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
+            class="w-64 flex flex-col overflow-y-auto h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
             <div class="flex items-center justify-between p-4 border-b border-gray-200 min-h-[72px]">
                 <img src="{{ asset('images/logo.png') }}" alt="Medical Illustration" class="mx-auto drop-shadow-xl">
                 <h2 class="text-xl font-bold text-[#637F26]" :class="{ 'hidden': !sidebarOpen }">Sistem Magang RS
@@ -17,7 +17,7 @@
                         @if (isset($menu->children) && count($menu->children) > 0)
                             <!-- Menu with dropdown -->
                             <div class="relative" x-data="{ isOpen: {{ request()->is($menu->url . '*') ? 'true' : 'false' }} }">
-                                <button @click="isOpen = !isOpen" :class="{ 'justify-center': !sidebarOpen }"
+                                <button @click="isOpen = !isOpen" :class="{ 'justify-center': !sidebarOpen, 'justify-start': sidebarOpen  }"
                                     class="flex items-center w-full p-3 transition-colors
                                     {{ request()->is(ltrim($menu->url, '/') . '*')
                                         ? 'text-[#637F26] border-l-2 border-[#637F26] bg-gradient-to-r from-[#F5F7F0] to-transparent font-medium'
@@ -76,7 +76,7 @@
                 @endif
             </nav>
 
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+            <div class="mt-auto p-4 border-t border-gray-200">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" :class="{ 'justify-center': !sidebarOpen }"
