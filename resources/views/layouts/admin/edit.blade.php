@@ -1,8 +1,8 @@
 @extends('layouts.auth')
-@php 
-$is_has_photo = trim($__env->yieldContent('is_has_photo', 'true')) === 'true'; 
-$photoUrl = trim($__env->yieldContent('photo_profile_url', '')) 
-        ? asset('storage/' . trim($__env->yieldContent('photo_profile_url', ''))) 
+@php
+    $is_has_photo = trim($__env->yieldContent('is_has_photo', 'true')) === 'true';
+    $photoUrl = trim($__env->yieldContent('photo_profile_url', ''))
+        ? asset('storage/' . trim($__env->yieldContent('photo_profile_url', '')))
         : '';
 @endphp
 @section('content')
@@ -35,7 +35,7 @@ $photoUrl = trim($__env->yieldContent('photo_profile_url', ''))
 
             @if (isset($is_has_photo) && $is_has_photo)
                 <!-- Profile Picture Upload -->
-                <div x-data="imageUpload('{{ $photoUrl}}')" class="mb-6">
+                <div x-data="imageUpload('{{ $photoUrl }}')" class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
 
                     <!-- Upload Area -->
@@ -77,7 +77,7 @@ $photoUrl = trim($__env->yieldContent('photo_profile_url', ''))
                 @yield('input_contents')
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-end gap-3 pt-6">
-                    <a href="{{ route('admin.admins.index') }}"
+                    <a href="@yield('route_back', url()->previous())"
                         class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-600 rounded-lg hover:bg-red-50">
                         Cancel
                     </a>

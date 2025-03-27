@@ -6,6 +6,7 @@ use App\Http\Controllers\General\HomeController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminUserAdminController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
+use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,6 +29,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::resource('/users/responsibles', AdminResponsibleUserController::class)->names('admin.responsibles');
     Route::get('/responsibles/filter', [AdminResponsibleUserController::class, 'filter'])->name('responsibles.filter');
+    
+    Route::resource('/permissions/users', AdminUserAuthorizationController::class)->names('admin.user_authorizations');
+    Route::get('/users/filter', [AdminUserAuthorizationController::class, 'filter'])->name('users.filter');
 
 });
 
