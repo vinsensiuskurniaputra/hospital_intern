@@ -77,6 +77,14 @@ class AdminRoleController extends Controller
             'menus.*' => ['exists:menus,id'], 
         ]);
 
+        $roleDefault = Role::whereIn('name', ['admin', 'student', 'responsible'])->pluck('id');
+        
+        if($roleDefault->contains($role->id)){
+            if( $validatedData['name'] != $role->name){
+                return redirect()->route('admin.roles.index')->with('error', 'You cannot change name default role');
+            }
+        }
+
         $menus = Menu::whereIn('id', $validatedData['menus'])->get();
 
         $role->update([
@@ -93,6 +101,12 @@ class AdminRoleController extends Controller
      */
     public function destroy(Role $role)
     {
+        $roleDefault = Role::whereIn('name', ['admin', 'student', 'responsible'])->pluck('id');
+
+        if($roleDefault->contains($role->id)){
+            return redirect()->route('admin.roles.index')->with('error', 'You cannot delete default role');
+        }
+
         $role->delete();
         return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully');
     }
