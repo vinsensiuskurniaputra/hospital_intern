@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
+use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminUserAdminController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
@@ -32,6 +33,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/permissions/users', AdminUserAuthorizationController::class)->names('admin.user_authorizations');
     Route::get('/users/filter', [AdminUserAuthorizationController::class, 'filter'])->name('users.filter');
+    
+    Route::resource('/permissions/roles', AdminRoleController::class)->names('admin.roles');
+    Route::get('/roles/filter', [AdminRoleController::class, 'filter'])->name('roles.filter');
 
 });
 

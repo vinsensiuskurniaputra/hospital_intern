@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Students Management')
+@section('title', 'Responsible Management')
 
 @section('content')
     <div x-data="{ addModal: false }">
