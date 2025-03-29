@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminCampusController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminUserAdminController;
+use App\Http\Controllers\Admin\AdminStudyProgramController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 
@@ -44,6 +45,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academic/campuses', AdminCampusController::class)->names('admin.campuses');
     Route::get('/campuses/filter', [AdminCampusController::class, 'filter'])->name('campuses.filter');
+    
+    Route::resource('/academic/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
+    Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
 
 });
 

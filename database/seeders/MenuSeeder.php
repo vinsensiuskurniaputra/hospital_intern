@@ -98,7 +98,7 @@ class MenuSeeder extends Seeder
 
         Menu::create([
             'name' => 'Campuses',
-            'url' => '/academic/campuses',
+            'url' => '/academics/campuses',
             'icon' => 'bi bi-buildings', // Lebih cocok untuk menu
             'parent_id' => $academicManagement->id,
             'order' => 1,
@@ -106,7 +106,7 @@ class MenuSeeder extends Seeder
 
         Menu::create([
             'name' => 'Study Programs',
-            'url' => '/academic/studyPrograms',
+            'url' => '/academics/studyPrograms',
             'icon' => 'bi bi-book', // Lebih cocok untuk menu
             'parent_id' => $academicManagement->id,
             'order' => 2,
