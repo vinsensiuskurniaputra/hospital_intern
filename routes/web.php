@@ -5,6 +5,7 @@ use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
 use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminRoleController;
+use App\Http\Controllers\Admin\AdminCampusController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminUserAdminController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
@@ -40,6 +41,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/permissions/menus', AdminMenuController::class)->names('admin.menus');
     Route::get('/menus/filter', [AdminMenuController::class, 'filter'])->name('menus.filter');
+    
+    Route::resource('/academic/campuses', AdminCampusController::class)->names('admin.campuses');
+    Route::get('/campuses/filter', [AdminCampusController::class, 'filter'])->name('campuses.filter');
 
 });
 

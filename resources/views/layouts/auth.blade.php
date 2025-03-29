@@ -17,14 +17,15 @@
                         @if (isset($menu->children) && count($menu->children) > 0)
                             <!-- Menu with dropdown -->
                             <div class="relative" x-data="{ isOpen: {{ request()->is($menu->url . '*') ? 'true' : 'false' }} }">
-                                <button @click="isOpen = !isOpen" :class="{ 'justify-center': !sidebarOpen, 'justify-start': sidebarOpen  }"
+                                <button @click="isOpen = !isOpen"
+                                    :class="{ 'justify-center': !sidebarOpen, 'justify-start': sidebarOpen }"
                                     class="flex items-center w-full p-3 transition-colors
                                     {{ request()->is(ltrim($menu->url, '/') . '*')
                                         ? 'text-[#637F26] border-l-2 border-[#637F26] bg-gradient-to-r from-[#F5F7F0] to-transparent font-medium'
                                         : 'text-gray-700 hover:bg-[#F5F7F0] hover:text-[#637F26]' }}">
                                     <i class="{{ $menu->icon }} mr-3 w-5 {{ request()->is($menu->url . '*') ? 'text-[#637F26]' : 'text-gray-500' }}"
                                         :class="{ 'mr-0': !sidebarOpen }"></i>
-                                    <span :class="{ 'hidden': !sidebarOpen }">{{ $menu->name }}</span>
+                                    <span :class="{ 'hidden': !sidebarOpen }" class="text-start">{{ $menu->name }}</span>
                                     <svg :class="{ 'hidden': !sidebarOpen, 'rotate-180': isOpen }"
                                         class="w-4 h-4 ml-auto transition-transform duration-200" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">

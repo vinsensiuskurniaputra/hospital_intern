@@ -39,6 +39,14 @@ class MenuSeeder extends Seeder
             'order' => 3,
         ]);
 
+        $academicManagement = Menu::create([
+            'name' => 'Academic Management',
+            'url' => '/academics',
+            'icon' => 'bi bi-mortarboard',
+            'parent_id' => null,
+            'order' => 4,
+        ]);
+
         // Submenu
         Menu::create([
             'name' => 'Admins',
@@ -86,6 +94,22 @@ class MenuSeeder extends Seeder
             'icon' => 'bi bi-list', // Lebih cocok untuk menu
             'parent_id' => $permissionManagement->id,
             'order' => 3,
+        ]);
+
+        Menu::create([
+            'name' => 'Campuses',
+            'url' => '/academic/campuses',
+            'icon' => 'bi bi-buildings', // Lebih cocok untuk menu
+            'parent_id' => $academicManagement->id,
+            'order' => 1,
+        ]);
+
+        Menu::create([
+            'name' => 'Study Programs',
+            'url' => '/academic/studyPrograms',
+            'icon' => 'bi bi-book', // Lebih cocok untuk menu
+            'parent_id' => $academicManagement->id,
+            'order' => 2,
         ]);
 
         $adminRole = Role::where('name', 'admin')->first();
