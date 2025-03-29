@@ -43,10 +43,10 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/permissions/menus', AdminMenuController::class)->names('admin.menus');
     Route::get('/menus/filter', [AdminMenuController::class, 'filter'])->name('menus.filter');
     
-    Route::resource('/academic/campuses', AdminCampusController::class)->names('admin.campuses');
+    Route::resource('/academics/campuses', AdminCampusController::class)->names('admin.campuses');
     Route::get('/campuses/filter', [AdminCampusController::class, 'filter'])->name('campuses.filter');
     
-    Route::resource('/academic/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
+    Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
 
 });
