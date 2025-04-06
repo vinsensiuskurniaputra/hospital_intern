@@ -27,6 +27,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('/users/students', AdminStudentController::class)->names('admin.students');
     Route::get('/students/filter', [AdminStudentController::class, 'filter'])->name('students.filter');
+    Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
 
     Route::resource('/users/admins', AdminUserAdminController::class)->names('admin.admins');
     Route::get('/admins/filter', [AdminUserAdminController::class, 'filter'])->name('admins.filter');
