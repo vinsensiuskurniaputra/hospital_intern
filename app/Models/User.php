@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Models\Role;
 use App\Models\Student;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -82,7 +83,7 @@ class User extends Authenticatable
             'name' => $data['name'] ?? $user->name,
             'email' => $data['email'] ?? $user->email,
             'password' => isset($data['password']) ? Hash::make($data['password']) : $user->password, // Hash jika ada perubahan password
-            'photo_profile_url' => $data['photo_profile_url'] ?? $user->photo_profile_url,
+            'photo_profile_url' => $data['photo_profile_url'] ,
         ]);
 
         return $user;
@@ -90,6 +91,13 @@ class User extends Authenticatable
 
     public static function deleteUser($id)
     {
-        self::where('id', $id)->delete();
+        $user = self::find($id);
+
+        if (!empty($user->photo_profile_url)) {
+            Storage::disk('public')->delete($user->photo_profile_url);
+        }
+
+        return $user->delete();
     }
+
 }

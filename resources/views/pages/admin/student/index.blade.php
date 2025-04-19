@@ -3,7 +3,7 @@
 @section('title', 'Students Management')
 
 @section('content')
-    <div x-data="{ addStudent: false, editStudent: false, selectedStudent: {} }">
+    <div x-data="{ addStudent: false, showImportModal: false }">
         <!-- Notification Messages -->
         <div class="fixed top-20 right-4 z-50 w-96 space-y-4">
             <!-- Success Message -->
@@ -31,10 +31,11 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm font-medium text-red-800">
-                            {{ session('error') ??
-                                "
-                                                                                                                                                                                                                                                            There is something wrong in your input !" }}
+                            {{ session('error') ?? 'here is something wrong in your input !' }}
                         </p>
+                        @error('file')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
                     <button @click="show = false" class="ml-auto text-red-500 hover:text-red-600">
                         <i class="bi bi-x-lg"></i>
@@ -126,7 +127,7 @@
                                 </div>
                             </div>
                             <div class="flex gap-3">
-                                <button
+                                <button @click="showImportModal = true"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
                                     <i class="bi bi-upload mr-2"></i>Import CSV
                                 </button>
@@ -158,8 +159,6 @@
                         <tbody id="studentTableBody" class="divide-y divide-gray-100">
                             @include('components.admin.student.table', [
                                 'students' => $students,
-                                'editStudent' => 'editStudent',
-                                'selectedStudent' => 'selectedStudent',
                             ])
                         </tbody>
                     </table>
@@ -242,6 +241,14 @@
 
             </div>
         </div>
+        @include('components.general.import_modal', [
+            'show' => 'showImportModal',
+            'title' => 'Students',
+            'description' => 'Upload your CSV file to import student data',
+            'action' => route('students.import'),
+            'template_url' => route('students.import'),
+        ])
+
         @include('components.admin.student.add', [
             'show' => 'addStudent',
             'campuses' => $campuses,

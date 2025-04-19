@@ -10,6 +10,7 @@ use App\Models\ClassYear;
 use App\Models\StudyProgram;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 
 class AdminStudentController extends Controller
 {
@@ -39,23 +40,29 @@ class AdminStudentController extends Controller
      */
     public function store(Request $request)
     {
-         $validatedData = $request->validate([
+        $validatedData = $request->validate([
             'username' => 'required|string|unique:users,username',
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email',
-            'photo_profile_url' => 'nullable|string',
+            'photo_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'internship_class_id' => 'nullable|exists:internship_classes,id',
             'study_program_id' => 'required|exists:study_programs,id',
             'nim' => 'required|string|unique:students,nim',
             'telp' => 'required|string',
         ]);
 
+        $photoPath = null;
+
+        if ($request->hasFile('photo_profile')) {
+            $photoPath = $request->file('photo_profile')->store('profile_pictures', 'public');
+        }
+
         $user = User::addUser([
             'username' => $validatedData['username'],
             'name' => $validatedData['name'],
             'email' => $validatedData['email'] ?? null,
             'password' => 'password',
-            'photo_profile_url' => $validatedData['photo_profile_url'] ?? null,
+            'photo_profile_url' => $photoPath,
         ]);
 
         $studentRole = Role::where('name', 'student')->first();
@@ -78,12 +85,7 @@ class AdminStudentController extends Controller
      */
     public function show(Student $student)
     {
-        $student = $student;
-        $studyPrograms = StudyProgram::all();
-        $campuses = Campus::all();
-        $classYears = ClassYear::all();
-        
-        return view('pages.admin.student.edit', compact('student', 'studyPrograms','campuses','classYears'));
+
     }
 
     /**
@@ -91,7 +93,12 @@ class AdminStudentController extends Controller
      */
     public function edit(Student $student)
     {
-        //
+        $student = $student;
+        $studyPrograms = StudyProgram::all();
+        $campuses = Campus::all();
+        $classYears = ClassYear::all();
+        
+        return view('pages.admin.student.edit', compact('student', 'studyPrograms','campuses','classYears'));
     }
 
     /**
@@ -103,19 +110,30 @@ class AdminStudentController extends Controller
             'username' => 'required|string|unique:users,username,' . $student->user->id,
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email,' . $student->user->id,
-            'photo_profile_url' => 'nullable|string',
+            'photo_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'internship_class_id' => 'nullable|exists:internship_classes,id',
             'study_program_id' => 'required|exists:study_programs,id',
             'nim' => 'required|string|unique:students,nim,' . $student->id,
             'telp' => 'required|string',
         ]);
 
+        $photoPath = $student->user->photo_profile_url;
+
+        if ($request->hasFile('photo_profile')) {
+            if ($photoPath) {
+                Storage::disk('public')->delete($photoPath);
+            }
+
+            $photoPath = $request->file('photo_profile')->store('profile_pictures', 'public');
+        } 
+
+
 
         User::updateUser($student->user_id, [
             'username' => $validatedData['username'],
             'name' => $validatedData['name'],
             'email' => $validatedData['email'] ?? null,
-            'photo_profile_url' => $validatedData['photo_profile_url'] ?? null,
+            'photo_profile_url' => $photoPath,
         ]);
 
         Student::updateStudent($student->id, [
@@ -135,6 +153,7 @@ class AdminStudentController extends Controller
     {
         $userId = $student->user_id;
         $studentId = $student->id;
+
 
         // Hapus data setelah ID tersimpan
         User::deleteUser($userId);
@@ -176,6 +195,58 @@ class AdminStudentController extends Controller
         $students = $query->paginate(10);
 
         return view('components.admin.student.table', compact('students'))->render();
+    }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|mimes:csv,txt',
+        ]);
+
+
+        $file = $request->file('file');
+        $rows = array_map('str_getcsv', file($file));
+        $headers = array_map('strtolower', array_map('trim', $rows[0]));
+        unset($rows[0]); // Hapus header
+
+        $inserted = 0;
+        $skipped = 0;
+
+        foreach ($rows as $row) {
+            $row = array_combine($headers, $row);
+
+            // Skip jika username atau nim sudah ada
+            if (User::where('username', $row['username'])->exists() || Student::where('nim', $row['nim'])->exists()) {
+                $skipped++;
+                continue;
+            }
+
+            // Buat user
+            $user = User::addUser([
+                'username' => $row['username'],
+                'name' => $row['name'],
+                'email' => $row['email'] ?? null,
+                'password' => 'password',
+                'photo_profile_url' => null,
+            ]);
+
+            // Tambahkan role student
+            $studentRole = Role::where('name', 'student')->first();
+            $user->roles()->attach($studentRole);
+
+            // Buat student
+            Student::createStudent([
+                'user_id' => $user->id,
+                'internship_class_id' => $row['internship_class_id'] ?? null,
+                'study_program_id' => $row['study_program_id'],
+                'nim' => $row['nim'],
+                'telp' => $row['telp'],
+            ]);
+
+            $inserted++;
+        }
+
+        return redirect()->route('admin.students.index')->with('success', "Import selesai: {$inserted} data ditambahkan, {$skipped} dilewati karena duplikat.");
     }
 
 }

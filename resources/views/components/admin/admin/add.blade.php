@@ -1,22 +1,15 @@
 <div x-show="{{ $show }}" class="fixed z-20 inset-0 bg-gray-600 bg-opacity-50 flex justify-end"
-    @click="{{ $show }} = false" x-cloak x-data="{
-        selectedCampus: '',
-        selectedClassYear: '',
-        programStudies: [],
-        internshipClasses: [],
-        allProgramStudies: {{ json_encode($campuses->mapWithKeys(fn($campus) => [$campus->id => $campus->studyPrograms])) }},
-        allInternshipClasses: {{ json_encode($classYears->mapWithKeys(fn($classYear) => [$classYear->id => $classYear->internshipClasses])) }}
-    }">
+    @click="{{ $show }} = false" x-cloak>
     <div class="bg-white p-6 shadow-lg lg:w-1/3 w-full h-screen overflow-y-scroll" @click.stop>
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-800">Add New Student</h2>
+            <h2 class="text-xl font-semibold text-gray-800">Add New Admin</h2>
             <button @click="{{ $show }} = false" class="text-gray-500 hover:text-gray-700">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
 
         <!-- Form Input -->
-        <form action="{{ route('admin.students.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.admins.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- Profile Picture Upload -->
@@ -69,16 +62,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">NIM</label>
-                    <input type="text" name="nim" value="{{ old('nim') }}" required
-                        class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26]">
-                    @error('nim')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
                     <input type="text" name="name" value="{{ old('name') }}" required
                         class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26]">
                     @error('name')
@@ -95,63 +79,21 @@
                     @enderror
                 </div>
 
-                <!-- Campus Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Campus</label>
-                    <select x-init="new TomSelect($el, { create: false, sortField: 'text' })" x-model="selectedCampus"
-                        @change="programStudies = allProgramStudies[selectedCampus] || []"
-                        class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                        <option value="">Select Campus</option>
-                        @foreach ($campuses as $campus)
-                            <option value="{{ $campus->id }}">{{ $campus->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Study Program -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Study Program</label>
-                    <select name="study_program_id" required class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                        <option value="">Select Study Program</option>
-                        <template x-for="study in programStudies" :key="study.id">
-                            <option :value="study.id" x-text="study.name"></option>
-                        </template>
-                    </select>
-                    @error('study_program_id')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" name="password" value="{{ old('password') }}"
+                        class="w-full px-4 py-2 border rounded-lg @error('password') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
+                    @error('password')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Class Year Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Class Year</label>
-                    <select x-init="new TomSelect($el, { create: false, sortField: 'text' })" x-model="selectedClassYear"
-                        @change="internshipClasses = allInternshipClasses[selectedClassYear] || []"
-                        class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                        <option value="">Select Class Year</option>
-                        @foreach ($classYears as $classYear)
-                            <option value="{{ $classYear->id }}">{{ $classYear->class_year }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Internship Class -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Internship Class</label>
-                    <select name="internship_class_id" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                        <option value="">Select Internship Class</option>
-                        <template x-for="internshipClass in internshipClasses" :key="internshipClass.id">
-                            <option :value="internshipClass.id" x-text="internshipClass.name"></option>
-                        </template>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">No. Telp</label>
-                    <input type="text" name="telp" value="{{ old('telp') }}" required
-                        class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26]">
-                    @error('telp')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password Confirmation</label>
+                    <input type="password" name="password_confirmation" value="{{ old('password_confirmation') }}"
+                        class="w-full px-4 py-2 border rounded-lg @error('password_confirmation') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
+                    @error('password_confirmation')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -165,7 +107,7 @@
                     <button type="submit"
                         class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg 
                         hover:bg-[#85A832] transition-colors duration-200 shadow-sm hover:shadow-md">
-                        Add Student
+                        Add Admin
                     </button>
                 </div>
             </div>

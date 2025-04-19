@@ -11,12 +11,7 @@ class Menu extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'url',
-        'icon',
-        'parent_id',
-    ];
+    protected $guarded = ['id'];
 
     public function parent()
     {
