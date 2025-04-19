@@ -153,35 +153,35 @@ class MenuSeeder extends Seeder
 
         $scheduleManagement = Menu::create([
             'name' => 'Schedules',
-            'url' => '/internships/schedules',
+            'url' => '/presences/schedules',
             'icon' => 'bi bi-clock', 
             'parent_id' => $presenceManagement->id,
             'order' => 1,
         ]);
         $studentPresenceManagement = Menu::create([
             'name' => 'Student Presences',
-            'url' => '/internships/studentPresences',
+            'url' => '/presences/studentPresences',
             'icon' => 'bi bi-person-check', 
             'parent_id' => $presenceManagement->id,
             'order' => 2,
         ]);
         $studentScoreManagement = Menu::create([
             'name' => 'Student Scores',
-            'url' => '/internships/studentScores',
+            'url' => '/presences/studentScores',
             'icon' => 'bi bi-graph-up', 
             'parent_id' => $presenceManagement->id,
             'order' => 3,
         ]);
         $certificateManagement = Menu::create([
             'name' => 'Certificates',
-            'url' => '/internships/certificates',
+            'url' => '/presences/certificates',
             'icon' => 'bi bi-award', 
             'parent_id' => $presenceManagement->id,
             'order' => 4,
         ]);
         $reportAndMonitoringManagement = Menu::create([
             'name' => 'Report and Monitorings',
-            'url' => '/internships/reportAndMonitorings',
+            'url' => '/presences/reportAndMonitorings',
             'icon' => 'bi bi-bar-chart-line', 
             'parent_id' => $presenceManagement->id,
             'order' => 5,

@@ -5,12 +5,20 @@ use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
 use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminRoleController;
+use App\Http\Controllers\Admin\AdminStaseController;
 use App\Http\Controllers\Admin\AdminCampusController;
 use App\Http\Controllers\Admin\AdminStudentController;
+use App\Http\Controllers\Admin\AdminPresenceController;
+use App\Http\Controllers\Admin\AdminScheduleController;
 use App\Http\Controllers\Admin\AdminUserAdminController;
+use App\Http\Controllers\Admin\AdminCertificateController;
+use App\Http\Controllers\Admin\AdminDepartementController;
+use App\Http\Controllers\Admin\AdminStudentGradeController;
 use App\Http\Controllers\Admin\AdminStudyProgramController;
+use App\Http\Controllers\Admin\AdminInternshipClassController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
+use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -49,6 +57,17 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
+    
+
+    Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
+    Route::resource('/internships/stases', AdminStaseController::class)->names('admin.stases');
+    Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
+
+    Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
+    Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
+    Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
+    Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
+    Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
 
 });
 
