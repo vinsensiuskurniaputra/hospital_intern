@@ -21,7 +21,12 @@ class MenuMiddleware
         $menus = [];
 
         if ($user) {
-            $menus = $user->roles()->with('menus')->get()->pluck('menus')->flatten()->unique('id')->sortBy('order');
+            // Get menus for user's roles, sorted by order
+            $menus = $user->roles()->with('menus')->get()
+                ->pluck('menus')
+                ->flatten()
+                ->unique('id')
+                ->sortBy('order');
         }
 
         View::share('menus', $menus);

@@ -50,8 +50,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
 });
 
-// Student Routes
-Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
+// Student Routes 
+Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard');
     
@@ -63,6 +63,33 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Student\StudentGradeController::class, 'index'])->name('grades');
+    
+    // Profile
+    Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
+    
+    // Notifications
+    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationsController::class, 'index'])->name('notifications');
+});
+
+// Responsible Routes 
+Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [App\Http\Controllers\Responsible\ResponsibleDashboardController::class, 'index'])->name('dashboard');
+    
+    // Jadwal
+    Route::get('/schedule', [App\Http\Controllers\Responsible\ResponsibleScheduleController::class, 'index'])->name('schedule');
+    
+    // Presensi
+    Route::get('/attendance', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'index'])->name('attendance');
+    
+    // Profile
+    Route::get('/profile', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'index'])->name('profile');
+    
+    // Nilai
+    Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades');
+    
+    // Laporan & Rekapitulasi
+    Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
 });
 
 
