@@ -14,7 +14,7 @@ class MenuSeeder extends Seeder
      */
     public function run(): void
     {
-        // Menu utama
+        // General
         $dashboard = Menu::create([
             'name' => 'Dashboard',
             'url' => '/home',
@@ -23,6 +23,8 @@ class MenuSeeder extends Seeder
             'order' => 1,
         ]);
 
+        // --- Menu Admin ---
+        // Menu utama
         $userManagement = Menu::create([
             'name' => 'User Management',
             'url' => '/users',
@@ -47,24 +49,38 @@ class MenuSeeder extends Seeder
             'order' => 4,
         ]);
 
+        $internshipManagement = Menu::create([
+            'name' => 'Internship Management',
+            'url' => '/internships',
+            'icon' => 'bi bi-person-workspace',
+            'parent_id' => null,
+            'order' => 5,
+        ]);
+
+        $presenceManagement = Menu::create([
+            'name' => 'Presence Management',
+            'url' => '/presences',
+            'icon' => 'bi bi-calendar-check',
+            'parent_id' => null,
+            'order' => 6,
+        ]);
+
         // Submenu
-        Menu::create([
+        $adminManagement = Menu::create([
             'name' => 'Admins',
             'url' => '/users/admins',
             'icon' => 'bi bi-person-badge', // Ikon lebih sesuai untuk admin
             'parent_id' => $userManagement->id,
             'order' => 1,
         ]);
-
-        Menu::create([
+        $resposibleManagement = Menu::create([
             'name' => 'Responsibles',
             'url' => '/users/responsibles',
             'icon' => 'bi bi-person-check', // Ikon untuk pengguna yang bertanggung jawab
             'parent_id' => $userManagement->id,
             'order' => 2,
         ]);
-
-        Menu::create([
+        $studentManagement = Menu::create([
             'name' => 'Students',
             'url' => '/users/students',
             'icon' => 'bi bi-mortarboard', // Ikon yang lebih cocok untuk mahasiswa/pelajar
@@ -72,23 +88,22 @@ class MenuSeeder extends Seeder
             'order' => 3,
         ]);
 
-        Menu::create([
+
+        $userAuthManagement = Menu::create([
             'name' => 'User Authorization ',
             'url' => '/permissions/users',
             'icon' => 'bi bi-person-lock', // Ikon lebih sesuai untuk admin
             'parent_id' => $permissionManagement->id,
             'order' => 1,
         ]);
-
-        Menu::create([
+        $roleManagement = Menu::create([
             'name' => 'Roles',
             'url' => '/permissions/roles',
             'icon' => 'bi bi-person-gear', // Lebih cocok untuk peran/role
             'parent_id' => $permissionManagement->id,
             'order' => 2,
         ]);
-
-        Menu::create([
+        $menuManagement = Menu::create([
             'name' => 'Menus',
             'url' => '/permissions/menus',
             'icon' => 'bi bi-list', // Lebih cocok untuk menu
@@ -96,15 +111,15 @@ class MenuSeeder extends Seeder
             'order' => 3,
         ]);
 
-        Menu::create([
+
+        $campusManagement = Menu::create([
             'name' => 'Campuses',
             'url' => '/academics/campuses',
             'icon' => 'bi bi-buildings', // Lebih cocok untuk menu
             'parent_id' => $academicManagement->id,
             'order' => 1,
         ]);
-
-        Menu::create([
+        $studyProgramManagement = Menu::create([
             'name' => 'Study Programs',
             'url' => '/academics/studyPrograms',
             'icon' => 'bi bi-book', // Lebih cocok untuk menu
@@ -112,6 +127,67 @@ class MenuSeeder extends Seeder
             'order' => 2,
         ]);
 
+
+        $departementManagement = Menu::create([
+            'name' => 'Departement',
+            'url' => '/internships/departements',
+            'icon' => 'bi bi-diagram-3', 
+            'parent_id' => $internshipManagement->id,
+            'order' => 1,
+        ]);
+        $staseManagement = Menu::create([
+            'name' => 'Stase',
+            'url' => '/internships/stases',
+            'icon' => 'bi bi-signpost-split', 
+            'parent_id' => $internshipManagement->id,
+            'order' => 2,
+        ]);
+        $internshipClassManagement = Menu::create([
+            'name' => 'Internship Classes',
+            'url' => '/internships/internshipClasses',
+            'icon' => 'bi bi-easel', 
+            'parent_id' => $internshipManagement->id,
+            'order' => 3,
+        ]);
+
+
+        $scheduleManagement = Menu::create([
+            'name' => 'Schedules',
+            'url' => '/presences/schedules',
+            'icon' => 'bi bi-clock', 
+            'parent_id' => $presenceManagement->id,
+            'order' => 1,
+        ]);
+        $studentPresenceManagement = Menu::create([
+            'name' => 'Student Presences',
+            'url' => '/presences/studentPresences',
+            'icon' => 'bi bi-person-check', 
+            'parent_id' => $presenceManagement->id,
+            'order' => 2,
+        ]);
+        $studentScoreManagement = Menu::create([
+            'name' => 'Student Scores',
+            'url' => '/presences/studentScores',
+            'icon' => 'bi bi-graph-up', 
+            'parent_id' => $presenceManagement->id,
+            'order' => 3,
+        ]);
+        $certificateManagement = Menu::create([
+            'name' => 'Certificates',
+            'url' => '/presences/certificates',
+            'icon' => 'bi bi-award', 
+            'parent_id' => $presenceManagement->id,
+            'order' => 4,
+        ]);
+        $reportAndMonitoringManagement = Menu::create([
+            'name' => 'Report and Monitorings',
+            'url' => '/presences/reportAndMonitorings',
+            'icon' => 'bi bi-bar-chart-line', 
+            'parent_id' => $presenceManagement->id,
+            'order' => 5,
+        ]);
+
+        // gift role
         $adminRole = Role::where('name', 'admin')->first();
 
         // Ambil semua menu
@@ -247,5 +323,6 @@ class MenuSeeder extends Seeder
             $responsibleReports
         ];
         $responsibleRole->menus()->attach(collect($responsibleMenus)->pluck('id'));
+
     }
 }
