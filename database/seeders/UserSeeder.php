@@ -4,7 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Student; // Tambahkan import model Student jika diperlukan
+use App\Models\Student;
+use App\Models\ResponsibleUser;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -66,6 +67,31 @@ class UserSeeder extends Seeder
         } catch (\Exception $e) {
             // Tangani jika ada error, misalnya kolom yang diperlukan belum ada
             $this->command->info('Error creating student profile: ' . $e->getMessage());
+        }
+
+        // Add responsible user
+        $responsible = User::create([
+            'username' => 'pj',
+            'name' => 'Dr. Responsible',
+            'email' => 'responsible@example.com',
+            'password' => bcrypt('password'),
+            'photo_profile_url' => 'https://ui-avatars.com/api/?name=Dr.+Responsible',
+        ]);
+
+        // Get responsible role
+        $responsibleRole = Role::where('name', 'responsible')->first();
+
+        // Attach role to user
+        $responsible->roles()->attach($responsibleRole);
+
+        // Create responsible user profile
+        try {
+            ResponsibleUser::create([
+                'user_id' => $responsible->id,
+                'telp' => '081234567890',
+            ]);
+        } catch (\Exception $e) {
+            $this->command->info('Error creating responsible profile: ' . $e->getMessage());
         }
     }
 }
