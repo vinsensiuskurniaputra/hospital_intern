@@ -103,6 +103,12 @@
                         </button>
                         <!-- Search Bar -->
                         <div class="flex-1 max-w-lg">
+                            @php
+                                $userRole = Auth::user()->roles()->first()->name ?? '';
+                                $hideSearchBar = in_array($userRole, ['student', 'responsible']);
+                            @endphp
+                            
+                            @if(!$hideSearchBar)
                             <div class="relative">
                                 <input type="text"
                                     class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26] text-sm"
@@ -114,6 +120,10 @@
                                     </svg>
                                 </div>
                             </div>
+                            @else
+                            <!-- Spacer to maintain layout -->
+                            <div class="invisible"></div>
+                            @endif
                         </div>
 
                         <!-- Right Side Nav Items -->

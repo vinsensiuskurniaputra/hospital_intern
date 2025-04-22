@@ -9,7 +9,6 @@ class StudentDashboardController extends Controller
 {
     public function index()
     {
-        // Perubahan path view untuk menyesuaikan dengan struktur folder baru
         return view('pages.student.dashboard.index');
     }
 }
