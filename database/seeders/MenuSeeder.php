@@ -119,5 +119,45 @@ class MenuSeeder extends Seeder
 
         // Hubungkan admin dengan semua menu
         $adminRole->menus()->attach($menus->pluck('id'));
+
+        // Menu untuk mahasiswa (role student)
+        $studentDashboard = Menu::create([
+            'name' => 'Dashboard',
+            'url' => '/student/dashboard',
+            'icon' => 'bi bi-house-door',
+            'parent_id' => null,
+            'order' => 1,
+        ]);
+
+        $studentSchedule = Menu::create([
+            'name' => 'Jadwal',
+            'url' => '/student/schedule',
+            'icon' => 'bi bi-calendar3',
+            'parent_id' => null,
+            'order' => 2,
+        ]);
+
+        $studentAttendance = Menu::create([
+            'name' => 'Presensi & Sertifikasi',
+            'url' => '/student/attendance',
+            'icon' => 'bi bi-card-checklist',
+            'parent_id' => null,
+            'order' => 3,
+        ]);
+
+        $studentGrades = Menu::create([
+            'name' => 'Nilai',
+            'url' => '/student/grades',
+            'icon' => 'bi bi-award',
+            'parent_id' => null,
+            'order' => 4,
+        ]);
+
+        // Mendapatkan role student
+        $studentRole = Role::where('name', 'student')->first();
+
+        // Hubungkan menu mahasiswa dengan role student
+        $studentMenus = [$studentDashboard, $studentSchedule, $studentAttendance, $studentGrades];
+        $studentRole->menus()->attach(collect($studentMenus)->pluck('id'));
     }
 }
