@@ -33,7 +33,7 @@
                         <p class="text-sm font-medium text-red-800">
                             {{ session('error') ??
                                 "
-                                                                                                                                                                                                                                                            There is something wrong in your input !" }}
+                                                                                                                                                                                                                                                                                        There is something wrong in your input !" }}
                         </p>
                     </div>
                     <button @click="show = false" class="ml-auto text-red-500 hover:text-red-600">
