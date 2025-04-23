@@ -53,7 +53,7 @@
                         </thead>
                         <tbody id="TableBody" class="divide-y divide-gray-100">
                             @include('components.admin.stase.table', [
-                                'stase' => $stases,
+                                'stases' => $stases,
                             ])
                         </tbody>
                     </table>
