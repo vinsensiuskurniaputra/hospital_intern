@@ -57,8 +57,13 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
+    
     Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
+    Route::get('/departements/filter', [AdminDepartementController::class, 'filter'])->name('departements.filter');
+
     Route::resource('/internships/stases', AdminStaseController::class)->names('admin.stases');
+    Route::get('/stases/filter', [AdminStaseController::class, 'filter'])->name('stases.filter');
+
     Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
 
     Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
