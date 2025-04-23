@@ -13,7 +13,7 @@ class AdminStudentGradeController extends Controller
      */
     public function index()
     {
-        return view('pages.admin.student_score.index');
+        return view('pages.admin.student_grade.index');
     }
 
     /**
