@@ -5,13 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Departement extends Model
+class Stase extends Model
 {
     use HasFactory;
+    protected $guarded = ['id'];
     protected $fillable = ['name'];
-
-    public function schedules()
-    {
-        return $this->hasMany(Schedule::class);
-    }
 }

@@ -323,7 +323,7 @@
                                 <td class="py-3 px-4">{{ $schedule->departement->name ?? 'N/A' }}</td>
                                 <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year ?? 'N/A' }}</td>
                                 <td class="py-3 px-4">
-                                    {{ $schedule->stase->responsibleUser->user->name ?? 'N/A' }}
+                                    {{ $schedule->responsibleUser->user->name ?? 'N/A' }}
                                 </td>
                                 <td class="py-3 px-4">
                                     @if($schedule->start_date && $schedule->end_date)

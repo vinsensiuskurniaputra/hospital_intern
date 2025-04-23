@@ -319,16 +319,16 @@
                         @foreach($schedules as $schedule)
                             <tr>
                                 <td class="py-3 px-4">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->stase->name ?? 'N/A' }}</td>
+                                <td class="py-3 px-4">{{ $schedule->stase ?? 'N/A' }}</td>
                                 <td class="py-3 px-4">{{ $schedule->departement->name ?? 'N/A' }}</td>
                                 <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year ?? 'N/A' }}</td>
                                 <td class="py-3 px-4">
-                                    {{ $schedule->stase->responsibleUser->user->name ?? 'N/A' }}
+                                    {{ $schedule->responsibleUser && $schedule->responsibleUser->user ? $schedule->responsibleUser->user->name : 'N/A' }}
                                 </td>
                                 <td class="py-3 px-4">
-                                    @if($schedule->start_date && $schedule->end_date)
-                                        {{ \Carbon\Carbon::parse($schedule->start_date)->format('d-m-Y') }} s/d 
-                                        {{ \Carbon\Carbon::parse($schedule->end_date)->format('d-m-Y') }}
+                                    @if($schedule->rotation_period_start && $schedule->rotation_period_end)
+                                        {{ \Carbon\Carbon::parse($schedule->rotation_period_start)->format('d-m-Y') }} s/d 
+                                        {{ \Carbon\Carbon::parse($schedule->rotation_period_end)->format('d-m-Y') }}
                                     @else
                                         N/A
                                     @endif

@@ -13,23 +13,18 @@ class AdminScheduleController extends Controller
 {
     public function index()
     {
-        $schedules = Schedule::with([
-            'internshipClass.classYear',
-            'stase',
-            'departement',
-            'responsibleUser.user'
-         ])->paginate(10); // Changed from get() to paginate()
-
+        $schedules = Schedule::with(['internshipClass', 'departement', 'responsibleUser.user'])
+            ->paginate(10);
         $departments = Departement::all();
-        $responsibles = ResponsibleUser::with('user')->whereHas('user')->get();
-        $internshipClasses = InternshipClass::with('classYear')->get();
-
-        return view('pages.admin.schedule.index', compact(
-            'schedules',
-            'departments',
-            'responsibles',
-            'internshipClasses'
-        ));
+        $responsibles = ResponsibleUser::with(['user'])->whereHas('user')->get();
+        $internshipClasses = InternshipClass::all();
+        
+        return view('pages.admin.schedule.index', [
+            'schedules' => $schedules,
+            'departments' => $departments,
+            'responsibles' => $responsibles,
+            'internshipClasses' => $internshipClasses
+        ]);
     }
 
     /**
@@ -98,12 +93,25 @@ class AdminScheduleController extends Controller
             });
         }
 
+        if ($request->has('search') && $request->search != '') {
+            $query->where(function($q) use ($request) {
+                $q->whereHas('internshipClass', function($q) use ($request) {
+                    $q->where('name', 'like', "%{$request->search}%");
+                })
+                ->orWhereHas('departement', function($q) use ($request) {
+                    $q->where('name', 'like', "%{$request->search}%");
+                })
+                ->orWhereHas('responsibleUser.user', function($q) use ($request) {
+                    $q->where('name', 'like', "%{$request->search}%");
+                });
+            });
+        }
+
         $schedules = $query->with([
-            'internshipClass.classYear',
-            'stase',
-            'departement',
+            'internshipClass.classYear', 
+            'departement', 
             'responsibleUser.user'
-        ])->get();
+        ])->paginate(10);
         
         return view('components.admin.schedule.table', compact('schedules'))->render();
     }

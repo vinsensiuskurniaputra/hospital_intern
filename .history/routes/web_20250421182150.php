@@ -64,7 +64,6 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
 
     Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
-    Route::get('/admin/schedules/filter', [AdminScheduleController::class, 'filter'])->name('admin.schedules.filter');
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');

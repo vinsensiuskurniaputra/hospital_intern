@@ -11,39 +11,27 @@ class Schedule extends Model
     
     protected $fillable = [
         'internship_class_id',
-        'stase_id',
+        'stase',
         'departement_id',
         'responsible_user_id',
-        'start_date',
-        'end_date',
+        'rotation_period_start',
+        'rotation_period_end',
         'start_time',
         'end_time'
     ];
-
-    protected $dates = [
-        'start_date',
-        'end_date',
-        'start_time',
-        'end_time'
-    ];
-
-    public function departement()
-    {
-        return $this->belongsTo(Departement::class);
-    }
 
     public function internshipClass()
     {
         return $this->belongsTo(InternshipClass::class);
     }
 
-    public function responsibleUser()
+    public function departement()
     {
-        return $this->belongsTo(ResponsibleUser::class);
+        return $this->belongsTo(Departement::class);
     }
 
-    public function stase()
+    public function responsibleUser()
     {
-        return $this->belongsTo(Stase::class);
+        return $this->belongsTo(ResponsibleUser::class, 'responsible_user_id');
     }
 }

@@ -18,18 +18,9 @@ class AdminScheduleController extends Controller
             'stase',
             'departement',
             'responsibleUser.user'
-         ])->paginate(10); // Changed from get() to paginate()
+        ])->get();
 
-        $departments = Departement::all();
-        $responsibles = ResponsibleUser::with('user')->whereHas('user')->get();
-        $internshipClasses = InternshipClass::with('classYear')->get();
-
-        return view('pages.admin.schedule.index', compact(
-            'schedules',
-            'departments',
-            'responsibles',
-            'internshipClasses'
-        ));
+        return view('pages.admin.schedule.index', compact('schedules'));
     }
 
     /**
@@ -84,7 +75,7 @@ class AdminScheduleController extends Controller
     {
         $query = Schedule::query();
 
-        if ($request->has('department') && $request->department != '') {
+        if ($request->has('departement') && $request->department != '') {
             $query->where('departement_id', $request->department);
         }
 

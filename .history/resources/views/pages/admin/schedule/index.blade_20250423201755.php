@@ -184,10 +184,9 @@
                 <!-- Filter Dropdowns -->
                 <div class="relative flex-1">
                     <select id="departemen-filter" class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
-                        <option value="">Departemen</option>
-                        @foreach($departments as $department)
-                            <option value="{{ $department->id }}">{{ $department->name }}</option>
-                        @endforeach
+                        <option>Departemen</option>
+                        <option>Poliklinik Ortopedi</option>
+                        <option>Poliklinik Umum</option>
                     </select>
                     <div class="absolute right-3 top-3 pointer-events-none">
                         <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -198,10 +197,9 @@
 
                 <div class="relative flex-1">
                     <select id="tahun-filter" class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
-                        <option value="">Tahun Angkatan</option>
-                        @foreach($internshipClasses as $class)
-                            <option value="{{ $class->id }}">{{ $class->classYear->class_year }}</option>
-                        @endforeach
+                        <option>Tahun Angkatan</option>
+                        <option>2024/2025</option>
+                        <option>2025/2026</option>
                     </select>
                     <div class="absolute right-3 top-3 pointer-events-none">
                         <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,12 +210,9 @@
 
                 <div class="relative flex-1">
                     <select id="pembimbing-filter" class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
-                        <option value="">Pembimbing</option>
-                        @foreach($responsibles as $responsible)
-                            @if($responsible && $responsible->user)
-                                <option value="{{ $responsible->id }}">{{ $responsible->user->name }}</option>
-                            @endif
-                        @endforeach
+                        <option>Pembimbing</option>
+                        <option>dr. Tirta Mandira Hudhi</option>
+                        <option>dr. Dion Haryadi</option>
                     </select>
                     <div class="absolute right-3 top-3 pointer-events-none">
                         <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -316,65 +311,75 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        @foreach($schedules as $schedule)
-                            <tr>
-                                <td class="py-3 px-4">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->stase->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->departement->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">
-                                    {{ $schedule->stase->responsibleUser->user->name ?? 'N/A' }}
-                                </td>
-                                <td class="py-3 px-4">
-                                    @if($schedule->start_date && $schedule->end_date)
-                                        {{ \Carbon\Carbon::parse($schedule->start_date)->format('d-m-Y') }} s/d 
-                                        {{ \Carbon\Carbon::parse($schedule->end_date)->format('d-m-Y') }}
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td class="py-3 px-4">
-                                    @if($schedule->start_time && $schedule->end_time)
-                                        {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - 
-                                        {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td class="py-3 px-4">
-                                    <div class="flex gap-2">
-                                        <a href="{{ route('admin.schedules.edit', $schedule->id) }}" class="text-blue-500">
-                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                </path>
-                                            </svg>
-                                        </a>
-                                        <form action="{{ route('admin.schedules.destroy', $schedule->id) }}" 
-                                              method="POST" 
-                                              onsubmit="return confirm('Are you sure?')" 
-                                              class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-500">
-                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                    </path>
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
+                        <!-- Row 1 -->
+                        <tr>
+                            <td class="py-3 px-4">FK - 01</td>
+                            <td class="py-3 px-4">1</td>
+                            <td class="py-3 px-4">Poliklinik Ortopedi</td>
+                            <td class="py-3 px-4">2025/2026</td>
+                            <td class="py-3 px-4">dr. Tirta Mandira Hudhi</td>
+                            <td class="py-3 px-4">1-9-2025 s/d 1-11-2025</td>
+                            <td class="py-3 px-4">10:00 - 14:00</td>
+                            <td class="py-3 px-4">
+                                <div class="flex gap-2">
+                                    <a href="edit_schedule.php" class="text-blue-500">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </a>
+                                    <a href="#" class="text-gray-500">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </a>
+                                    <a href="delete_schedule.php" class="text-red-500">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr>
+                            <td class="py-3 px-4">FK - 02</td>
+                            <td class="py-3 px-4">2</td>
+                            <td class="py-3 px-4">Poliklinik Umum</td>
+                            <td class="py-3 px-4">2025/2026</td>
+                            <td class="py-3 px-4">dr. Dion Haryadi</td>
+                            <td class="py-3 px-4">1-9-2025 s/d 1-12-2025</td>
+                            <td class="py-3 px-4">10:00 - 14:00</td>
+                            <td class="py-3 px-4">
+                                <div class="flex gap-2">
+                                    <a href="edit_schedule.php" class="text-blue-500">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </a>
+                                    <a href="#" class="text-gray-500">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </a>
+                                    <a href="delete_schedule.php" class="text-red-500">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Pagination -->
-            <div class="mt-4">
-                {{ $schedules->links() }}
+            <div class="flex items-center justify-center mt-4">
+                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-500">Previous</button>
+                <button class="px-3 py-1 bg-green-600 text-white rounded-md mx-1 text-sm">1</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-md mx-1 text-sm">2</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-md mx-1 text-sm">3</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-500">Next</button>
             </div>
         </div>
     </div>
@@ -571,14 +576,33 @@
                 const department = departmentFilter.value;
                 const year = yearFilter.value;
                 const instructor = instructorFilter.value;
-                const searchTerm = searchInput.value;
+                const searchTerm = searchInput.value.toLowerCase();
                 
-                // Send AJAX request
-                fetch(`/admin/schedules/filter?department=${department}&year=${year}&instructor=${instructor}&search=${searchTerm}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        document.querySelector('tbody').innerHTML = html;
-                    });
+                // Get all table rows
+                const rows = Array.from(document.querySelectorAll('tbody tr'));
+                
+                // Filter rows based on criteria
+                rows.forEach(row => {
+                    const departmentCell = row.cells[2].textContent.trim();
+                    const yearCell = row.cells[3].textContent.trim();
+                    const instructorCell = row.cells[4].textContent.trim();
+                    const allText = row.textContent.toLowerCase();
+                    
+                    // Check if row matches all criteria
+                    const departmentMatch = department === 'Departemen' || departmentCell === department;
+                    const yearMatch = year === 'Tahun Angkatan' || yearCell === year;
+                    const instructorMatch = instructor === 'Pembimbing' || instructorCell === instructor;
+                    const searchMatch = searchTerm === '' || allText.includes(searchTerm);
+                    
+                    // Show or hide row based on filter matches
+                    if (departmentMatch && yearMatch && instructorMatch && searchMatch) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                updatePagination();
             }
             
             // Pagination functionality

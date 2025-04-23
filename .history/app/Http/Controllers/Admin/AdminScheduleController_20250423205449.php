@@ -15,10 +15,10 @@ class AdminScheduleController extends Controller
     {
         $schedules = Schedule::with([
             'internshipClass.classYear',
-            'stase',
             'departement',
-            'responsibleUser.user'
-         ])->paginate(10); // Changed from get() to paginate()
+            'responsibleUser.user',
+            'stase'
+        ])->get();
 
         $departments = Departement::all();
         $responsibles = ResponsibleUser::with('user')->whereHas('user')->get();

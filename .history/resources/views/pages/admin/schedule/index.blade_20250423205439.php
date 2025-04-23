@@ -318,28 +318,18 @@
                     <tbody class="divide-y divide-gray-200">
                         @foreach($schedules as $schedule)
                             <tr>
-                                <td class="py-3 px-4">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->stase->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->departement->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year ?? 'N/A' }}</td>
+                                <td class="py-3 px-4">{{ $schedule->internshipClass->name }}</td>
+                                <td class="py-3 px-4">{{ $schedule->stase }}</td>
+                                <td class="py-3 px-4">{{ $schedule->departement->name }}</td>
+                                <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year }}</td>
+                                <td class="py-3 px-4">{{ $schedule->responsibleUser->user }}</td>
                                 <td class="py-3 px-4">
-                                    {{ $schedule->stase->responsibleUser->user->name ?? 'N/A' }}
+                                    {{ \Carbon\Carbon::parse($schedule->rotation_period_start)->format('d-m-Y') }} s/d 
+                                    {{ \Carbon\Carbon::parse($schedule->rotation_period_end)->format('d-m-Y') }}
                                 </td>
                                 <td class="py-3 px-4">
-                                    @if($schedule->start_date && $schedule->end_date)
-                                        {{ \Carbon\Carbon::parse($schedule->start_date)->format('d-m-Y') }} s/d 
-                                        {{ \Carbon\Carbon::parse($schedule->end_date)->format('d-m-Y') }}
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td class="py-3 px-4">
-                                    @if($schedule->start_time && $schedule->end_time)
-                                        {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - 
-                                        {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                                    @else
-                                        N/A
-                                    @endif
+                                    {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - 
+                                    {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="flex gap-2">

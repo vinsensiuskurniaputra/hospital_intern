@@ -214,9 +214,7 @@
                     <select id="pembimbing-filter" class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
                         <option value="">Pembimbing</option>
                         @foreach($responsibles as $responsible)
-                            @if($responsible && $responsible->user)
-                                <option value="{{ $responsible->id }}">{{ $responsible->user->name }}</option>
-                            @endif
+                            <option value="{{ $responsible->id }}">{{ $responsible->user->name }}</option>
                         @endforeach
                     </select>
                     <div class="absolute right-3 top-3 pointer-events-none">
@@ -318,28 +316,18 @@
                     <tbody class="divide-y divide-gray-200">
                         @foreach($schedules as $schedule)
                             <tr>
-                                <td class="py-3 px-4">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->stase->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->departement->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year ?? 'N/A' }}</td>
+                                <td class="py-3 px-4">{{ $schedule->internshipClass->name }}</td>
+                                <td class="py-3 px-4">{{ $schedule->stase }}</td>
+                                <td class="py-3 px-4">{{ $schedule->departement->name }}</td>
+                                <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year }}</td>
+                                <td class="py-3 px-4">{{ $schedule->responsibleUser->user->name }}</td>
                                 <td class="py-3 px-4">
-                                    {{ $schedule->stase->responsibleUser->user->name ?? 'N/A' }}
+                                    {{ \Carbon\Carbon::parse($schedule->rotation_period_start)->format('d-m-Y') }} s/d 
+                                    {{ \Carbon\Carbon::parse($schedule->rotation_period_end)->format('d-m-Y') }}
                                 </td>
                                 <td class="py-3 px-4">
-                                    @if($schedule->start_date && $schedule->end_date)
-                                        {{ \Carbon\Carbon::parse($schedule->start_date)->format('d-m-Y') }} s/d 
-                                        {{ \Carbon\Carbon::parse($schedule->end_date)->format('d-m-Y') }}
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td class="py-3 px-4">
-                                    @if($schedule->start_time && $schedule->end_time)
-                                        {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - 
-                                        {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                                    @else
-                                        N/A
-                                    @endif
+                                    {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - 
+                                    {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="flex gap-2">
@@ -571,14 +559,33 @@
                 const department = departmentFilter.value;
                 const year = yearFilter.value;
                 const instructor = instructorFilter.value;
-                const searchTerm = searchInput.value;
+                const searchTerm = searchInput.value.toLowerCase();
                 
-                // Send AJAX request
-                fetch(`/admin/schedules/filter?department=${department}&year=${year}&instructor=${instructor}&search=${searchTerm}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        document.querySelector('tbody').innerHTML = html;
-                    });
+                // Get all table rows
+                const rows = Array.from(document.querySelectorAll('tbody tr'));
+                
+                // Filter rows based on criteria
+                rows.forEach(row => {
+                    const departmentCell = row.cells[2].textContent.trim();
+                    const yearCell = row.cells[3].textContent.trim();
+                    const instructorCell = row.cells[4].textContent.trim();
+                    const allText = row.textContent.toLowerCase();
+                    
+                    // Check if row matches all criteria
+                    const departmentMatch = department === 'Departemen' || departmentCell === department;
+                    const yearMatch = year === 'Tahun Angkatan' || yearCell === year;
+                    const instructorMatch = instructor === 'Pembimbing' || instructorCell === instructor;
+                    const searchMatch = searchTerm === '' || allText.includes(searchTerm);
+                    
+                    // Show or hide row based on filter matches
+                    if (departmentMatch && yearMatch && instructorMatch && searchMatch) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                updatePagination();
             }
             
             // Pagination functionality

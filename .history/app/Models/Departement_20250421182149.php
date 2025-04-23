@@ -8,10 +8,5 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Departement extends Model
 {
     use HasFactory;
-    protected $fillable = ['name'];
-
-    public function schedules()
-    {
-        return $this->hasMany(Schedule::class);
-    }
+    protected $guarded = ['id'];
 }
