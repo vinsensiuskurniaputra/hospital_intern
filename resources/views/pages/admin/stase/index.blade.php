@@ -12,16 +12,6 @@
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                 <h1 class="text-2xl text-gray-800 pb-6">Stase</h1>
             </div>
-             <div class="p-6 space-y-6">
-            <!-- Summary Cards -->
-            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h1 class="text-2xl text-gray-800 pb-6">Stase</h1>
-            </div>
-                  <div class="p-6 space-y-6">
-            <!-- Summary Cards -->
-            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h1 class="text-2xl text-gray-800 pb-6">Stase</h1>
-            </div>
 
             <!-- Main Content Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -46,11 +36,46 @@
                     </div>
                 </div>
 
-              
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="table-auto w-full ">
+                        <thead class="bg-gray-50 border-y border-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detail
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Responsible
+                                </th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TableBody" class="divide-y divide-gray-100">
+                            @include('components.admin.stase.table', [
+                                'stases' => $stases,
+                            ])
+                        </tbody>
+                    </table>
+                </div>
+
                 <!-- Pagination -->
                 @include('components.general.pagination', [
                     'datas' => $stases,
                 ])
+
+            </div>
+        </div>
+        @include('components.admin.stase.add', [
+            'show' => 'addModal',
+        ])
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function fetchSearch() {
+                var search = $('#searchInput').val();
 
                 $.ajax({
                     url: "{{ route('stases.filter') }}", // Pastikan route ini dibuat
