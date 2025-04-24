@@ -5,18 +5,12 @@
 @section('content')
     <div class="p-6 space-y-6">
 
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">Total Students</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">2,450</h3>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">Total Students</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">2,450</h3>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">Total Students</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">2,450</h3>
-                    </div>
+
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Students Stats -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Total Students</p>
                         <h3 class="text-2xl font-bold text-gray-800 mt-1">2,450</h3>
@@ -28,7 +22,46 @@
                 <p class="text-xs text-gray-500 mt-4">YEAR 2024</p>
             </div>
 
-    
+            <!-- Doctors Stats -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Doctors</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">126</h3>
+                    </div>
+                    <div class="p-3 bg-[#F5F7F0] rounded-lg">
+                        <i class="bi bi-file-earmark-person text-xl text-[#637F26]"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-4">YEAR 2024</p>
+            </div>
+
+            <!-- Admins Stats -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Admins</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">8</h3>
+                    </div>
+                    <div class="p-3 bg-[#F5F7F0] rounded-lg">
+                        <i class="bi bi-shield-check text-xl text-[#637F26]"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-4">YEAR 2024</p>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <!-- Left Column -->
+            <div class="xl:col-span-2 space-y-6">
+                <!-- Attendance Chart -->
+                <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Student Attendance</h3>
+                            <p class="text-sm text-gray-500">January - July 2024</p>
+                        </div>
                         <div class="text-right">
                             <p class="text-2xl font-bold text-gray-800">1,000</p>
                             <p class="text-sm text-red-500 flex items-center justify-end">
