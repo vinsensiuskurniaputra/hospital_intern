@@ -64,9 +64,6 @@ class AdminScheduleController extends Controller
             'end_time' => 'required|after:start_time',
         ]);
 
-        // Add the current date as date_schedule
-        $validated['date_schedule'] = now()->toDateString();
-
         Schedule::create($validated);
 
         return redirect()
@@ -79,7 +76,7 @@ class AdminScheduleController extends Controller
      */
     public function show(Schedule $schedule)
     {
-        return view('pages.admin.schedule.show', compact('schedule'));
+        //
     }
 
     /**

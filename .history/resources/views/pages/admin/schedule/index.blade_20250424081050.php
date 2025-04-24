@@ -101,7 +101,7 @@
             <!-- Class Cards -->
             <div class="w-2/3 grid grid-cols-2 gap-4">
                 @foreach($schedules->take(6) as $schedule)
-                    <a href="{{ route('admin.schedules.show', $schedule->id) }}" 
+                    <a href="{{ route('admin.schedules.View', $schedule->id) }}" 
                        class="block bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <h3 class="text-lg font-medium mb-1">{{ $schedule->internshipClass->name ?? 'N/A' }}</h3>
                         <div class="flex items-center text-gray-500 mb-1">

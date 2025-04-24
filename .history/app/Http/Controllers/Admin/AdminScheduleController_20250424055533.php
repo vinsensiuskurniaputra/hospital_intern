@@ -38,15 +38,7 @@ class AdminScheduleController extends Controller
      */
     public function create()
     {
-        $internshipClasses = InternshipClass::all();
-        $departments = Departement::all();
-        $stases = Stase::all();
-
-        return view('pages.admin.schedule.create', compact(
-            'internshipClasses',
-            'departments',
-            'stases'
-        ));
+        //
     }
 
     /**
@@ -54,24 +46,7 @@ class AdminScheduleController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'internship_class_id' => 'required|exists:internship_classes,id',
-            'stase_id' => 'required|exists:stases,id',
-            'departement_id' => 'required|exists:departements,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
-        ]);
-
-        // Add the current date as date_schedule
-        $validated['date_schedule'] = now()->toDateString();
-
-        Schedule::create($validated);
-
-        return redirect()
-            ->route('admin.schedules.index')
-            ->with('success', 'Jadwal berhasil ditambahkan');
+        //
     }
 
     /**
@@ -79,7 +54,7 @@ class AdminScheduleController extends Controller
      */
     public function show(Schedule $schedule)
     {
-        return view('pages.admin.schedule.show', compact('schedule'));
+        //
     }
 
     /**
@@ -126,11 +101,7 @@ class AdminScheduleController extends Controller
      */
     public function destroy(Schedule $schedule)
     {
-        $schedule->delete();
-
-        return redirect()
-            ->route('admin.schedules.index')
-            ->with('success', 'Jadwal berhasil dihapus');
+        //
     }
 
     public function filter(Request $request)

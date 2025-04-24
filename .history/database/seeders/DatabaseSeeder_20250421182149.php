@@ -10,11 +10,6 @@ use Illuminate\Database\Seeder;
 use Database\Seeders\MenuSeeder;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\UserSeeder;
-use Database\Seeders\DepartementSeeder;
-use Database\Seeders\StaseSeeder;
-use Database\Seeders\InternshipClassSeeder;
-use Database\Seeders\ResponsibleUserSeeder;
-use Database\Seeders\ScheduleSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -33,11 +28,6 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class, 
             MenuSeeder::class, 
-            DepartementSeeder::class,
-            StaseSeeder::class,
-            InternshipClassSeeder::class,
-            ResponsibleUserSeeder::class,
-            ScheduleSeeder::class,
         ]);
 
         $students = Student::factory()->count(10)->create();

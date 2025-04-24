@@ -79,7 +79,7 @@ class AdminScheduleController extends Controller
      */
     public function show(Schedule $schedule)
     {
-        return view('pages.admin.schedule.show', compact('schedule'));
+        //
     }
 
     /**

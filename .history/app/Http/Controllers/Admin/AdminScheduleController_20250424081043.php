@@ -77,9 +77,9 @@ class AdminScheduleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Schedule $schedule)
+    public function View(Schedule $schedule)
     {
-        return view('pages.admin.schedule.show', compact('schedule'));
+        return view('pages.admin.schedule.View', compact('schedule'));
     }
 
     /**

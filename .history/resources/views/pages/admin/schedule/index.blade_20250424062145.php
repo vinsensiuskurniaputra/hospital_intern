@@ -101,8 +101,7 @@
             <!-- Class Cards -->
             <div class="w-2/3 grid grid-cols-2 gap-4">
                 @foreach($schedules->take(6) as $schedule)
-                    <a href="{{ route('admin.schedules.show', $schedule->id) }}" 
-                       class="block bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <h3 class="text-lg font-medium mb-1">{{ $schedule->internshipClass->name ?? 'N/A' }}</h3>
                         <div class="flex items-center text-gray-500 mb-1">
                             <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,7 +117,7 @@
                             </span>
                         </div>
                         <div class="text-gray-500">{{ $schedule->departement->name ?? 'N/A' }}</div>
-                    </a>
+                    </div>
                 @endforeach
             </div>
         </div>
@@ -301,6 +300,7 @@
                                         </a>
                                         <form action="{{ route('admin.schedules.destroy', $schedule->id) }}" 
                                               method="POST" 
+                                              onsubmit="return confirm('Are you sure?')" 
                                               class="inline delete-form">
                                             @csrf
                                             @method('DELETE')
