@@ -63,8 +63,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::resource('/internships/stases', AdminStaseController::class)->names('admin.stases');
     Route::get('/stases/filter', [AdminStaseController::class, 'filter'])->name('stases.filter');
-
+    
     Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
+    Route::get('/internshipClasses/filter', [AdminInternshipClassController::class, 'filter'])->name('internshipClasses.filter');
 
     Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
