@@ -19,7 +19,8 @@ use App\Http\Controllers\Admin\AdminInternshipClassController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
-use App\Http\Controllers\Student\NotifikasiController;
+use App\Http\Controllers\Student\StudentNotificationsController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -88,8 +89,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
     
     // Notifications
-    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
-
+    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationsController::class, 'index'])->name('notifications');
 
 });
 
