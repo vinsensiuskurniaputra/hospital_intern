@@ -80,25 +80,30 @@
 
         <!-- Main Content with Navbar -->
         <div class="flex-1 min-h-screen transition-all duration-300">
-            <!-- Top Navigation Bar -->
-            <nav class="bg-white border-b border-gray-200 fixed right-0 left-0 z-30">
-                <div class="px-4 py-3 flex justify-between items-center">
-                    <button @click="sidebarOpen = !sidebarOpen" class="p-1 rounded-lg hover:bg-gray-100">
-                        <i class="bi bi-list text-2xl text-[#637F26]"></i>
-                    </button>
 
-                    <!-- Right Side Items -->
-                    <div class="flex items-center space-x-3">
-                        <!-- Notification Icon -->
-                        <a href="{{ route('student.notifications') }}" 
-                           class="p-2 hover:bg-gray-100 rounded-full">
-                            <i class="bi bi-bell text-xl" 
-                               :class="{{ request()->routeIs('student.notifications') ? 'text-gray-900' : 'text-gray-600' }}">
-                            </i>
-                        </a>
+            <!-- Top Navbar -->
+            <nav class="left-72 bg-white border-b border-gray-200 fixed right-0 z-10 transition-all duration-300"
+                :class="{ 'left-72': sidebarOpen, 'left-20': !sidebarOpen }">
+                <div class="px-4 py-3">
+                    <div class="flex items-center justify-between">
+                        {{-- Button Open And Close Bar --}}
+                        <button @click="sidebarOpen = !sidebarOpen" class="p-1 rounded-lg hover:bg-gray-100">
+                            <i class="bi bi-list text-2xl text-[#637F26]"></i>
+                        </button>
 
-                        <!-- Profile Dropdown -->
-                        <div class="relative">
+                        <!-- Right Side Nav Items -->
+                        <div class="flex items-center space-x-2">
+                            <a href="{{ route('student.notifications') }}" 
+                               class="p-2 hover:bg-gray-100 rounded-full">
+                                <i class="bi bi-bell text-xl transition-colors duration-200"
+                                   :class="{
+                                       'text-gray-900': '{{ request()->routeIs('student.notifications') }}',
+                                       'text-gray-600 hover:text-gray-900': '{{ !request()->routeIs('student.notifications') }}'
+                                   }">
+                                </i>
+                            </a>
+                            
+                            <!-- Profile section -->
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
                                     <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt="Profile" class="w-8 h-8 rounded-full">
@@ -131,7 +136,8 @@
             </nav>
 
             <!-- Page Content -->
-            <div class="pt-[73px]">
+            <div class="pt-[73px] bg-gray-50 h-screen overflow-y-scroll "
+                :style="{ width: sidebarOpen ? 'calc(100vw - 18rem)' : 'calc(100vw - 5rem)' }">
                 @yield('content')
             </div>
         </div>
