@@ -29,7 +29,7 @@ class StudentNotifikasiController extends Controller
 @section('content')
 <div class="p-6" x-data="{ 
     isFilterOpen: false,
-    selectedFilter: 'All',  // Changed default to 'All'
+    selectedFilter: null,
     notifications: [
         {
             title: 'Pengambilan Sertifikat Magang',
@@ -71,7 +71,7 @@ class StudentNotifikasiController extends Controller
         <div class="relative">
             <button @click="isFilterOpen = !isFilterOpen" 
                     class="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none flex items-center min-w-[120px] justify-between">
-                <span x-text="selectedFilter === 'All' ? 'Filter' : selectedFilter"></span>
+                <span x-text="selectedFilter || 'Filter'"></span>
                 <i class="bi bi-chevron-down ml-2"></i>
             </button>
             
@@ -80,11 +80,6 @@ class StudentNotifikasiController extends Controller
                 @click.away="isFilterOpen = false"
                 class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
                 
-                <button @click="selectedFilter = 'All'; isFilterOpen = false"
-                        class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
-                        :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === 'All' }">
-                    Filter
-                </button>
                 <button @click="selectedFilter = 'Umum'; isFilterOpen = false"
                         class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
                         :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === 'Umum' }">
@@ -116,7 +111,7 @@ class StudentNotifikasiController extends Controller
 
     <!-- Notifications List -->
     <div class="space-y-4">
-        <template x-for="notification in notifications.filter(n => selectedFilter === 'All' || n.type === selectedFilter)" :key="notification.title">
+        <template x-for="notification in notifications.filter(n => !selectedFilter || n.type === selectedFilter)" :key="notification.title">
             <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                 <div class="flex justify-between items-start mb-4">
                     <h2 class="text-lg font-semibold text-gray-800" x-text="notification.title"></h2>
@@ -126,7 +121,7 @@ class StudentNotifikasiController extends Controller
                               :class="{
                                 'bg-emerald-100 text-emerald-800': notification.type === 'Umum',
                                 'bg-amber-100 text-amber-800': notification.type === 'Jadwal',
-                                'bg-blue-100 text-blue-800': notification.type === 'Evaluasi',
+                                'bg-green-100 text-green-800': notification.type === 'Evaluasi',
                                 'bg-red-100 text-red-800': notification.type === 'Kebijakan',
                                 'bg-green-100 text-green-800': notification.type === 'Administrasi'
                               }">
