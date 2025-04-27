@@ -28,14 +28,50 @@ class StudentNotifikasiController extends Controller
 
 @section('content')
 <div class="p-6">
-    <!-- Header -->
+    <!-- Header with Interactive Filter -->
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-xl font-semibold text-gray-800">Notifikasi / Pengumuman Penting</h1>
-        <div class="relative">
-            <button class="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#637F26]">
+        <div class="relative" x-data="{ isOpen: false }">
+            <button @click="isOpen = !isOpen" 
+                    class="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#637F26] flex items-center">
                 Filter
                 <i class="bi bi-chevron-down ml-2"></i>
             </button>
+            
+            <!-- Filter Dropdown -->
+            <div x-show="isOpen" 
+                 @click.away="isOpen = false"
+                 x-transition:enter="transition ease-out duration-100"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">Kategori</div>
+                <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" class="rounded text-[#637F26] focus:ring-[#637F26] mr-2">
+                    <span class="text-sm text-gray-700">Umum</span>
+                </label>
+                <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" class="rounded text-[#637F26] focus:ring-[#637F26] mr-2">
+                    <span class="text-sm text-gray-700">Jadwal</span>
+                </label>
+                <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" class="rounded text-[#637F26] focus:ring-[#637F26] mr-2">
+                    <span class="text-sm text-gray-700">Evaluasi</span>
+                </label>
+                <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" class="rounded text-[#637F26] focus:ring-[#637F26] mr-2">
+                    <span class="text-sm text-gray-700">Kebijakan</span>
+                </label>
+                <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" class="rounded text-[#637F26] focus:ring-[#637F26] mr-2">
+                    <span class="text-sm text-gray-700">Administrasi</span>
+                </label>
+                <div class="border-t border-gray-200 mt-2 pt-2 px-4">
+                    <button class="w-full bg-[#637F26] text-white rounded-lg px-4 py-2 text-sm">
+                        Terapkan Filter
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

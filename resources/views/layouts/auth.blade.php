@@ -76,17 +76,6 @@
                     @endforeach
                 @endif
             </nav>
-
-            <div class="mt-auto p-4 border-t border-gray-200">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" :class="{ 'justify-center': !sidebarOpen }"
-                        class="flex items-center w-full p-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors">
-                        <i class="bi bi-box-arrow-right w-5" :class="{ 'mr-3': sidebarOpen }"></i>
-                        <span :class="{ 'hidden': !sidebarOpen }">Logout</span>
-                    </button>
-                </form>
-            </div>
         </aside>
 
         <!-- Main Content with Navbar -->
@@ -101,74 +90,41 @@
                         <button @click="sidebarOpen = !sidebarOpen" class="p-1 rounded-lg hover:bg-gray-100">
                             <i class="bi bi-list text-2xl text-[#637F26]"></i>
                         </button>
-                        <!-- Search Bar -->
-                        <div class="flex-1 max-w-lg">
-                            @php
-                                $userRole = Auth::user()->roles()->first()->name ?? '';
-                                $hideSearchBar = in_array($userRole, ['student', 'responsible']);
-                            @endphp
-                            
-                            @if(!$hideSearchBar)
-                            <div class="relative">
-                                <input type="text"
-                                    class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26] text-sm"
-                                    placeholder="Search...">
-                                <div class="absolute left-3 top-2.5 text-gray-400">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            @else
-                            <!-- Spacer to maintain layout -->
-                            <div class="invisible"></div>
-                            @endif
-                        </div>
 
                         <!-- Right Side Nav Items -->
-                        <div class="flex items-center space-x-4">
-                            <!-- Notifications -->
-                            <a href="{{ route('student.notifications.index') }}" class="p-2 text-gray-500 hover:text-[#637F26] rounded-lg hover:bg-gray-100 relative">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                @if(isset($unreadNotifications) && $unreadNotifications > 0)
-                                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">{{ $unreadNotifications }}
-                                    </span>
-                                @endif
-                            </a>
-                        </div>
-
-                            <!-- User Profile Dropdown -->
-                            <div class="relative" x-data="{ open: false }">
-                                <button @click="open = !open"
-                                    class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-                                    <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt="Profile"
-                                        class="w-8 h-8 rounded-full">
-                                    <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
-                                </button>
-
-                                <!-- Dropdown Menu -->
-                                <div x-show="open" @click.away="open = false"
-                                    x-transition:enter="transition ease-out duration-100"
-                                    x-transition:enter-start="opacity-0 scale-95"
-                                    x-transition:enter-end="opacity-100 scale-100"
-                                    class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
-                                    style="display: none;">
-                                    <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                    <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                                    <hr class="my-2 border-gray-200">
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit"
-                                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                            Sign out
-                                        </button>
-                                    </form>
+                        <div class="flex items-center space-x-3">
+                            <!-- Notifications moved closer to profile -->
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ route('student.notifications') }}" class="p-2 hover:bg-gray-100 rounded-full">
+                                    <i class="bi bi-bell text-xl text-gray-600 hover:text-[#637F26]"></i>
+                                </a>
+                                
+                                <!-- User Profile Dropdown -->
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt="Profile" class="w-8 h-8 rounded-full">
+                                        <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
+                                    </button>
+                                    <!-- Dropdown Menu -->
+                                    <div x-show="open" @click.away="open = false"
+                                        x-transition:enter="transition ease-out duration-100"
+                                        x-transition:enter-start="opacity-0 scale-95"
+                                        x-transition:enter-end="opacity-100 scale-100"
+                                        class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
+                                        style="display: none;">
+                                        <a href="#"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                        <a href="#"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                        <hr class="my-2 border-gray-200">
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit"
+                                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                Sign out
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
