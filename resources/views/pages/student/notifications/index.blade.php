@@ -113,11 +113,17 @@ class StudentNotifikasiController extends Controller
     <div class="space-y-4">
         <template x-for="notification in notifications.filter(n => !selectedFilter || n.type === selectedFilter)" :key="notification.title">
             <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                <div class="flex justify-between items-start mb-4">
-                    <h2 class="text-lg font-semibold text-gray-800" x-text="notification.title"></h2>
-                    <div class="flex flex-col items-end space-y-2">
-                        <span class="text-sm text-gray-500" x-text="notification.date"></span>
-                        <span class="px-3 py-1 text-sm font-medium rounded-full"
+                <div class="flex">
+                    <!-- Left side with title and content -->
+                    <div class="flex-1 pr-24"> <!-- Added fixed right padding (1.5cm ≈ 24px) -->
+                        <h2 class="text-lg font-semibold text-gray-800 mb-2" x-text="notification.title"></h2>
+                        <p class="text-gray-600" x-text="notification.content"></p>
+                    </div>
+                    
+                    <!-- Right side with date and category -->
+                    <div class="flex flex-col items-end min-w-[120px]"> <!-- Fixed minimum width -->
+                        <span class="text-sm text-gray-500 mb-2" x-text="notification.date"></span>
+                        <span class="px-3 py-1 text-sm font-medium rounded-full whitespace-nowrap"
                               :class="{
                                 'bg-green-100 text-green-800': notification.type === 'Umum',
                                 'bg-yellow-100 text-yellow-800': notification.type === 'Jadwal',
@@ -129,7 +135,6 @@ class StudentNotifikasiController extends Controller
                         </span>
                     </div>
                 </div>
-                <p class="text-gray-600" x-text="notification.content"></p>
             </div>
         </template>
     </div>
