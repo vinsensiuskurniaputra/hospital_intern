@@ -80,51 +80,49 @@
 
         <!-- Main Content with Navbar -->
         <div class="flex-1 min-h-screen transition-all duration-300">
+            <!-- Top Navigation Bar -->
+            <nav class="bg-white border-b border-gray-200 fixed right-0 left-0 z-30">
+                <div class="px-4 py-3 flex justify-between items-center">
+                    <button @click="sidebarOpen = !sidebarOpen" class="p-1 rounded-lg hover:bg-gray-100">
+                        <i class="bi bi-list text-2xl text-[#637F26]"></i>
+                    </button>
 
-            <!-- Top Navbar -->
-            <nav class="left-72 bg-white border-b border-gray-200 fixed right-0 z-10 transition-all duration-300"
-                :class="{ 'left-72': sidebarOpen, 'left-20': !sidebarOpen }">
-                <div class="px-4 py-3">
-                    <div class="flex items-center justify-between">
-                        {{-- Button Open And Close Bar --}}
-                        <button @click="sidebarOpen = !sidebarOpen" class="p-1 rounded-lg hover:bg-gray-100">
-                            <i class="bi bi-list text-2xl text-[#637F26]"></i>
-                        </button>
+                    <!-- Right Side Items -->
+                    <div class="flex items-center space-x-3">
+                        <!-- Notification Icon -->
+                        <a href="{{ route('student.notifications') }}" 
+                           class="p-2 hover:bg-gray-100 rounded-full">
+                            <i class="bi bi-bell text-xl" 
+                               :class="{{ request()->routeIs('student.notifications') ? 'text-gray-900' : 'text-gray-600' }}">
+                            </i>
+                        </a>
 
-                        <!-- Right Side Nav Items -->
-                        <div class="flex items-center space-x-3">
-                            <!-- Notifications moved closer to profile -->
-                            <div class="flex items-center space-x-2">
-                                <a href="{{ route('student.notifications') }}" class="p-2 hover:bg-gray-100 rounded-full">
-                                    <i class="bi bi-bell text-xl text-gray-600 hover:text-[#637F26]"></i>
-                                </a>
-                                
-                                <!-- User Profile Dropdown -->
-                                <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-                                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt="Profile" class="w-8 h-8 rounded-full">
-                                        <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
-                                    </button>
-                                    <!-- Dropdown Menu -->
-                                    <div x-show="open" @click.away="open = false"
-                                        x-transition:enter="transition ease-out duration-100"
-                                        x-transition:enter-start="opacity-0 scale-95"
-                                        x-transition:enter-end="opacity-100 scale-100"
-                                        class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
-                                        style="display: none;">
-                                        <a href="#"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                        <a href="#"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                                        <hr class="my-2 border-gray-200">
-                                        <form method="POST" action="{{ route('logout') }}">
-                                            @csrf
-                                            <button type="submit"
-                                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                                Sign out
-                                            </button>
-                                        </form>
-                                    </div>
+                        <!-- Profile Dropdown -->
+                        <div class="relative">
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                    <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt="Profile" class="w-8 h-8 rounded-full">
+                                    <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
+                                </button>
+                                <!-- Dropdown Menu -->
+                                <div x-show="open" @click.away="open = false"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 scale-95"
+                                    x-transition:enter-end="opacity-100 scale-100"
+                                    class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
+                                    style="display: none;">
+                                    <a href="#"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                    <a href="#"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                    <hr class="my-2 border-gray-200">
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit"
+                                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                            Sign out
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -133,8 +131,7 @@
             </nav>
 
             <!-- Page Content -->
-            <div class="pt-[73px] bg-gray-50 h-screen overflow-y-scroll "
-                :style="{ width: sidebarOpen ? 'calc(100vw - 18rem)' : 'calc(100vw - 5rem)' }">
+            <div class="pt-[73px]">
                 @yield('content')
             </div>
         </div>
