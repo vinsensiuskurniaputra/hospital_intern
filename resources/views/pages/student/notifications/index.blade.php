@@ -115,7 +115,7 @@ class StudentNotifikasiController extends Controller
             <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                 <div class="flex justify-between items-start mb-4">
                     <h2 class="text-lg font-semibold text-gray-800" x-text="notification.title"></h2>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex flex-col items-end space-y-2">
                         <span class="text-sm text-gray-500" x-text="notification.date"></span>
                         <span class="px-3 py-1 text-sm font-medium rounded-full"
                               :class="{
