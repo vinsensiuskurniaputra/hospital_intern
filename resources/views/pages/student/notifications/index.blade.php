@@ -14,7 +14,7 @@ class StudentNotifikasiController extends Controller
                 'date' => '05 Agustus 2024 - 23:59',
                 'content' => 'Bagi mahasiswa yang telah menyelesaikan seluruh rangkaian magang dan evaluasi, sertifikat magang sudah bisa diunduh melalui sistem mulai 09 Agustus 2024.',
                 'tag' => 'Umum',
-                'tag_color' => 'emerald'
+                'tag_color' => 'green'
             ],
             // Tambahkan lainnya...
         ];
@@ -115,21 +115,21 @@ class StudentNotifikasiController extends Controller
             <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                 <div class="flex">
                     <!-- Left side with title and content -->
-                    <div class="flex-1 pr-12"> <!-- Reduced padding from pr-24 to pr-12 -->
+                    <div class="flex-1 pr-4"> <!-- Reduced padding to pr-4 -->
                         <h2 class="text-lg font-semibold text-gray-800 mb-2" x-text="notification.title"></h2>
                         <p class="text-gray-600" x-text="notification.content"></p>
                     </div>
                     
                     <!-- Right side with date and category -->
-                    <div class="flex flex-col items-end min-w-[100px]"> <!-- Reduced min-width -->
+                    <div class="flex flex-col items-end min-w-[90px]"> <!-- Reduced min-width -->
                         <span class="text-sm text-gray-500 mb-2" x-text="notification.date"></span>
                         <span class="px-3 py-1 text-sm font-medium rounded-full whitespace-nowrap"
                               :class="{
-                                'bg-emerald-100 text-emerald-800': notification.type === 'Umum',
-                                'bg-amber-100 text-amber-800': notification.type === 'Jadwal',
-                                'bg-green-100 text-green-800': notification.type === 'Evaluasi',
+                                'bg-green-100 text-green-800': notification.type === 'Umum',
+                                'bg-yellow-100 text-yellow-800': notification.type === 'Jadwal',
+                                'bg-blue-100 text-blue-800': notification.type === 'Evaluasi',
                                 'bg-red-100 text-red-800': notification.type === 'Kebijakan',
-                                'bg-green-100 text-green-800': notification.type === 'Administrasi'
+                                'bg-purple-100 text-purple-800': notification.type === 'Administrasi'
                               }">
                             <span x-text="notification.type"></span>
                         </span>
