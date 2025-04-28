@@ -88,6 +88,9 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     // Dashboard
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
     
+    // Notifications
+    Route::get('/notifications', [StudentNotificationsController::class, 'index'])->name('notifications');
+    
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule');
     
@@ -101,7 +104,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
     
     // Notifications
-    Route::get('/notifications', [StudentNotificationsController::class, 'index'])->name('notifications');
+    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationsController::class, 'index'])->name('notifications');
 
 });
 
@@ -125,6 +128,5 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     // Laporan & Rekapitulasi
     Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
 });
-
 
 

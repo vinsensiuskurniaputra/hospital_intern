@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Notifications\DatabaseNotification as Notification;
+use Illuminate\Http\Request;
 
 class StudentNotificationsController extends Controller
 {
     public function index()
     {
-        $notifications = Notification::latest()->get();
+        $notifications = [
+            // ...your notification data...
+        ];
+
         return view('pages.student.notifications.index', compact('notifications'));
     }
 }
