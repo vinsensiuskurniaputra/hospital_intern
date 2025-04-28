@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Role;
 use App\Models\Student;
+use App\Models\ResponsibleUser;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
@@ -61,6 +62,11 @@ class User extends Authenticatable
     public function student()
     {
         return $this->hasOne(Student::class);
+    }
+    
+    public function responsibleUser()
+    {
+        return $this->hasOne(ResponsibleUser::class);
     }
 
     public static function addUser($data)

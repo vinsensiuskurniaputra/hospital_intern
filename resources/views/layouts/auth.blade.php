@@ -4,73 +4,50 @@
     <div class="flex" x-data="{ sidebarOpen: true, open: {}, userDropdownOpen: false }">
         <!-- Sidebar -->
         <aside :class="{ 'w-72': sidebarOpen, 'w-20': !sidebarOpen }"
-            class="w-72 flex flex-col overflow-y-auto custom-scroll h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 min-h-[72px]">
-                <img src="{{ asset('images/logo.png') }}" alt="Medical Illustration" class="mx-auto drop-shadow-xl">
-                <h2 class="text-xl font-bold text-[#637F26]" :class="{ 'hidden': !sidebarOpen }">Sistem Magang RS
+            class="w-72 flex flex-col h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
+            <div class="flex items-center p-4 border-b border-gray-200 min-h-[72px]">
+                <img src="{{ asset('images/logo.png') }}" :class="{ 'm-auto': !sidebarOpen }" alt="Medical Illustration"
+                    class="drop-shadow-xl">
+                <h2 class="text-lg font-bold text-[#637F26] ml-2" :class="{ 'hidden': !sidebarOpen }">Sistem Magang RS
                 </h2>
             </div>
 
-            <nav class="p-4 space-y-2">
+            <nav class="p-4 space-y-2 overflow-y-auto overflow-x-hidden custom-scroll">
                 @if (Auth::check())
-                    @foreach ($menus as $menu)
+                    @foreach ($menusSideBar as $menu)
                         @if (isset($menu->children) && count($menu->children) > 0)
-                            <!-- Menu with dropdown -->
-                            <div class="relative" x-data="{ isOpen: {{ request()->is($menu->url . '*') ? 'true' : 'false' }} }">
-                                <button @click="isOpen = !isOpen"
-                                    :class="{ 'justify-center': !sidebarOpen, 'justify-start': sidebarOpen }"
-                                    class="flex items-center w-full p-3 transition-colors
-                                    {{ request()->is(ltrim($menu->url, '/') . '*')
-                                        ? 'text-[#637F26] border-l-2 border-[#637F26] bg-gradient-to-r from-[#F5F7F0] to-transparent font-medium'
-                                        : 'text-gray-700 hover:bg-[#F5F7F0] hover:text-[#637F26]' }}">
-                                    <i class="{{ $menu->icon }} mr-3 w-5 {{ request()->is($menu->url . '*') ? 'text-[#637F26]' : 'text-gray-500' }}"
+                            <h1 class="border-t border-gray-200" :class="{ 'hidden': sidebarOpen }"></h1>
+                            <h1 class="text-xs text-gray-500 py-2 " :class="{ 'hidden': !sidebarOpen }">{{ $menu->name }}
+                            </h1>
+                            @foreach ($menu->children as $child)
+                                <a href="{{ url($child->url) }}" id="menu-{{ $child->id }}"
+                                    @mouseenter="Alpine.store('tooltip').show('{{ $child->name }}', document.getElementById('menu-{{ $child->id }}'))"
+                                    @mouseleave="Alpine.store('tooltip').hide()" :class="{ 'justify-center': !sidebarOpen }"
+                                    class="group relative flex items-center p-3 transition-colors
+{{ request()->path() == ltrim($child->url, '/')
+    ? 'text-[#637F26] border-l-2 border-[#637F26] bg-gradient-to-r from-[#F5F7F0] to-transparent font-medium'
+    : 'text-gray-700 hover:bg-[#F5F7F0] hover:text-[#637F26]' }}">
+
+                                    <i class="{{ $child->icon }} w-5 {{ request()->path() == ltrim($child->url, '/') ? 'text-[#637F26]' : 'text-gray-500' }}"
                                         :class="{ 'mr-0': !sidebarOpen }"></i>
-                                    <span :class="{ 'hidden': !sidebarOpen }" class="text-start">{{ $menu->name }}</span>
-                                    <svg :class="{ 'hidden': !sidebarOpen, 'rotate-180': isOpen }"
-                                        class="w-4 h-4 ml-auto transition-transform duration-200" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                                <!-- Dropdown items -->
-                                <div x-show="isOpen && sidebarOpen" x-transition x-cloak class="pl-8 mt-1 space-y-1">
-                                    @foreach ($menu->children as $child)
-                                        <a href="{{ url($child->url) }}"
-                                            class="block p-3 text-sm transition-colors
-                                            {{ request()->is(ltrim($child->url, '/'))
-                                                ? 'text-[#637F26] bg-[#F5F7F0] font-medium'
-                                                : 'text-gray-600 hover:bg-[#F5F7F0] hover:text-[#637F26]' }}">
-                                            <i class="{{ $child->icon }} mr-3 w-5 {{ request()->is(ltrim($child->url, '/')) ? 'text-[#637F26]' : 'text-gray-500' }}"
-                                                :class="{ 'mr-0': !sidebarOpen }"></i>
-                                            {{ $child->name }}
-                                        </a>
-                                    @endforeach
-                                </div>
-                                <!-- Tooltip for collapsed state -->
-                                <div x-show="!sidebarOpen && isOpen" x-cloak
-                                    class="fixed left-20 z-50 w-48 bg-white rounded-lg shadow-lg border border-gray-200">
-                                    @foreach ($menu->children as $child)
-                                        <a href="{{ url($child->url) }}"
-                                            class="block p-3 text-sm transition-colors
-                                            {{ request()->is(ltrim($child->url, '/'))
-                                                ? 'text-[#637F26] bg-[#F5F7F0] font-medium'
-                                                : 'text-gray-600 hover:bg-[#F5F7F0] hover:text-[#637F26]' }}">
-                                            {{ $child->name }}
-                                        </a>
-                                    @endforeach
-                                </div>
-                            </div>
+
+                                    <span :class="{ 'hidden': !sidebarOpen }"
+                                        class="text-sm ml-3">{{ $child->name }}</span>
+                                </a>
+                            @endforeach
                         @elseif ($menu->parent_id == null)
                             <!-- Single menu item -->
                             <a href="{{ url($menu->url) }}" :class="{ 'justify-center': !sidebarOpen }"
+                                id="menu-{{ $menu->id }}"
+                                @mouseenter="Alpine.store('tooltip').show('{{ $menu->name }}', document.getElementById('menu-{{ $menu->id }}'))"
+                                @mouseleave="Alpine.store('tooltip').hide()" :class="{ 'justify-center': !sidebarOpen }"
                                 class="flex items-center p-3 transition-colors
                                 {{ request()->path() == ltrim($menu->url, '/')
                                     ? 'text-[#637F26] border-l-2 border-[#637F26] bg-gradient-to-r from-[#F5F7F0] to-transparent font-medium'
                                     : 'text-gray-700 hover:bg-[#F5F7F0] hover:text-[#637F26]' }}">
-                                <i class="{{ $menu->icon }} mr-3 w-5 {{ request()->path() == ltrim($menu->url, '/') ? 'text-[#637F26]' : 'text-gray-500' }}"
+                                <i class="{{ $menu->icon }} w-5 {{ request()->path() == ltrim($menu->url, '/') ? 'text-[#637F26]' : 'text-gray-500' }}"
                                     :class="{ 'mr-0': !sidebarOpen }"></i>
-                                <span :class="{ 'hidden': !sidebarOpen }">{{ $menu->name }}</span>
+                                <span :class="{ 'hidden': !sidebarOpen }" class="text-sm ml-3 ">{{ $menu->name }}</span>
                             </a>
                         @endif
                     @endforeach
@@ -103,17 +80,27 @@
                         </button>
                         <!-- Search Bar -->
                         <div class="flex-1 max-w-lg">
-                            <div class="relative">
-                                <input type="text"
-                                    class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26] text-sm"
-                                    placeholder="Search...">
-                                <div class="absolute left-3 top-2.5 text-gray-400">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
+                            @php
+                                $userRole = Auth::user()->roles()->first()->name ?? '';
+                                $hideSearchBar = in_array($userRole, ['student', 'responsible']);
+                            @endphp
+
+                            @if (!$hideSearchBar)
+                                <div class="relative">
+                                    <input type="text"
+                                        class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26] text-sm"
+                                        placeholder="Search...">
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
                                 </div>
-                            </div>
+                            @else
+                                <!-- Spacer to maintain layout -->
+                                <div class="invisible"></div>
+                            @endif
                         </div>
 
                         <!-- Right Side Nav Items -->
@@ -167,5 +154,36 @@
                 @yield('content')
             </div>
         </div>
+
+        <!-- Tooltip container -->
+        <div x-data x-show="$store.tooltip.visible" x-cloak x-text="$store.tooltip.text"
+            x-bind:style="{
+                top: $store.tooltip.y + 'px',
+                left: $store.tooltip.x + 'px'
+            }"
+            :class="{ 'hidden': sidebarOpen }"
+            class="fixed z-50 px-2 py-1 text-xs text-white bg-black rounded pointer-events-none transition-all duration-200"
+            style="transform: translateY(-50%);">
+        </div>
     </div>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('tooltip', {
+                text: '',
+                x: 0,
+                y: 0,
+                visible: false,
+                show(text, el) {
+                    const rect = el.getBoundingClientRect();
+                    this.text = text;
+                    this.x = rect.right + 12;
+                    this.y = rect.top + rect.height / 2 + window.scrollY;
+                    this.visible = true;
+                },
+                hide() {
+                    this.visible = false;
+                }
+            });
+        });
+    </script>
 @endsection
