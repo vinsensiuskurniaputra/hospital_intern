@@ -62,13 +62,11 @@ class StudentNotifikasiController extends Controller
 <div class="p-6" x-data="{ 
     isFilterOpen: false,
     selectedFilter: null,
-    notifications: {{ json_encode($notifications) }}
+    notifications: @json($notifications)
 }">
-    <!-- Header with Filter -->
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-xl font-semibold text-gray-800">Notifikasi / Pengumuman Penting</h1>
         
-        <!-- Filter Dropdown -->
         <div class="relative">
             <button @click="isFilterOpen = !isFilterOpen" 
                     class="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none flex items-center min-w-[120px] justify-between">
@@ -76,41 +74,21 @@ class StudentNotifikasiController extends Controller
                 <i class="bi bi-chevron-down ml-2"></i>
             </button>
             
-            <!-- Dropdown Menu -->
             <div x-show="isFilterOpen" 
                 @click.away="isFilterOpen = false"
                 class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
                 
-                <button @click="selectedFilter = 'Umum'; isFilterOpen = false"
-                        class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
-                        :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === 'Umum' }">
-                    Umum
-                </button>
-                <button @click="selectedFilter = 'Jadwal'; isFilterOpen = false"
-                        class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
-                        :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === 'Jadwal' }">
-                    Jadwal
-                </button>
-                <button @click="selectedFilter = 'Evaluasi'; isFilterOpen = false"
-                        class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
-                        :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === 'Evaluasi' }">
-                    Evaluasi
-                </button>
-                <button @click="selectedFilter = 'Kebijakan'; isFilterOpen = false"
-                        class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
-                        :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === 'Kebijakan' }">
-                    Kebijakan
-                </button>
-                <button @click="selectedFilter = 'Administrasi'; isFilterOpen = false"
-                        class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
-                        :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === 'Administrasi' }">
-                    Administrasi
-                </button>
+                <template x-for="type in ['Umum', 'Jadwal', 'Evaluasi', 'Kebijakan', 'Administrasi']">
+                    <button @click="selectedFilter = type; isFilterOpen = false"
+                            class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
+                            :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === type }">
+                        <span x-text="type"></span>
+                    </button>
+                </template>
             </div>
         </div>
     </div>
 
-    <!-- Notifications List -->
     <div class="space-y-4">
         <template x-for="notification in notifications
             .filter(n => !selectedFilter || n.type === selectedFilter)
@@ -118,15 +96,18 @@ class StudentNotifikasiController extends Controller
             :key="notification.id">
             <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm transition-all duration-200"
                  :class="{ 
-                     'border-l-4 border-l-[#637F26] bg-gray-50': !notification.is_read,
+                     'border-l-4 border-l-[#637F26] bg-[#F5F7F0]': !notification.is_read,
                      'hover:border-l-4 hover:border-l-[#637F26]': notification.is_read
                  }"
-                 @click="markAsRead(notification.id)">
-                <div class="flex justify-between items-start mb-4">
-                    <h2 class="text-lg font-semibold text-gray-800" x-text="notification.title"></h2>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-500" x-text="formatDate(notification.created_at)"></span>
-                        <span class="px-3 py-1 text-sm font-medium rounded-full"
+                 @click="markAsRead(notification)">
+                <div class="flex">
+                    <div class="flex-1 pr-4">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-2" x-text="notification.title"></h2>
+                        <p class="text-gray-600" x-text="notification.content"></p>
+                    </div>
+                    <div class="flex flex-col items-end min-w-[100px]">
+                        <span class="text-sm text-gray-500 mb-2" x-text="formatDate(notification.created_at)"></span>
+                        <span class="px-3 py-1 text-sm font-medium rounded-full whitespace-nowrap"
                               :class="{
                                 'bg-emerald-100 text-emerald-800': notification.type === 'Umum',
                                 'bg-amber-100 text-amber-800': notification.type === 'Jadwal',
@@ -138,7 +119,6 @@ class StudentNotifikasiController extends Controller
                         </span>
                     </div>
                 </div>
-                <p class="text-gray-600" x-text="notification.content"></p>
             </div>
         </template>
     </div>
@@ -146,30 +126,26 @@ class StudentNotifikasiController extends Controller
 
 <script>
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleString('id-ID', { 
+    const options = { 
         day: 'numeric',
         month: 'long',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
-    });
+    };
+    return new Date(dateString).toLocaleString('id-ID', options);
 }
 
-function markAsRead(notificationId) {
+function markAsRead(notification) {
     if (!notification.is_read) {
-        fetch(`/student/notifications/${notificationId}/read`, {
+        fetch(`/student/notifications/${notification.id}/read`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json'
             }
         }).then(() => {
-            this.notifications = this.notifications.map(n => {
-                if (n.id === notificationId) {
-                    return { ...n, is_read: true };
-                }
-                return n;
-            });
+            notification.is_read = true;
         });
     }
 }

@@ -90,6 +90,8 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     
     // Notifications
     Route::get('/notifications', [StudentNotificationsController::class, 'index'])->name('notifications');
+    Route::post('/notifications/{id}/read', [StudentNotificationsController::class, 'markAsRead'])
+        ->name('notifications.markAsRead');
 
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule');
