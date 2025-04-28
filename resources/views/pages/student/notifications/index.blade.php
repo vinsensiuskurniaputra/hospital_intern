@@ -64,9 +64,11 @@ class StudentNotifikasiController extends Controller
     selectedFilter: null,
     notifications: @json($notifications)
 }">
+    <!-- Header with Filter -->
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-xl font-semibold text-gray-800">Notifikasi / Pengumuman Penting</h1>
         
+        <!-- Filter Dropdown -->
         <div class="relative">
             <button @click="isFilterOpen = !isFilterOpen" 
                     class="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none flex items-center min-w-[120px] justify-between">
@@ -75,8 +77,8 @@ class StudentNotifikasiController extends Controller
             </button>
             
             <div x-show="isFilterOpen" 
-                @click.away="isFilterOpen = false"
-                class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
+                 @click.away="isFilterOpen = false"
+                 class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
                 <button @click="selectedFilter = null; isFilterOpen = false"
                         class="w-full px-4 py-2 text-sm text-left hover:bg-[#E7F7E8] hover:text-[#637F26]"
                         :class="{ 'bg-[#E7F7E8] text-[#637F26]': selectedFilter === null }">
@@ -93,17 +95,13 @@ class StudentNotifikasiController extends Controller
         </div>
     </div>
 
+    <!-- Notifications List -->
     <div class="space-y-4">
         <template x-for="notification in notifications
             .filter(n => !selectedFilter || n.type === selectedFilter)
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))" 
             :key="notification.id">
-            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm transition-all duration-200"
-                 :class="{ 
-                     'border-l-4 border-l-[#637F26] bg-[#F5F7F0]': !notification.is_read,
-                     'hover:border-l-4 hover:border-l-[#637F26]': notification.is_read
-                 }"
-                 @click="markAsRead(notification)">
+            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                 <div class="flex">
                     <div class="flex-1 pr-4">
                         <h2 class="text-lg font-semibold text-gray-800 mb-2" x-text="notification.title"></h2>
@@ -139,20 +137,6 @@ function formatDate(dateString) {
         minute: '2-digit'
     };
     return new Date(dateString).toLocaleString('id-ID', options);
-}
-
-function markAsRead(notification) {
-    if (!notification.is_read) {
-        fetch(`/student/notifications/${notification.id}/read`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Content-Type': 'application/json'
-            }
-        }).then(() => {
-            notification.is_read = true;
-        });
-    }
 }
 </script>
 @endpush
