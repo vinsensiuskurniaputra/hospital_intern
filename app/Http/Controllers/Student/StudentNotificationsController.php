@@ -9,6 +9,10 @@ class StudentNotificationsController extends Controller
 {
     public function index()
     {
-        return view('pages.student.notifications.index');
+        $notifications = [
+            // ...your notification data...
+        ];
+
+        return view('pages.student.notifications.index', compact('notifications'));
     }
 }

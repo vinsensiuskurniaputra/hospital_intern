@@ -20,7 +20,7 @@ use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
 use App\Http\Controllers\Student\StudentNotificationsController;
-
+use App\Http\Controllers\Student\StudentDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -74,7 +74,10 @@ Route::middleware(['auth', 'menu'])->group(function () {
 Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+    
+    // Notifications
+    Route::get('/notifications', [StudentNotificationsController::class, 'index'])->name('notifications');
     
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule');
