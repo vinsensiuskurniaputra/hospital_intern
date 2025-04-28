@@ -143,6 +143,17 @@
             <div class="pt-[73px] bg-gray-50 h-screen overflow-y-scroll "
                 :style="{ width: sidebarOpen ? 'calc(100vw - 18rem)' : 'calc(100vw - 5rem)' }">
                 @yield('content')
+
+                <!-- Card Notifikasi -->
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <div class="flex">
+                        <div class="flex-1 pr-4">
+                            <h2 class="text-lg font-semibold text-gray-800 mb-2">...</h2>
+                            <p class="text-gray-600">...</p>
+                        </div>
+                        <!-- ... kode badge dan timestamp ... -->
+                    </div>
+                </div>
             </div>
         </div>
 
