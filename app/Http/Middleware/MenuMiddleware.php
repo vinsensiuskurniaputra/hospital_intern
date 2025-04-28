@@ -29,7 +29,7 @@ class MenuMiddleware
                 ->sortBy('order');
         }
 
-        View::share('menus', $menus);
+        View::share('menusSideBar', $menus);
 
         return $next($request);
     }
