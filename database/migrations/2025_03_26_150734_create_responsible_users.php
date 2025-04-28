@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('responsible_users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('telp');
+            $table->string('telp')->nullable();
             $table->timestamps();
         });
     }
