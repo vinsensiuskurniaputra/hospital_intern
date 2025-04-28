@@ -15,31 +15,37 @@ class ResponsibleUserSeeder extends Seeder
         // Create responsible users
         $responsibles = [
             [
+                'username' => 'dr.anak',
                 'name' => 'Dr. Anak',
                 'email' => 'dr.anak@hospital.test',
                 'password' => Hash::make('password'),
             ],
             [
+                'username' => 'dr.bedah',
                 'name' => 'Dr. Bedah',
                 'email' => 'dr.bedah@hospital.test',
                 'password' => Hash::make('password'),
             ],
             [
+                'username' => 'dr.gigi',
                 'name' => 'Dr. Gigi',
                 'email' => 'dr.gigi@hospital.test',
                 'password' => Hash::make('password'),
             ],
             [
+                'username' => 'dr.mata',
                 'name' => 'Dr. Mata',
                 'email' => 'dr.mata@hospital.test',
                 'password' => Hash::make('password'),
             ],
             [
+                'username' => 'dr.tht',
                 'name' => 'Dr. THT',
                 'email' => 'dr.tht@hospital.test',
                 'password' => Hash::make('password'),
             ],
             [
+                'username' => 'dr.saraf',
                 'name' => 'Dr. Saraf',
                 'email' => 'dr.saraf@hospital.test',
                 'password' => Hash::make('password'),

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminPresenceController;
 use App\Http\Controllers\Admin\AdminScheduleController;
 use App\Http\Controllers\Admin\AdminUserAdminController;
+use App\Http\Controllers\General\NotificationController;
 use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminDepartementController;
 use App\Http\Controllers\Admin\AdminStudentGradeController;
@@ -63,8 +64,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::resource('/internships/stases', AdminStaseController::class)->names('admin.stases');
     Route::get('/stases/filter', [AdminStaseController::class, 'filter'])->name('stases.filter');
-
+    
     Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
+    Route::get('/internshipClasses/filter', [AdminInternshipClassController::class, 'filter'])->name('internshipClasses.filter');
 
     Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
     Route::get('/admin/schedules/filter', [AdminScheduleController::class, 'filter'])->name('admin.schedules.filter');
@@ -74,6 +76,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
+
+    Route::resource('/notification', NotificationController::class)->names('notification');
 });
 
 // Student Routes 
