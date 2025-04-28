@@ -11,7 +11,7 @@
         'required' => true,
         'placeholder' => 'Enter name...',
     ])
-    <label class="block text-sm font-medium text-gray-700 mb-2">Assign Menu:</label>
+    <label class="block text-sm font-medium text-gray-700 mb-2">Atur Menu:</label>
     <div class="grid grid-cols-2 gap-2">
         @foreach ($menus as $menu)
             <label class="flex items-center space-x-2">

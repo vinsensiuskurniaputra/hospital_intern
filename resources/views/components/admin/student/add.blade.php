@@ -9,7 +9,7 @@
     }">
     <div class="bg-white p-6 shadow-lg lg:w-1/3 w-full h-screen overflow-y-scroll" @click.stop>
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-800">Add New Student</h2>
+            <h2 class="text-xl font-semibold text-gray-800">Tambah Siswa Baru</h2>
             <button @click="{{ $show }} = false" class="text-gray-500 hover:text-gray-700">
                 <i class="bi bi-x-lg"></i>
             </button>
@@ -21,7 +21,7 @@
 
             <!-- Profile Picture Upload -->
             <div x-data="imageUpload()" class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Foto Profil</label>
 
                 <!-- Upload Area -->
                 <div class="w-full border-2 border-dashed rounded-lg p-4 relative flex flex-col items-center justify-center"
@@ -44,8 +44,8 @@
                     <label x-show="!imageUrl"
                         class="flex flex-col items-center w-full p-6 cursor-pointer hover:bg-gray-100 transition rounded-lg">
                         <i class="bi bi-cloud-arrow-up text-3xl text-gray-400"></i>
-                        <span class="mt-2 text-sm text-gray-500">Drag and drop your photo here, or</span>
-                        <span class="mt-1 text-sm font-medium text-green-700">Browse Files</span>
+                        <span class="mt-2 text-sm text-gray-500">Seret dan lepaskan fotomu di sini, atau</span>
+                        <span class="mt-1 text-sm font-medium text-green-700">Telusuri Berkas</span>
                         <input type="file" name="photo_profile" class="hidden" x-ref="fileInput"
                             @change="handleFileSelect" accept="image/*">
                     </label>
