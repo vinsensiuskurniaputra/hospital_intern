@@ -190,21 +190,18 @@ class MenuSeeder extends Seeder
         // gift role
         $adminRole = Role::where('name', 'admin')->first();
 
-        // Ambil semua menu
-        $menus = Menu::all();
+        $adminMenus = [
+            $dashboard, 
+            $userManagement, 
+            $permissionManagement, 
+            $academicManagement, 
+            $internshipManagement, 
+            $presenceManagement,
+        ];
+        $adminRole->menus()->attach(collect($adminMenus)->pluck('id'));
 
-        // Hubungkan admin dengan semua menu
-        $adminRole->menus()->attach($menus->pluck('id'));
 
         // Menu untuk mahasiswa (role student)
-        $studentDashboard = Menu::create([
-            'name' => 'Dashboard',
-            'url' => '/home',
-            'icon' => 'bi bi-house-door',
-            'parent_id' => null,
-            'order' => 1,
-        ]);
-
         $studentSchedule = Menu::create([
             'name' => 'Jadwal',
             'url' => '/student/schedule',
@@ -252,7 +249,7 @@ class MenuSeeder extends Seeder
 
         // Hubungkan menu mahasiswa dengan role student (updated to include new menus)
         $studentMenus = [
-            $studentDashboard, 
+            $dashboard, 
             $studentSchedule, 
             $studentAttendance, 
             $studentGrades, 
@@ -262,13 +259,6 @@ class MenuSeeder extends Seeder
         $studentRole->menus()->attach(collect($studentMenus)->pluck('id'));
         
         // Menu untuk Penanggung Jawab (role responsible)
-        $responsibleDashboard = Menu::create([
-            'name' => 'Dashboard',
-            'url' => '/home',
-            'icon' => 'bi bi-house-door',
-            'parent_id' => null,
-            'order' => 1,
-        ]);
 
         $responsibleSchedule = Menu::create([
             'name' => 'Jadwal',
@@ -315,7 +305,7 @@ class MenuSeeder extends Seeder
 
         // Hubungkan menu penanggung jawab dengan role responsible
         $responsibleMenus = [
-            $responsibleDashboard, 
+            $dashboard, 
             $responsibleSchedule, 
             $responsibleAttendance, 
             $responsibleProfile, 
