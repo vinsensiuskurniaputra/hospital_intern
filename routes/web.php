@@ -87,7 +87,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
 
     // Dashboard
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-
+    
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule');
     
