@@ -75,7 +75,6 @@ class UserSeeder extends Seeder
             'name' => 'Dr. Responsible',
             'email' => 'responsible@example.com',
             'password' => bcrypt('password'),
-            'photo_profile_url' => 'https://ui-avatars.com/api/?name=Dr.+Responsible',
         ]);
 
         // Get responsible role
