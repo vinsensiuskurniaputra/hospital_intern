@@ -34,9 +34,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class, 
             MenuSeeder::class, 
             DepartementSeeder::class,
+            ResponsibleUserSeeder::class,
             StaseSeeder::class,
             InternshipClassSeeder::class,
-            ResponsibleUserSeeder::class,
             ScheduleSeeder::class,
         ]);
 
