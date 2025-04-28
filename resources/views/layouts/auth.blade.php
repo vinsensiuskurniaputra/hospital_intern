@@ -12,31 +12,17 @@
             </div>
 
             <!-- Navigation Menu -->
-            <nav class="p-4 space-y-2">
+            <nav class="flex-1 p-4 space-y-2">
                 @if (Auth::check())
-                    <!-- Dashboard -->
-                    <a href="{{ route('student.dashboard') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#637F26] hover:text-white transition-colors">
-                        <i class="bi bi-house-door w-5 mr-3"></i>
-                        <span>Dashboard</span>
-                    </a>
-
-                    <!-- Jadwal -->
-                    <a href="{{ route('student.schedule') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#637F26] hover:text-white transition-colors">
-                        <i class="bi bi-calendar w-5 mr-3"></i>
-                        <span>Jadwal</span>
-                    </a>
-
-                    <!-- Presensi & Sertifikasi -->
-                    <a href="{{ route('student.presence') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#637F26] hover:text-white transition-colors">
-                        <i class="bi bi-card-checklist w-5 mr-3"></i>
-                        <span>Presensi & Sertifikasi</span>
-                    </a>
-
-                    <!-- Nilai -->
-                    <a href="{{ route('student.grades') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#637F26] hover:text-white transition-colors">
-                        <i class="bi bi-journal-text w-5 mr-3"></i>
-                        <span>Nilai</span>
-                    </a>
+                    @foreach ($menus as $menu)
+                        <a href="{{ url($menu->url) }}" 
+                           :class="{ 'justify-center': !sidebarOpen }"
+                           class="flex items-center p-3 transition-colors {{ request()->is(ltrim($menu->url, '/')) ? 'bg-[#F5F7F0] text-[#637F26]' : 'text-gray-700 hover:bg-[#F5F7F0] hover:text-[#637F26]' }}">
+                            <i class="{{ $menu->icon }} mr-3 w-5 {{ request()->is(ltrim($menu->url, '/')) ? 'text-[#637F26]' : 'text-gray-500' }}"
+                               :class="{ 'mr-0': !sidebarOpen }"></i>
+                            <span :class="{ 'hidden': !sidebarOpen }">{{ $menu->name }}</span>
+                        </a>
+                    @endforeach
                 @endif
             </nav>
         </aside>
@@ -54,26 +40,20 @@
                         </button>
 
                         <!-- Right Side Nav Items -->
-                        <div class="flex items-center space-x-4">
-                            <!-- Notifications -->
-                            <div class="relative">
+                        <div class="flex items-center space-x-3">
+                            <!-- Notifications moved closer to profile -->
+                            <div class="flex items-center space-x-2">
                                 <a href="{{ route('student.notifications') }}" class="p-2 hover:bg-gray-100 rounded-full">
                                     <i class="bi bi-bell text-xl text-gray-600 hover:text-[#637F26]"></i>
                                 </a>
-                            </div>
-
-                            <!-- Profile Dropdown -->
-                            <div class="relative" x-data="{ userDropdownOpen: false }">
-                                <button @click="userDropdownOpen = !userDropdownOpen" class="flex items-center space-x-2">
-                                    <div class="w-8 h-8 rounded-full bg-[#637F26] flex items-center justify-center">
-                                        <span class="text-white text-sm font-medium">SU</span>
-                                    </div>
-                                    <span class="text-sm font-medium text-gray-700">Student User</span>
-                                </button>
-                                <!-- Dropdown Menu -->
-                                <div x-show="userDropdownOpen" @click.away="userDropdownOpen = false" 
-                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                                    <a href="{{ route('student.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                
+                                <!-- User Profile Dropdown -->
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt="Profile" class="w-8 h-8 rounded-full">
+                                        <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
+                                    </button>
+                                    <!-- ...existing dropdown code... -->
                                 </div>
                             </div>
                         </div>

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\Menu;
 
 class MenuMiddleware
 {
@@ -15,22 +16,17 @@ class MenuMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle($request, Closure $next)
     {
-        $user = Auth::user();
-        $menus = [];
-
-        if ($user) {
-            // Get menus for user's roles, sorted by order
-            $menus = $user->roles()->with('menus')->get()
-                ->pluck('menus')
-                ->flatten()
-                ->unique('id')
-                ->sortBy('order');
+        if (Auth::check()) {
+            $userRole = Auth::user()->roles()->first();
+            $menus = Menu::where('role_id', $userRole->id)
+                        ->orderBy('order')
+                        ->get();
+            
+            View::share('menus', $menus);
         }
-
-        View::share('menusSideBar', $menus);
-
+        
         return $next($request);
     }
 }
