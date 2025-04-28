@@ -12,65 +12,69 @@
             </div>
 
             <!-- Navigation Menu -->
-            <nav class="flex-1 p-4 space-y-2">
+            <nav class="p-4 space-y-2">
                 @if (Auth::check())
-                    @foreach ($menus as $menu)
-                        <a href="{{ url($menu->url) }}" 
-                           :class="{ 'justify-center': !sidebarOpen }"
-                           class="flex items-center p-3 transition-colors {{ request()->is(ltrim($menu->url, '/')) ? 'bg-[#F5F7F0] text-[#637F26]' : 'text-gray-700 hover:bg-[#F5F7F0] hover:text-[#637F26]' }}">
-                            <i class="{{ $menu->icon }} mr-3 w-5 {{ request()->is(ltrim($menu->url, '/')) ? 'text-[#637F26]' : 'text-gray-500' }}"
-                               :class="{ 'mr-0': !sidebarOpen }"></i>
-                            <span :class="{ 'hidden': !sidebarOpen }">{{ $menu->name }}</span>
-                        </a>
-                    @endforeach
+                    <!-- Dashboard -->
+                    <a href="{{ route('student.dashboard') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#637F26] hover:text-white transition-colors">
+                        <i class="bi bi-house-door w-5 mr-3"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <!-- Jadwal -->
+                    <a href="{{ route('student.schedule') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#637F26] hover:text-white transition-colors">
+                        <i class="bi bi-calendar w-5 mr-3"></i>
+                        <span>Jadwal</span>
+                    </a>
+
+                    <!-- Presensi & Sertifikasi -->
+                    <a href="{{ route('student.presence') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#637F26] hover:text-white transition-colors">
+                        <i class="bi bi-card-checklist w-5 mr-3"></i>
+                        <span>Presensi & Sertifikasi</span>
+                    </a>
+
+                    <!-- Nilai -->
+                    <a href="{{ route('student.grades') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#637F26] hover:text-white transition-colors">
+                        <i class="bi bi-journal-text w-5 mr-3"></i>
+                        <span>Nilai</span>
+                    </a>
                 @endif
             </nav>
         </aside>
 
         <!-- Main Content with Navbar -->
         <div class="flex-1 min-h-screen transition-all duration-300">
-            <!-- Top Navigation Bar -->
-            <nav class="bg-white border-b border-gray-200 fixed right-0 left-0 z-30">
-                <div class="px-4 py-3 flex justify-between items-center">
-                    <button @click="sidebarOpen = !sidebarOpen" class="p-1 rounded-lg hover:bg-gray-100">
-                        <i class="bi bi-list text-2xl text-[#637F26]"></i>
-                    </button>
+            <!-- Top Navbar -->
+            <nav class="left-72 bg-white border-b border-gray-200 fixed right-0 z-10 transition-all duration-300"
+                :class="{ 'left-72': sidebarOpen, 'left-20': !sidebarOpen }">
+                <div class="px-4 py-3">
+                    <div class="flex items-center justify-between">
+                        <!-- Toggle Sidebar Button -->
+                        <button @click="sidebarOpen = !sidebarOpen" class="p-1 rounded-lg hover:bg-gray-100">
+                            <i class="bi bi-list text-2xl text-[#637F26]"></i>
+                        </button>
 
-                    <!-- Right Side Items -->
-                    <div class="flex items-center space-x-3">
-                        <!-- Notification Icon -->
-                        <a href="{{ route('student.notifications') }}" 
-                           class="p-2 hover:bg-gray-100 rounded-full">
-                            <i class="bi bi-bell text-xl" 
-                               :class="{{ request()->routeIs('student.notifications') ? 'text-gray-900' : 'text-gray-600' }}">
-                            </i>
-                        </a>
+                        <!-- Right Side Nav Items -->
+                        <div class="flex items-center space-x-4">
+                            <!-- Notifications -->
+                            <div class="relative">
+                                <a href="{{ route('student.notifications') }}" class="p-2 hover:bg-gray-100 rounded-full">
+                                    <i class="bi bi-bell text-xl text-gray-600 hover:text-[#637F26]"></i>
+                                </a>
+                            </div>
 
-                        <!-- Profile Dropdown -->
-                        <div class="relative">
-                            <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-                                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt="Profile" class="w-8 h-8 rounded-full">
-                                <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
-                            </button>
-                            <!-- Dropdown Menu -->
-                            <div x-show="open" @click.away="open = false"
-                                x-transition:enter="transition ease-out duration-100"
-                                x-transition:enter-start="opacity-0 scale-95"
-                                x-transition:enter-end="opacity-100 scale-100"
-                                class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
-                                style="display: none;">
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                                <hr class="my-2 border-gray-200">
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit"
-                                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                        Sign out
-                                    </button>
-                                </form>
+                            <!-- Profile Dropdown -->
+                            <div class="relative" x-data="{ userDropdownOpen: false }">
+                                <button @click="userDropdownOpen = !userDropdownOpen" class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 rounded-full bg-[#637F26] flex items-center justify-center">
+                                        <span class="text-white text-sm font-medium">SU</span>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">Student User</span>
+                                </button>
+                                <!-- Dropdown Menu -->
+                                <div x-show="userDropdownOpen" @click.away="userDropdownOpen = false" 
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                                    <a href="{{ route('student.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                </div>
                             </div>
                         </div>
                     </div>
