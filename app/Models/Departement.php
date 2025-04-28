@@ -9,12 +9,15 @@ class Departement extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'description'];
     protected $guarded = ['id'];
 
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
     }
-
+    public function studentGrades()
+    {
+        return $this->hasMany(StudentGrade::class);
+    }
 }
