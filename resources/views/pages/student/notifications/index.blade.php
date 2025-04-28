@@ -10,16 +10,20 @@ class StudentNotifikasiController extends Controller
     {
         $notifications = [
             [
+                'id' => 1,
                 'title' => 'Pengambilan Sertifikat Magang',
                 'date' => '05 Agustus 2024 - 23:59',
-                'content' => 'Bagi mahasiswa yang telah menyelesaikan seluruh rangkaian magang dan evaluasi, sertifikat magang sudah bisa diunduh melalui sistem mulai 09 Agustus 2024.',
-                'tag' => 'Umum',
-                'tag_color' => 'green'
+                'type' => 'Umum',
+                'content' => 'Bagi mahasiswa yang telah menyelesaikan seluruh rangkaian magang dan evaluasi...',
+                'action' => [
+                    'text' => 'Unduh Sertifikat',
+                    'url' => '#'
+                ]
             ],
-            // Tambahkan lainnya...
+            // ... other notifications
         ];
 
-        return view('notifikasi.index', compact('notifications'));
+        return view('pages.student.notifications.index', compact('notifications'));
     }
 }
 ?>
@@ -32,30 +36,39 @@ class StudentNotifikasiController extends Controller
     selectedFilter: null,
     notifications: [
         {
+            id: 1,
             title: 'Pengambilan Sertifikat Magang',
             date: '05 Agustus 2024 - 23:59',
             type: 'Umum',
-            content: 'Bagi mahasiswa yang telah menyelesaikan seluruh rangkaian magang dan evaluasi, sertifikat magang sudah bisa diunduh melalui sistem mulai 09 Agustus 2024.'
+            content: 'Bagi mahasiswa yang telah menyelesaikan seluruh rangkaian magang dan evaluasi, sertifikat magang sudah bisa diunduh melalui sistem mulai 09 Agustus 2024.',
+            action: {
+                text: 'Unduh Sertifikat',
+                url: '#'
+            }
         },
         {
+            id: 2,
             title: 'Pergantian Jadwal',
             date: '09 Juli 2024 - 00:03',
             type: 'Jadwal',
             content: 'Pengumuman untuk mahasiswa Kelas FK-01 di Departemen Kesehatan: jadwal rotasi magang diubah menjadi 11 Juli. Mohon untuk mengecek jadwal terbaru di sistem dan menyesuaikan dengan perubahan ini.'
         },
         {
+            id: 3,
             title: 'Jadwal Ujian Evaluasi Sebelum Rotasi Baru',
             date: '28 Juni 2024 - 10:00',
             type: 'Evaluasi',
             content: 'Mahasiswa magang diharapkan untuk mengikuti ujian evaluasi sebelum rotasi ke departemen berikutnya. Ujian akan dilaksanakan secara online melalui sistem pada 30 Jun 2024 pukul 10:00 WIB.'
         },
         {
+            id: 4,
             title: 'Kebijakan Baru Kedisiplinan Magang',
             date: '29 Maret 2024 - 15:00',
             type: 'Kebijakan',
             content: 'Mulai tanggal 1 April 2024, mahasiswa magang diwajibkan untuk hadir minimal 90% dari total hari magang.'
         },
         {
+            id: 5,
             title: 'Pengumpulan Berkas Administrasi Magang',
             date: '28 Februari 2024 - 12:00',
             type: 'Administrasi',
@@ -111,13 +124,15 @@ class StudentNotifikasiController extends Controller
 
     <!-- Notifications List -->
     <div class="space-y-4">
-        <template x-for="notification in notifications.filter(n => !selectedFilter || n.type === selectedFilter)" :key="notification.title">
-            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <template x-for="notification in notifications" :key="notification.id">
+            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                 @click="window.location.href=`/student/notifications/${notification.id}`">
                 <div class="flex">
                     <!-- Left side with title and content -->
                     <div class="flex-1 pr-4"> <!-- Reduced padding to pr-4 -->
                         <h2 class="text-lg font-semibold text-gray-800 mb-2" x-text="notification.title"></h2>
                         <p class="text-gray-600" x-text="notification.content"></p>
+                        <a :href="notification.action?.url" class="text-blue-500 hover:underline" x-text="notification.action?.text"></a>
                     </div>
                     
                     <!-- Right side with date and category -->
