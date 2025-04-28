@@ -33,7 +33,8 @@ return new class extends Migration
 
         Schema::create('attendance_excuse', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('presence_id')->constrained('presences')->onDelete('cascade');
+            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
+            $table->foreignId('presence_sessions_id')->constrained('presences')->onDelete('cascade');
             $table->string('detail');
             $table->string('letter_url')->nullable();
             $table->string('status')->default('pending');
