@@ -94,17 +94,9 @@
 
                         <!-- Right Side Nav Items -->
                         <div class="flex items-center space-x-3">
-                            <!-- Notification Icon -->
-                            <a href="{{ route('student.notifications') }}" 
-                               class="p-2 hover:bg-gray-100 rounded-full"
-                               @click="window.location.href = '{{ route('student.notifications') }}'"
-                               :class="{ 'text-gray-900': '{{ request()->routeIs('student.notifications') }}' }">
-                                <i class="bi bi-bell text-xl transition-colors duration-200"
-                                   :class="{
-                                       'text-gray-900': '{{ request()->routeIs('student.notifications') }}',
-                                       'text-gray-600': '{{ !request()->routeIs('student.notifications') }}'
-                                   }">
-                                </i>
+                            <!-- Notifications -->
+                            <a href="{{ route('student.notifications') }}" class="relative">
+                                <i class="bi bi-bell text-xl text-gray-600 hover:text-[#637F26]"></i>
                             </a>
 
                             <!-- Profile section -->
