@@ -101,7 +101,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
     
     // Notifications
-    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationsController::class, 'index'])->name('notifications');
+    Route::get('/notifications', [StudentNotificationsController::class, 'index'])->name('notifications');
 
 });
 
