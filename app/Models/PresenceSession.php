@@ -11,7 +11,13 @@ class PresenceSession extends Model
 {
     use HasFactory;
     
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'schedule_id',
+        'token',
+        'date',
+        'start_time',
+        'end_time'
+    ];
     
     /**
      * Get the schedule that owns this presence session
@@ -35,5 +41,21 @@ class PresenceSession extends Model
     public function attendanceExcuses(): HasMany
     {
         return $this->hasMany(AttendanceExcuse::class, 'presence_sessions_id');
+    }
+    
+    /**
+     * Check if the presence session is active
+     */
+    public function isActive(): bool
+    {
+        $now = now();
+        $sessionDate = $this->date;
+        $startTime = $this->start_time;
+        $endTime = $this->end_time;
+        
+        $sessionStart = \Carbon\Carbon::parse("$sessionDate $startTime");
+        $sessionEnd = \Carbon\Carbon::parse("$sessionDate $endTime");
+        
+        return $now->between($sessionStart, $sessionEnd);
     }
 }
