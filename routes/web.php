@@ -32,6 +32,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+
 Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('/users/students', AdminStudentController::class)->names('admin.students');
@@ -99,7 +100,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
     
     // Notifications
-    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationsController::class, 'index'])->name('notifications');
+    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationController::class, 'index'])->name('notifications');
 });
 
 // Responsible Routes 
@@ -121,6 +122,9 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     
     // Laporan & Rekapitulasi
     Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
+
+    // Notifications
+    Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
 });
 
 

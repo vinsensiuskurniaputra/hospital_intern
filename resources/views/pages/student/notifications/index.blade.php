@@ -1,57 +1,41 @@
 @extends('layouts.auth')
 
+@section('title', 'Notifikasi')
+
 @section('content')
 <div class="p-6">
     <div class="bg-white rounded-lg shadow p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">Profile Mahasiswa</h1>
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Notifikasi</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="md:col-span-1">
-                <div class="flex flex-col items-center p-4 border border-gray-200 rounded-lg">
-                    <img src="{{ $user->photo_profile_url ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name) }}" 
-                         alt="Profile" class="w-32 h-32 rounded-full mb-4">
-                    <h2 class="text-xl font-semibold">{{ $user->name }}</h2>
-                    <p class="text-gray-600">{{ $student->nim ?? 'NIM tidak tersedia' }}</p>
-                    <button class="mt-4 px-4 py-2 bg-[#637F26] text-white rounded-lg hover:bg-[#4e6320] transition">
-                        Edit Profile
-                    </button>
-                </div>
-            </div>
-            
-            <div class="md:col-span-2">
-                <div class="border border-gray-200 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">Informasi Pribadi</h3>
-                    
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-gray-500">Nama Lengkap</p>
-                                <p class="font-medium">{{ $user->name }}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Email</p>
-                                <p class="font-medium">{{ $user->email }}</p>
-                            </div>
+        <div class="divide-y">
+            @forelse($notifications as $notification)
+                <div class="py-4 {{ $notification['read_at'] ? 'opacity-70' : 'bg-gray-50' }}">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <span class="inline-block rounded-full p-2 bg-[#F5F7F0] text-[#637F26]">
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                            </span>
                         </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-gray-500">NIM</p>
-                                <p class="font-medium">{{ $student->nim ?? 'Tidak tersedia' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Program Studi</p>
-                                <p class="font-medium">{{ $student->studyProgram->name ?? 'Tidak tersedia' }}</p>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <p class="text-sm text-gray-500">No. Telepon</p>
-                            <p class="font-medium">{{ $student->telp ?? 'Tidak tersedia' }}</p>
+                        <div class="ml-4 flex-1">
+                            <p class="font-medium text-gray-900">
+                                {{ $notification['data']['title'] ?? 'Notifikasi' }}
+                            </p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                {{ $notification['data']['message'] ?? '' }}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-2">
+                                {{ \Carbon\Carbon::parse($notification['created_at'])->diffForHumans() }}
+                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
+            @empty
+                <div class="py-8 text-center">
+                    <p class="text-gray-500">Tidak ada notifikasi</p>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>
