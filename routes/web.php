@@ -22,7 +22,6 @@ use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
 use App\Http\Controllers\Student\StudentNotificationsController;
 use App\Http\Controllers\Student\StudentDashboardController;
-use App\Http\Controllers\Responsible\ResponsibleScheduleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -116,11 +115,7 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Responsible\ResponsibleScheduleController::class, 'index'])->name('schedule');
-        Route::get('/schedule', [ResponsibleScheduleController::class, 'index'])->name('responsible.schedule.index');
-        Route::post('/schedule', [ResponsibleScheduleController::class, 'store'])->name('responsible.schedule.store');
-        Route::put('/schedule/{id}', [ResponsibleScheduleController::class, 'update'])->name('responsible.schedule.update');
-        Route::delete('/schedule/{id}', [ResponsibleScheduleController::class, 'destroy'])->name('responsible.schedule.destroy');
-
+    
     // Presensi
     Route::get('/attendance', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'index'])->name('attendance');
     
