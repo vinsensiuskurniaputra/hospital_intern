@@ -7,13 +7,23 @@ use Illuminate\Http\Request;
 
 class ResponsibleScheduleController extends Controller
 {
-    /**
-     * Display the schedule page for responsible user.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         return view('pages.responsible.schedule.index');
+    }
+
+    public function store(Request $request)
+    {
+        // Logic to store new schedule
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Logic to update schedule
+    }
+
+    public function destroy($id)
+    {
+        // Logic to delete schedule
     }
 }
