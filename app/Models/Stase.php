@@ -11,7 +11,7 @@ class Stase extends Model
     use HasFactory;
 
 
-    protected $fillable = ['name', 'responsible_user_id'];
+    protected $fillable = ['name', 'responsible_user_id', 'detail'];
 
     protected $guarded = ['id'];
 
@@ -24,5 +24,15 @@ class Stase extends Model
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    public function gradeComponents()
+    {
+        return $this->hasMany(GradeComponent::class);
+    }
+
+    public function studentGrades()
+    {
+        return $this->hasMany(StudentGrade::class);
     }
 }
