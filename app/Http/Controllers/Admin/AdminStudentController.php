@@ -197,4 +197,56 @@ class AdminStudentController extends Controller
         return view('components.admin.student.table', compact('students'))->render();
     }
 
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|mimes:csv,txt',
+        ]);
+
+
+        $file = $request->file('file');
+        $rows = array_map('str_getcsv', file($file));
+        $headers = array_map('strtolower', array_map('trim', $rows[0]));
+        unset($rows[0]); // Hapus header
+
+        $inserted = 0;
+        $skipped = 0;
+
+        foreach ($rows as $row) {
+            $row = array_combine($headers, $row);
+
+            // Skip jika username atau nim sudah ada
+            if (User::where('username', $row['username'])->exists() || Student::where('nim', $row['nim'])->exists()) {
+                $skipped++;
+                continue;
+            }
+
+            // Buat user
+            $user = User::addUser([
+                'username' => $row['username'],
+                'name' => $row['name'],
+                'email' => $row['email'] ?? null,
+                'password' => 'password',
+                'photo_profile_url' => null,
+            ]);
+
+            // Tambahkan role student
+            $studentRole = Role::where('name', 'student')->first();
+            $user->roles()->attach($studentRole);
+
+            // Buat student
+            Student::createStudent([
+                'user_id' => $user->id,
+                'internship_class_id' => $row['internship_class_id'] ?? null,
+                'study_program_id' => $row['study_program_id'],
+                'nim' => $row['nim'],
+                'telp' => $row['telp'],
+            ]);
+
+            $inserted++;
+        }
+
+        return redirect()->route('admin.students.index')->with('success', "Import selesai: {$inserted} data ditambahkan, {$skipped} dilewati karena duplikat.");
+    }
+
 }
