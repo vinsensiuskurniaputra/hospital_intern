@@ -11,7 +11,7 @@ class Stase extends Model
     use HasFactory;
 
 
-    protected $fillable = ['name', 'responsible_user_id', 'detail'];
+    protected $fillable = ['name', 'responsible_user_id', 'departement_id', 'detail'];
 
     protected $guarded = ['id'];
 
