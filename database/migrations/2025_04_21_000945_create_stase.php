@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('stases', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('responsible_user_id')->constrained('responsible_users')->onDelete('cascade');
+            $table->foreignId('responsible_user_id')->nullable()->constrained('responsible_users')->onDelete('set null');
+            $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
             $table->string('name');
             $table->string('detail')->nullable();
             $table->timestamps();

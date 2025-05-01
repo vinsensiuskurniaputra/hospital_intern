@@ -22,12 +22,12 @@ class InternshipClassSeeder extends Seeder
 
         // Then create internship classes
         $classes = [
-            ['name' => 'FK-01', 'class_year_id' => 1],
-            ['name' => 'FK-02', 'class_year_id' => 1],
-            ['name' => 'FK-03', 'class_year_id' => 1],
-            ['name' => 'FK-04', 'class_year_id' => 2],
-            ['name' => 'FK-05', 'class_year_id' => 2],
-            ['name' => 'FK-06', 'class_year_id' => 2],
+            ['name' => 'FK-01', 'class_year_id' => 1, 'campus_id' => 1],
+            ['name' => 'FK-02', 'class_year_id' => 1, 'campus_id' => 1],
+            ['name' => 'FK-03', 'class_year_id' => 1, 'campus_id' => 2],
+            ['name' => 'FK-04', 'class_year_id' => 2, 'campus_id' => 2],
+            ['name' => 'FK-05', 'class_year_id' => 2, 'campus_id' => 3],
+            ['name' => 'FK-06', 'class_year_id' => 2, 'campus_id' => 3],
         ];
 
         foreach ($classes as $class) {

@@ -17,8 +17,6 @@ class AdminScheduleController extends Controller
         $schedules = Schedule::with([
             'internshipClass.classYear',
             'stase',
-            'departement',
-            'responsibleUser.user'
          ])->paginate(10); // Changed from get() to paginate()
 
         $departments = Departement::all();
@@ -60,8 +58,6 @@ class AdminScheduleController extends Controller
             'departement_id' => 'required|exists:departements,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
         ]);
 
         // Add the current date as date_schedule
