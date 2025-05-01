@@ -74,7 +74,7 @@ class MenuSeeder extends Seeder
             'order' => 1,
         ]);
         $resposibleManagement = Menu::create([
-            'name' => 'Responsibles',
+            'name' => 'PIC',
             'url' => '/users/responsibles',
             'icon' => 'bi bi-person-check', // Ikon untuk pengguna yang bertanggung jawab
             'parent_id' => $userManagement->id,
@@ -301,7 +301,7 @@ class MenuSeeder extends Seeder
         ]);
 
         // Mendapatkan role responsible
-        $responsibleRole = Role::where('name', 'responsible')->first();
+        $responsibleRole = Role::where('name', 'pic')->first();
 
         // Hubungkan menu penanggung jawab dengan role responsible
         $responsibleMenus = [

@@ -11,7 +11,7 @@ class Stase extends Model
     use HasFactory;
 
 
-    protected $fillable = ['name', 'responsible_user_id', 'detail'];
+    protected $fillable = ['name', 'responsible_user_id', 'departement_id', 'detail'];
 
     protected $guarded = ['id'];
 
@@ -20,6 +20,10 @@ class Stase extends Model
         return $this->belongsTo(ResponsibleUser::class);
     }
 
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class);
+    }
 
     public function schedules()
     {

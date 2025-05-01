@@ -33,5 +33,15 @@
     @error('class_year_id')
         <span class="text-red-500 text-sm">{{ $message }}</span>
     @enderror
+    <label class="block text-sm font-medium text-gray-700 mb-1">Campus</label>
+    <select name="campus_id" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+        <option value="{{ $internshipClass->campus->id }}">{{ $internshipClass->campus->name }}</option>
+        @foreach ($campuses as $data)
+            <option value="{{ $data->id }}">{{ $data->name }}</option>
+        @endforeach
+    </select>
+    @error('campus_id')
+        <span class="text-red-500 text-sm">{{ $message }}</span>
+    @enderror
 
 @endsection

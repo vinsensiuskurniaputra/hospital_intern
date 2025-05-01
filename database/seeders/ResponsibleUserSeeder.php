@@ -52,7 +52,7 @@ class ResponsibleUserSeeder extends Seeder
             ],
         ];
 
-        $instructorRole = Role::where('name', 'instructor')->first();
+        $instructorRole = Role::where('name', 'pic')->first();
 
         foreach ($responsibles as $responsible) {
             // Create user first
