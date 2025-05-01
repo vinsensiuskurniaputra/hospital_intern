@@ -11,14 +11,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            // Academic structure
+            ClassYearSeeder::class,
+            CampusAndStudyProgramSeeder::class,
+            
             // Base structure
             RoleSeeder::class,
             UserSeeder::class,
             MenuSeeder::class,
             
-            // Academic structure
-            CampusAndStudyProgramSeeder::class,
-            ClassYearSeeder::class,
             
             // Hospital structure
             DepartementSeeder::class,
