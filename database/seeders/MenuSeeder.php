@@ -74,7 +74,7 @@ class MenuSeeder extends Seeder
             'order' => 1,
         ]);
         $resposibleManagement = Menu::create([
-            'name' => 'Responsibles',
+            'name' => 'PIC',
             'url' => '/users/responsibles',
             'icon' => 'bi bi-person-check', // Ikon untuk pengguna yang bertanggung jawab
             'parent_id' => $userManagement->id,
