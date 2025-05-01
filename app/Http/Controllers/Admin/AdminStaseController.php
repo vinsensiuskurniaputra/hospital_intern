@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Models\Stase;
+use App\Models\Departement;
 use Illuminate\Http\Request;
 use App\Models\ResponsibleUser;
 use App\Http\Controllers\Controller;
@@ -17,9 +18,10 @@ class AdminStaseController extends Controller
     {
         $stases = Stase::paginate(10);
         $responsibles = User::whereHas('roles', function ($query) {
-            $query->where('name', 'responsible');
+            $query->where('name', 'pic');
         })->get();
-        return view('pages.admin.stase.index', compact('stases', 'responsibles'));
+        $departements = Departement::all();
+        return view('pages.admin.stase.index', compact('stases', 'responsibles', 'departements'));
     }
 
     /**
@@ -38,6 +40,7 @@ class AdminStaseController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'responsible_user_id' => 'required|exists:responsible_users,id',
+            'departement_id' => 'required|exists:departements,id',
             'detail' => 'required|string|max:255',
         ]);
 
@@ -45,6 +48,7 @@ class AdminStaseController extends Controller
         $user = Stase::create([
             'name' => $validatedData['name'],
             'responsible_user_id' => $validatedData['responsible_user_id'],
+            'departement_id' => $validatedData['departement_id'],
             'detail' => $validatedData['detail'],
         ]);
 
@@ -65,9 +69,10 @@ class AdminStaseController extends Controller
     public function edit(Stase $stase)
     {
         $responsibles = User::whereHas('roles', function ($query) {
-            $query->where('name', 'responsible');
+            $query->where('name', 'pic');
         })->get();
-        return view('pages.admin.stase.edit', compact('stase', 'responsibles'));
+        $departements = Departement::all();
+        return view('pages.admin.stase.edit', compact('stase', 'responsibles', 'departements'));
     }
 
     /**

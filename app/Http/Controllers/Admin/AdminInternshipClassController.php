@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Campus;
 use App\Models\ClassYear;
 use Illuminate\Http\Request;
 use App\Models\InternshipClass;
@@ -16,7 +17,8 @@ class AdminInternshipClassController extends Controller
     {
         $internshipClasses = InternshipClass::paginate(10);
         $classYears = ClassYear::all();
-        return view('pages.admin.internship_class.index', compact('internshipClasses', 'classYears'));
+        $campuses = Campus::all();
+        return view('pages.admin.internship_class.index', compact('internshipClasses', 'classYears', 'campuses'));
     }
 
     /**
@@ -35,6 +37,7 @@ class AdminInternshipClassController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'class_year_id' => 'required|exists:class_years,id',
+            'campus_id' => 'required|exists:campuses,id',
             'description' => 'required|string|max:255',
         ]);
 
@@ -42,6 +45,7 @@ class AdminInternshipClassController extends Controller
         InternshipClass::create([
             'name' => $validatedData['name'],
             'class_year_id' => $validatedData['class_year_id'],
+            'campus_id' => $validatedData['campus_id'],
             'description' => $validatedData['description'],
         ]);
 
@@ -62,7 +66,8 @@ class AdminInternshipClassController extends Controller
     public function edit(InternshipClass $internshipClass)
     {
         $classYears = ClassYear::all();
-        return view('pages.admin.internship_class.edit', compact('classYears', 'internshipClass'));
+        $campuses = Campus::all();
+        return view('pages.admin.internship_class.edit', compact('classYears', 'internshipClass', 'campuses'));
     }
 
     /**
@@ -73,12 +78,14 @@ class AdminInternshipClassController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'class_year_id' => 'required|exists:class_years,id',
+            'campus_id' => 'required|exists:campuses,id',
             'description' => 'required|string|max:255',
         ]);
 
         $internshipClass->update([
             'name' => $validatedData['name'],
             'class_year_id' => $validatedData['class_year_id'],
+            'campus_id' => $validatedData['campus_id'],
             'description' => $validatedData['description'],
         ]);
 
