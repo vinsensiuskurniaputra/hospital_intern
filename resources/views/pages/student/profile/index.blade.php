@@ -19,9 +19,9 @@
                 <div class="flex-1 ml-4"> <!-- Added ml-4 here -->
                     <div class="flex justify-between items-start">
                         <div>
-                            <h1 class="text-2xl font-bold text-white">Alwan Danny Latif</h1>
+                            <h1 class="text-2xl font-bold text-white">{{ $results['namaLengkap'] }}</h1>
                             <p class="text-gray-100">{{ Auth::user()->roles()->first()->display_name }}</p>
-                            <p class="text-gray-100 mt-1">Mahasiswa Kedokteran & Magang</p>
+                            <p class="text-gray-100 mt-1">Mahasiswa {{ $results['prodi']}}</p>
                         </div>
                         <div class="text-white">
                             <p class="text-sm font-medium mb-2">Proses Magang</p>
@@ -56,37 +56,37 @@
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm text-gray-600">Nama Lengkap</label>
-                    <input type="text" value="Alwan Danny Latif" 
+                    <input type="text" value="{{ $results['namaLengkap'] }}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Nomor Induk Mahasiswa</label>
-                    <input type="text" value="33423203" 
+                    <input type="text" value="{{$results['nim']}}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Asal Kampus</label>
-                    <input type="text" value="Universitas Diponegoro" 
+                    <input type="text" value="{{$results['campus']}}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Alamat Email</label>
-                    <input type="email" value="{{ Auth::user()->email }}" 
+                    <input type="email" value="{{ $results['email'] }}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Program Studi</label>
-                    <input type="text" value="Kedokteran Gigi" 
+                    <input type="text" value="{{ $results['prodi'] }}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Nomor Telepon</label>
-                    <input type="text" value="056978151005" 
+                    <input type="text" value="{{$results['telp']}}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Angkatan</label>
-                    <input type="text" value="2023/2024" 
+                    <input type="text" value="{{$results['angkatan']}}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
             </div>
