@@ -20,6 +20,10 @@ class Stase extends Model
         return $this->belongsTo(ResponsibleUser::class);
     }
 
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class);
+    }
 
     public function schedules()
     {

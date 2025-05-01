@@ -105,7 +105,7 @@
                             <div>
                                 <h3 class="text-lg font-medium text-gray-800">
                                     {{ $schedule->internshipClass->name ?? 'N/A' }}</h3>
-                                <p class="text-sm text-gray-500">{{ $schedule->departement->name ?? 'N/A' }}</p>
+                                <p class="text-sm text-gray-500">{{ $schedule->stase->departement->name ?? 'N/A' }}</p>
                             </div>
                             <div class="flex items-center gap-4">
                                 <div class="text-right">
@@ -231,8 +231,6 @@
                                 Pembimbing</th>
                             <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Periode Rotasi</th>
-                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam
-                                Mulai</th>
                             <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi
                             </th>
                         </tr>
@@ -242,7 +240,7 @@
                             <tr>
                                 <td class="py-3 px-4">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
                                 <td class="py-3 px-4">{{ $schedule->stase->name ?? 'N/A' }}</td>
-                                <td class="py-3 px-4">{{ $schedule->departement->name ?? 'N/A' }}</td>
+                                <td class="py-3 px-4">{{ $schedule->stase->departement->name ?? 'N/A' }}</td>
                                 <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year ?? 'N/A' }}
                                 </td>
                                 <td class="py-3 px-4">
@@ -252,14 +250,6 @@
                                     @if ($schedule->start_date && $schedule->end_date)
                                         {{ \Carbon\Carbon::parse($schedule->start_date)->format('d-m-Y') }} s/d
                                         {{ \Carbon\Carbon::parse($schedule->end_date)->format('d-m-Y') }}
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td class="py-3 px-4">
-                                    @if ($schedule->start_time && $schedule->end_time)
-                                        {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} -
-                                        {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
                                     @else
                                         N/A
                                     @endif

@@ -301,7 +301,7 @@ class MenuSeeder extends Seeder
         ]);
 
         // Mendapatkan role responsible
-        $responsibleRole = Role::where('name', 'responsible')->first();
+        $responsibleRole = Role::where('name', 'pic')->first();
 
         // Hubungkan menu penanggung jawab dengan role responsible
         $responsibleMenus = [

@@ -1,66 +1,148 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hospital Intern Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A web-based system for managing medical internships at hospitals, built with Laravel 10 and TailwindCSS.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+-   Multi-role authentication (Admin, Doctor, Student)
+-   Student attendance tracking
+-   Internship scheduling
+-   Performance monitoring
+-   Real-time notifications
+-   Report generation
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-   PHP >= 8.1
+-   Composer
+-   Node.js & NPM
+-   MySQL or PostgreSQL
+-   Laravel CLI
 
-## Learning Laravel
+## Project Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Clone the repository
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+git clone https://github.com/yourusername/hospital-intern.git
+cd hospital-intern
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. Install PHP dependencies
 
-## Laravel Sponsors
+```bash
+composer install
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. Install NPM packages
 
-### Premium Partners
+```bash
+npm install
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+4. Environment setup
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+5. Configure your database in `.env`
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=hospital_intern
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+6. Run migrations and seeders
+
+```bash
+php artisan migrate --seed
+```
+
+7. Start the development server
+
+```bash
+php artisan serve
+npm run dev
+```
+
+## Project Structure
+
+```
+├── app
+│   ├── Http
+│   │   ├── Controllers        # Controllers
+│   │   ├── Middleware        # Custom middleware
+│   │   └── Requests         # Form requests
+│   ├── Models               # Eloquent models
+│   └── Services            # Business logic
+├── database
+│   ├── migrations          # Database migrations
+│   └── seeders            # Database seeders
+├── resources
+│   ├── css                # Tailwind CSS
+│   ├── js                 # Alpine.js and custom scripts
+│   └── views
+│       ├── components     # Reusable Blade components
+│       ├── layouts        # Layout templates
+│       └── pages          # Page views
+└── routes
+    └── web.php           # Web routes
+```
+
+## Key Components
+
+### Authentication
+
+-   Custom auth using Laravel's built-in features
+-   Role-based access control
+-   Session management
+
+### Database Models
+
+-   Users (Admin, Doctor, Student)
+-   Internship Classes
+-   Schedules
+-   Attendance
+-   Study Programs
+-   Campus
+
+### Frontend
+
+-   TailwindCSS for styling
+-   Alpine.js for interactivity
+-   Blade components
+-   Responsive design
+
+## Development Guidelines
+
+1. Follow PSR-12 coding standards
+2. Use type hints and return types
+3. Write meaningful commit messages
+4. Document new features
+5. Write tests for critical features
+
+## Testing
+
+Run the test suite:
+
+```bash
+php artisan test
+```
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a pull request
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
