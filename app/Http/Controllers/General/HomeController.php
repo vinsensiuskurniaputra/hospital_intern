@@ -11,6 +11,8 @@ use App\Models\Presence;
 use App\Models\Schedule;
 use App\Models\StudentGrade;
 use App\Models\ResponsibleUser;
+use App\Models\Stase;
+use App\Models\PresenceSession;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -77,29 +79,134 @@ class HomeController extends Controller
     // Ganti method nama:
     private function picDashboard()
     {
-        // Kode untuk dashboard PIC tetap sama
         try {
-            // Tidak perlu mengubah logika yang ada,
-            // hanya memastikan variabel yang diperlukan oleh view dilewatkan dengan benar
+            // Mendapatkan ID pengguna saat ini
+            $userId = Auth::id();
+            
+            // Mengambil data responsible user
+            $responsible = ResponsibleUser::where('user_id', $userId)->first();
+            
+            if (!$responsible) {
+                Log::warning('PIC user not found for user_id: ' . $userId);
+                return view('pages.responsible.dashboard.index', [
+                    'error' => 'Data penanggung jawab tidak ditemukan',
+                    'studentCount' => 0,
+                    'todaySchedules' => collect([]),
+                    'notifications' => collect([]),
+                    'chartData' => ['labels' => [], 'data' => []],
+                    'studentsToGrade' => collect([])
+                ]);
+            }
+            
+            // Mengambil stase yang dipegang oleh PIC ini
+            $staseIds = Stase::where('responsible_user_id', $userId)->pluck('id')->toArray();
+            
+            if (empty($staseIds)) {
+                Log::info('PIC user does not have any stase: ' . $userId);
+                // Jika tidak ada stase, gunakan semua stase yang ada di database
+                $staseIds = Stase::pluck('id')->toArray();
+                if (empty($staseIds)) {
+                    // Jika stase benar-benar kosong, buat nilai default
+                    $staseIds = [0]; // ID yang tidak ada
+                }
+            }
+            
+            // 1. Data jadwal hari ini (dari stase yang dipegang PIC)
+            $today = Carbon::now()->format('Y-m-d');
+            $todaySchedules = Schedule::whereIn('stase_id', $staseIds)
+                ->where(function($query) use ($today) {
+                    $query->whereDate('date_schedule', $today)
+                          ->orWhere(function($q) use ($today) {
+                              $q->where('start_date', '<=', $today)
+                                ->where('end_date', '>=', $today);
+                          });
+                })
+                ->with(['stase', 'internshipClass'])
+                ->take(6)
+                ->get();
+                
+            // 2. Mahasiswa yang dibimbing (menghitung total)
+            $studentCount = Student::whereHas('schedules', function($query) use ($staseIds) {
+                $query->whereIn('stase_id', $staseIds);
+            })->count();
+            
+            // 3. Data notifikasi terbaru untuk PIC
+            $notifications = Notification::where('user_id', $userId)
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->get();
+            
+            // 4. Data untuk chart kehadiran
+            $chartData = $this->getAttendanceChartData($staseIds);
+            
+            // 5. Data mahasiswa yang harus dinilai
+            $studentsToGrade = Student::whereDoesntHave('grades', function($query) use ($staseIds) {
+                $query->whereIn('stase_id', $staseIds);
+            })
+            ->whereHas('schedules', function($query) use ($staseIds, $today) {
+                $query->whereIn('stase_id', $staseIds)
+                    ->where('end_date', '<', $today);
+            })
+            ->with('user')
+            ->take(5)
+            ->get();
             
             return view('pages.responsible.dashboard.index', [
-                'responsible' => ResponsibleUser::where('user_id', Auth::id())->first(),
-                'todaySchedules' => Schedule::with(['stase'])->take(6)->get() ?? collect([]),
-                'notifications' => Notification::where('user_id', Auth::id())
-                    ->orderBy('created_at', 'desc')
-                    ->take(3)
-                    ->get() ?? collect([]),
-                'chartData' => [
-                    'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-                    'data' => [800, 750, 880, 920, 870, 830, 900]
-                ]
+                'responsible' => $responsible,
+                'todaySchedules' => $todaySchedules,
+                'studentCount' => $studentCount,
+                'notifications' => $notifications,
+                'chartData' => $chartData,
+                'studentsToGrade' => $studentsToGrade
             ]);
+            
         } catch (\Exception $e) {
-            Log::error('Error loading responsible dashboard: ' . $e->getMessage());
+            Log::error('Error loading PIC dashboard: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
             return view('pages.responsible.dashboard.index', [
-                'error' => 'Terjadi kesalahan saat memuat dashboard'
+                'error' => 'Terjadi kesalahan saat memuat dashboard: ' . $e->getMessage(),
+                'studentCount' => 0,
+                'todaySchedules' => collect([]),
+                'notifications' => collect([]),
+                'chartData' => ['labels' => [], 'data' => []],
+                'studentsToGrade' => collect([])
             ]);
         }
+    }
+
+    // Helper method untuk chart kehadiran
+    private function getAttendanceChartData($staseIds)
+    {
+        // Mengambil data 7 bulan terakhir untuk chart
+        $months = [];
+        $attendanceData = [];
+        
+        for ($i = 6; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i);
+            $monthName = $month->format('M');
+            $months[] = $monthName;
+            
+            // Menghitung kehadiran untuk bulan tersebut
+            $startOfMonth = $month->copy()->startOfMonth()->format('Y-m-d');
+            $endOfMonth = $month->copy()->endOfMonth()->format('Y-m-d');
+            
+            // Hitung semua kehadiran pada stase yang dipegang PIC untuk bulan ini
+            $attendanceCount = Presence::whereHas('presenceSession.schedule', function($query) use ($staseIds) {
+                    $query->whereIn('stase_id', $staseIds);
+                })
+                ->whereDate('date_entry', '>=', $startOfMonth)
+                ->whereDate('date_entry', '<=', $endOfMonth)
+                ->where('status', 'present')
+                ->count();
+                
+            $attendanceData[] = $attendanceCount;
+        }
+        
+        return [
+            'labels' => $months,
+            'data' => $attendanceData
+        ];
     }
     
     private function studentDashboard()
@@ -243,16 +350,6 @@ class HomeController extends Controller
                 'recentGrades' => collect([]),
                 'student' => null
             ])->with('error', 'Terjadi kesalahan saat memuat dashboard.');
-
-        $userRole = Auth::user()->roles()->first()->name;
-        
-        if ($userRole == 'admin') {
-            return view('pages.admin.dashboard.index');
-        } elseif ($userRole == 'student') {
-            return view('pages.student.dashboard.index');
-        } elseif ($userRole == 'pic') {
-            return view('pages.responsible.dashboard.index');
         }
     }
-}
 }
