@@ -109,7 +109,7 @@
                             @php
                                 $notificationRoute = '#';
                                 $userRole = Auth::user()->roles()->first()->name ?? '';
-                                
+
                                 if ($userRole == 'student') {
                                     $notificationRoute = route('student.notifications');
                                 } elseif ($userRole == 'responsible') {
@@ -146,34 +146,22 @@
                                     x-transition:enter-end="opacity-100 scale-100"
                                     class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
                                     style="display: none;">
-                                    
-                                    @php
-                                        $profileRoute = '#';
-                                        $userRole = Auth::user()->roles()->first()->name ?? '';
-                                        
-                                        if ($userRole == 'student') {
-                                            $profileRoute = route('student.profile');
-                                        } elseif ($userRole == 'responsible') {
-                                            $profileRoute = route('responsible.profile');
-                                        } else {
-                                            // Default untuk admin atau role lain
-                                            $profileRoute = route('home');
-                                        }
-                                    @endphp
-                                    
-                                    <a href="{{ $profileRoute }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+
+                                    <a href="{{ $profileRoute }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         Profile
                                     </a>
-                                    
+
                                     <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         Settings
                                     </a>
-                                    
+
                                     <hr class="my-2 border-gray-200">
-                                    
+
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        <button type="submit"
+                                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                             Sign out
                                         </button>
                                     </form>
