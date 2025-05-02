@@ -3,8 +3,8 @@
 @section('base-content')
     <div class="flex" x-data="{ sidebarOpen: true, open: {}, userDropdownOpen: false }">
         <!-- Sidebar -->
-        <aside :class="{ 'w-64': sidebarOpen, 'w-20': !sidebarOpen }"
-            class="w-64 flex flex-col overflow-y-auto h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
+        <aside :class="{ 'w-72': sidebarOpen, 'w-20': !sidebarOpen }"
+            class="w-72 flex flex-col overflow-y-auto custom-scroll h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
             <div class="flex items-center justify-between p-4 border-b border-gray-200 min-h-[72px]">
                 <img src="{{ asset('images/logo.png') }}" alt="Medical Illustration" class="mx-auto drop-shadow-xl">
                 <h2 class="text-xl font-bold text-[#637F26]" :class="{ 'hidden': !sidebarOpen }">Sistem Magang RS
@@ -93,8 +93,8 @@
         <div class="flex-1 min-h-screen transition-all duration-300">
 
             <!-- Top Navbar -->
-            <nav class="left-64 bg-white border-b border-gray-200 fixed right-0 z-10 transition-all duration-300"
-                :class="{ 'left-64': sidebarOpen, 'left-20': !sidebarOpen }">
+            <nav class="left-72 bg-white border-b border-gray-200 fixed right-0 z-10 transition-all duration-300"
+                :class="{ 'left-72': sidebarOpen, 'left-20': !sidebarOpen }">
                 <div class="px-4 py-3">
                     <div class="flex items-center justify-between">
                         {{-- Button Open And Close Bar --}}
@@ -163,7 +163,7 @@
 
             <!-- Page Content -->
             <div class="pt-[73px] bg-gray-50 h-screen overflow-y-scroll "
-                :style="{ width: sidebarOpen ? 'calc(100vw - 16rem)' : 'calc(100vw - 5rem)' }">
+                :style="{ width: sidebarOpen ? 'calc(100vw - 18rem)' : 'calc(100vw - 5rem)' }">
                 @yield('content')
             </div>
         </div>

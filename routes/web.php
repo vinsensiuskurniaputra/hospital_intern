@@ -6,12 +6,20 @@ use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
 use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminRoleController;
+use App\Http\Controllers\Admin\AdminStaseController;
 use App\Http\Controllers\Admin\AdminCampusController;
 use App\Http\Controllers\Admin\AdminStudentController;
+use App\Http\Controllers\Admin\AdminPresenceController;
+use App\Http\Controllers\Admin\AdminScheduleController;
 use App\Http\Controllers\Admin\AdminUserAdminController;
+use App\Http\Controllers\Admin\AdminCertificateController;
+use App\Http\Controllers\Admin\AdminDepartementController;
+use App\Http\Controllers\Admin\AdminStudentGradeController;
 use App\Http\Controllers\Admin\AdminStudyProgramController;
+use App\Http\Controllers\Admin\AdminInternshipClassController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
+use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,6 +36,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('/users/students', AdminStudentController::class)->names('admin.students');
     Route::get('/students/filter', [AdminStudentController::class, 'filter'])->name('students.filter');
+    Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
 
     Route::resource('/users/admins', AdminUserAdminController::class)->names('admin.admins');
     Route::get('/admins/filter', [AdminUserAdminController::class, 'filter'])->name('admins.filter');
@@ -50,8 +59,25 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
 
+<<<<<<< HEAD
     Route::get('/home/profile', [StudentProfileController::class, 'index'])->name('student-profile');
+=======
+    Route::get('/home/profile', [StudentProfileController::class, 'index']);
+
+    Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
+    Route::resource('/internships/stases', AdminStaseController::class)->names('admin.stases');
+    Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
+
+    Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
+    Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
+    Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
+    Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
+    Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
+>>>>>>> 2083b3f86d91d04be94695c0fc0b9800515428c6
 });
+
+    
+
 
 // Student Routes
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
