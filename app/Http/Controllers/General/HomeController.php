@@ -255,3 +255,4 @@ class HomeController extends Controller
         }
     }
 }
+}
