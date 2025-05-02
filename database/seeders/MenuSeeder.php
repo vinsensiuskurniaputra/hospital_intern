@@ -227,22 +227,22 @@ class MenuSeeder extends Seeder
         ]);
         
         // Add new profile menu for students
-        $studentProfile = Menu::create([
-            'name' => 'Profile',
-            'url' => '/student/profile',
-            'icon' => 'bi bi-person-circle',
-            'parent_id' => null,
-            'order' => 5,
-        ]);
+        // $studentProfile = Menu::create([
+        //     'name' => 'Profile',
+        //     'url' => '/student/profile',
+        //     'icon' => 'bi bi-person-circle',
+        //     'parent_id' => null,
+        //     'order' => 5,
+        // ]);
         
         // Add new notifications menu for students
-        $studentNotifications = Menu::create([
-            'name' => 'Notifikasi',
-            'url' => '/student/notifications',
-            'icon' => 'bi bi-bell',
-            'parent_id' => null,
-            'order' => 6,
-        ]);
+        // $studentNotifications = Menu::create([
+        //     'name' => 'Notifikasi',
+        //     'url' => '/student/notifications',
+        //     'icon' => 'bi bi-bell',
+        //     'parent_id' => null,
+        //     'order' => 6,
+        // ]);
 
         // Mendapatkan role student
         $studentRole = Role::where('name', 'student')->first();
@@ -253,8 +253,8 @@ class MenuSeeder extends Seeder
             $studentSchedule, 
             $studentAttendance, 
             $studentGrades, 
-            $studentProfile, 
-            $studentNotifications
+            // $studentProfile, 
+            // $studentNotifications
         ];
         $studentRole->menus()->attach(collect($studentMenus)->pluck('id'));
         
@@ -276,13 +276,13 @@ class MenuSeeder extends Seeder
             'order' => 3,
         ]);
         
-        $responsibleProfile = Menu::create([
-            'name' => 'Profile',
-            'url' => '/responsible/profile',
-            'icon' => 'bi bi-person-circle',
-            'parent_id' => null,
-            'order' => 4,
-        ]);
+        // $responsibleProfile = Menu::create([
+        //     'name' => 'Profile',
+        //     'url' => '/responsible/profile',
+        //     'icon' => 'bi bi-person-circle',
+        //     'parent_id' => null,
+        //     'order' => 4,
+        // ]);
         
         $responsibleGrades = Menu::create([
             'name' => 'Nilai',
@@ -308,7 +308,7 @@ class MenuSeeder extends Seeder
             $dashboard, 
             $responsibleSchedule, 
             $responsibleAttendance, 
-            $responsibleProfile, 
+            // $responsibleProfile, 
             $responsibleGrades, 
             $responsibleReports
         ];

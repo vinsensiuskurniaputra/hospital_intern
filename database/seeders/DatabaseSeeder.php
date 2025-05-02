@@ -30,6 +30,9 @@ class DatabaseSeeder extends Seeder
             GradeComponentSeeder::class,
             InternshipClassSeeder::class,
             ScheduleSeeder::class,
+            
+            // Notifications
+            NotificationSeeder::class,
         ]);
 
         // Create students
@@ -49,5 +52,11 @@ class DatabaseSeeder extends Seeder
             StudentGradeSeeder::class,
             CertificateSeeder::class,
         ]);
+
+        // Tambahkan seeder custom untuk user_id = 2
+        $this->call(CustomUserPresenceSeeder::class);
+
+        // Tambahkan seeder jadwal untuk user ID 2
+        $this->call(UserScheduleSeeder::class);
     }
 }
