@@ -74,7 +74,7 @@ class MenuSeeder extends Seeder
             'order' => 1,
         ]);
         $resposibleManagement = Menu::create([
-            'name' => 'Responsibles',
+            'name' => 'PIC',
             'url' => '/users/responsibles',
             'icon' => 'bi bi-person-check', // Ikon untuk pengguna yang bertanggung jawab
             'parent_id' => $userManagement->id,
@@ -190,21 +190,18 @@ class MenuSeeder extends Seeder
         // gift role
         $adminRole = Role::where('name', 'admin')->first();
 
-        // Ambil semua menu
-        $menus = Menu::all();
+        $adminMenus = [
+            $dashboard, 
+            $userManagement, 
+            $permissionManagement, 
+            $academicManagement, 
+            $internshipManagement, 
+            $presenceManagement,
+        ];
+        $adminRole->menus()->attach(collect($adminMenus)->pluck('id'));
 
-        // Hubungkan admin dengan semua menu
-        $adminRole->menus()->attach($menus->pluck('id'));
 
         // Menu untuk mahasiswa (role student)
-        $studentDashboard = Menu::create([
-            'name' => 'Dashboard',
-            'url' => '/home',
-            'icon' => 'bi bi-house-door',
-            'parent_id' => null,
-            'order' => 1,
-        ]);
-
         $studentSchedule = Menu::create([
             'name' => 'Jadwal',
             'url' => '/student/schedule',
@@ -230,45 +227,38 @@ class MenuSeeder extends Seeder
         ]);
         
         // Add new profile menu for students
-        $studentProfile = Menu::create([
-            'name' => 'Profile',
-            'url' => '/student/profile',
-            'icon' => 'bi bi-person-circle',
-            'parent_id' => null,
-            'order' => 5,
-        ]);
+        // $studentProfile = Menu::create([
+        //     'name' => 'Profile',
+        //     'url' => '/student/profile',
+        //     'icon' => 'bi bi-person-circle',
+        //     'parent_id' => null,
+        //     'order' => 5,
+        // ]);
         
         // Add new notifications menu for students
-        $studentNotifications = Menu::create([
-            'name' => 'Notifikasi',
-            'url' => '/student/notifications',
-            'icon' => 'bi bi-bell',
-            'parent_id' => null,
-            'order' => 6,
-        ]);
+        // $studentNotifications = Menu::create([
+        //     'name' => 'Notifikasi',
+        //     'url' => '/student/notifications',
+        //     'icon' => 'bi bi-bell',
+        //     'parent_id' => null,
+        //     'order' => 6,
+        // ]);
 
         // Mendapatkan role student
         $studentRole = Role::where('name', 'student')->first();
 
         // Hubungkan menu mahasiswa dengan role student (updated to include new menus)
         $studentMenus = [
-            $studentDashboard, 
+            $dashboard, 
             $studentSchedule, 
             $studentAttendance, 
             $studentGrades, 
-            $studentProfile, 
-            $studentNotifications
+            // $studentProfile, 
+            // $studentNotifications
         ];
         $studentRole->menus()->attach(collect($studentMenus)->pluck('id'));
         
         // Menu untuk Penanggung Jawab (role responsible)
-        $responsibleDashboard = Menu::create([
-            'name' => 'Dashboard',
-            'url' => '/home',
-            'icon' => 'bi bi-house-door',
-            'parent_id' => null,
-            'order' => 1,
-        ]);
 
         $responsibleSchedule = Menu::create([
             'name' => 'Jadwal',
@@ -286,13 +276,13 @@ class MenuSeeder extends Seeder
             'order' => 3,
         ]);
         
-        $responsibleProfile = Menu::create([
-            'name' => 'Profile',
-            'url' => '/responsible/profile',
-            'icon' => 'bi bi-person-circle',
-            'parent_id' => null,
-            'order' => 4,
-        ]);
+        // $responsibleProfile = Menu::create([
+        //     'name' => 'Profile',
+        //     'url' => '/responsible/profile',
+        //     'icon' => 'bi bi-person-circle',
+        //     'parent_id' => null,
+        //     'order' => 4,
+        // ]);
         
         $responsibleGrades = Menu::create([
             'name' => 'Nilai',
@@ -311,14 +301,14 @@ class MenuSeeder extends Seeder
         ]);
 
         // Mendapatkan role responsible
-        $responsibleRole = Role::where('name', 'responsible')->first();
+        $responsibleRole = Role::where('name', 'pic')->first();
 
         // Hubungkan menu penanggung jawab dengan role responsible
         $responsibleMenus = [
-            $responsibleDashboard, 
+            $dashboard, 
             $responsibleSchedule, 
             $responsibleAttendance, 
-            $responsibleProfile, 
+            // $responsibleProfile, 
             $responsibleGrades, 
             $responsibleReports
         ];

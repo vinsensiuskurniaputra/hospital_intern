@@ -21,8 +21,7 @@ class UserSeeder extends Seeder
             'username' => 'admin',
             'name' => 'Administrator',
             'email' => 'admin@example.com',
-            'password' => bcrypt('password'), // Enkripsi password
-            'photo_profile_url' => 'https://ui-avatars.com/api/?name=Admin',
+            'password' => bcrypt('password'),
         ]);
 
         // Ambil ID Role Admin
@@ -36,8 +35,7 @@ class UserSeeder extends Seeder
             'username' => 'student',
             'name' => 'Student User',
             'email' => 'student@example.com',
-            'password' => bcrypt('password'), // Enkripsi password
-            'photo_profile_url' => 'https://ui-avatars.com/api/?name=Student+User',
+            'password' => bcrypt('password'),
         ]);
 
         // Ambil ID Role Student
@@ -75,11 +73,10 @@ class UserSeeder extends Seeder
             'name' => 'Dr. Responsible',
             'email' => 'responsible@example.com',
             'password' => bcrypt('password'),
-            'photo_profile_url' => 'https://ui-avatars.com/api/?name=Dr.+Responsible',
         ]);
 
         // Get responsible role
-        $responsibleRole = Role::where('name', 'responsible')->first();
+        $responsibleRole = Role::where('name', 'pic')->first();
 
         // Attach role to user
         $responsible->roles()->attach($responsibleRole);

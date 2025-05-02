@@ -18,6 +18,19 @@ class MenuMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
+
+        $userRole = Auth::user()->roles()->first()->name;
+
+        $profileRoute = '#';
+        if ($userRole == 'student') {
+            $profileRoute = route('student.profile');
+        } elseif ($userRole == 'pic') {
+            $profileRoute = route('student.profile');
+        } else {
+            // Default untuk admin atau role lain
+            $profileRoute = route('home');
+        }
+
         $menus = [];
 
         if ($user) {
@@ -29,7 +42,8 @@ class MenuMiddleware
                 ->sortBy('order');
         }
 
-        View::share('menus', $menus);
+        View::share('menusSideBar', $menus);
+        View::share('profileRoute', $profileRoute);
 
         return $next($request);
     }

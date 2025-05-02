@@ -14,11 +14,8 @@ return new class extends Migration
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('stase_id')->constrained('stases')->onDelete('cascade');
-            $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
             $table->foreignId('internship_class_id')->constrained('internship_classes')->onDelete('cascade');
             $table->date('date_schedule');
-            $table->time('start_time');
-            $table->time('end_time');
             $table->date('start_date');
             $table->date('end_date');
             $table->timestamps();
