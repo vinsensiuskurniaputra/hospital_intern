@@ -180,20 +180,30 @@
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('attendanceChart').getContext('2d');
         
-        // Data dari backend disimpan sebagai variabel JavaScript
-        const attendanceData = @json([
+        // Data dari backend - menyimpan data persentase untuk chart
+        const attendancePercentData = @json([
             $attendanceStats['present']['percent'] ?? 0,
             $attendanceStats['sick']['percent'] ?? 0, 
             $attendanceStats['absent']['percent'] ?? 0
         ]);
         
+        // Data absolut untuk ditampilkan di tooltip
+        const attendanceCountData = @json([
+            $attendanceStats['present']['count'] ?? 0,
+            $attendanceStats['sick']['count'] ?? 0, 
+            $attendanceStats['absent']['count'] ?? 0
+        ]);
+        
+        // Labels untuk chart
+        const labels = ['Hadir', 'Izin', 'Alpa'];
+        
         // Membuat chart dengan Chart.js
         new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Hadir', 'Izin', 'Alpa'],
+                labels: labels,
                 datasets: [{
-                    data: attendanceData,
+                    data: attendancePercentData, // Tetap menampilkan persentase di chart
                     backgroundColor: [
                         '#4ADE80', // green
                         '#FBBF24', // yellow
@@ -210,6 +220,19 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            // Menampilkan jumlah absolut pada tooltip
+                            label: function(context) {
+                                const index = context.dataIndex;
+                                const label = labels[index];
+                                const count = attendanceCountData[index];
+                                const percent = attendancePercentData[index];
+                                
+                                return `${label}: ${count} presensi (${percent}%)`;
+                            }
+                        }
                     }
                 }
             }
