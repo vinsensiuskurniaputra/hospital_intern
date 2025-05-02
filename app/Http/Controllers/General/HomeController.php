@@ -243,6 +243,15 @@ class HomeController extends Controller
                 'recentGrades' => collect([]),
                 'student' => null
             ])->with('error', 'Terjadi kesalahan saat memuat dashboard.');
+
+        $userRole = Auth::user()->roles()->first()->name;
+        
+        if ($userRole == 'admin') {
+            return view('pages.admin.dashboard.index');
+        } elseif ($userRole == 'student') {
+            return view('pages.student.dashboard.index');
+        } elseif ($userRole == 'pic') {
+            return view('pages.responsible.dashboard.index');
         }
     }
 }
