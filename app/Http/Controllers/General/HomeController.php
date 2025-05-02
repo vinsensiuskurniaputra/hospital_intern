@@ -11,11 +11,12 @@ class HomeController extends Controller
     public function index()
     {
         $userRole = Auth::user()->roles()->first()->name;
+        
         if ($userRole == 'admin') {
             return view('pages.admin.dashboard.index');
         } elseif ($userRole == 'student') {
             return view('pages.student.dashboard.index');
-        } elseif ($userRole == 'responsible') {
+        } elseif ($userRole == 'pic') {
             return view('pages.responsible.dashboard.index');
         }
     }
