@@ -50,7 +50,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
 
-    Route::get('/home/profile', [StudentProfileController::class, 'index']);
+    Route::get('/home/profile', [StudentProfileController::class, 'index'])->name('student-profile');
 });
 
 // Student Routes

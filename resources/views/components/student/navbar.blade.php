@@ -52,7 +52,7 @@
                 <span class="ms-2 d-none d-md-inline">{{ Auth::user()->name ?? 'Student User' }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                <li><a class="dropdown-item" href="{{ route('student-profile') }}"><i class="bi bi-person me-2"></i>Profil</a></li>
                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Pengaturan</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
