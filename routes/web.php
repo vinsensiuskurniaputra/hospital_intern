@@ -85,7 +85,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
 Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/home', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard');
     
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule');
@@ -106,7 +106,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
 // Responsible Routes 
 Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')->group(function () {
     // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\Responsible\ResponsibleDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/home', [App\Http\Controllers\Responsible\ResponsibleDashboardController::class, 'index'])->name('dashboard');
     
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Responsible\ResponsibleScheduleController::class, 'index'])->name('schedule');
