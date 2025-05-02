@@ -30,6 +30,9 @@ class DatabaseSeeder extends Seeder
             GradeComponentSeeder::class,
             InternshipClassSeeder::class,
             ScheduleSeeder::class,
+            
+            // Notifications
+            NotificationSeeder::class,
         ]);
 
         // Create students
