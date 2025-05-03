@@ -7,14 +7,15 @@
     <div class="card">
         <div class="card-body">
             <div class="p-6">
-                <h5 class="text-xl font-semibold mb-6">Penilaian Mahasiswa</h5>
+                <!-- Main Title -->
+                <h5 class="text-2xl font-semibold mb-8">Penilaian Mahasiswa</h5>
 
-                <!-- Penilaian Tertunda -->
+                <!-- Penilaian Tertunda Section -->
                 <div class="mb-8">
-                    <div class="border-b border-gray-300 mb-4">
-                        <h6 class="font-medium pb-2">Penilaian Tertunda</h6>
+                    <div class="border-b-2 border-gray-200 mb-6">
+                        <h6 class="text-xl font-medium pb-2">Penilaian Tertunda</h6>
                     </div>
-                    <h6 class="text-sm font-medium text-gray-900 mb-4">Mahasiswa Yang Menunggu Penilaian</h6>
+                    <h6 class="text-lg font-medium text-gray-900 mb-4">Mahasiswa Yang Menunggu Penilaian</h6>
                     
                     <div class="space-y-4">
                         @foreach([
@@ -23,38 +24,44 @@
                             ['Jeki DokDok', 'Pediatrics', 'Mei 22 - Juni 19'],
                             ['Jeki Demangki', 'Emergency Medicine', 'Mei 5 - Juni 2']
                         ] as [$name, $dept, $period])
-                        <div class="flex items-center justify-between p-4 bg-white border rounded-lg">
+                        <div class="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm transition-all duration-200">
                             <div class="flex items-center space-x-3">
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode($name) }}&background=F5F7F0&color=637F26" 
                                      class="h-10 w-10 rounded-full"
                                      alt="{{ $name }}">
                                 <div>
-                                    <p class="font-medium">{{ $name }}</p>
+                                    <p class="font-medium text-gray-900">{{ $name }}</p>
                                     <p class="text-sm text-gray-500">{{ $dept }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-4">
                                 <span class="text-sm text-gray-500">{{ $period }}</span>
                                 <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium">Tertunda</span>
-                                <button type="button" class="text-blue-600 hover:text-blue-800 font-medium">edit</button>
+                                <a href="#form-penilaian" 
+                                   onclick="editAssessment('{{ $name }}', '{{ $dept }}', '{{ $period }}')"
+                                   class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">
+                                    edit
+                                </a>
                             </div>
                         </div>
                         @endforeach
                     </div>
                 </div>
 
-                <!-- Formulir Penilaian -->
-                <div class="mb-8 pb-8 border-b border-gray-200">
-                    <h6 class="font-medium mb-4">Formulir Penilaian</h6>
+                <!-- Single Form Section -->
+                <div id="form-penilaian" class="mb-8">
+                    <div class="border-b-2 border-gray-200 mb-6">
+                        <h6 class="text-xl font-medium pb-2 text-gray-900">Formulir Penilaian</h6>
+                    </div>
                     
                     <!-- Info Cards -->
                     <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="bg-[#F5F7F0] p-4 rounded-lg">
-                            <h6 class="font-medium mb-2">Informasi Mahasiswa</h6>
-                            <p class="text-sm text-gray-600">Emma Johnson • Medical Year 3 • Student ID: M302012</p>
+                        <div class="bg-[#F5F7F0] p-5 rounded-[20px] border-2 border-[#637F26]/30">
+                            <h6 class="font-medium mb-2 text-gray-900">Informasi Mahasiswa</h6>
+                            <p class="text-sm text-gray-600">Emma Johnson • Medical Year 3 • Student ID: MED202</p>
                         </div>
-                        <div class="bg-[#F5F7F0] p-4 rounded-lg">
-                            <h6 class="font-medium mb-2">Detail Rotasi</h6>
+                        <div class="bg-[#F5F7F0] p-5 rounded-[20px] border-2 border-[#637F26]/30">
+                            <h6 class="font-medium mb-2 text-gray-900">Detail Rotasi</h6>
                             <p class="text-sm text-gray-600">Cardiology • Dr. James Wilson • May 15 - Jun 12, 2023</p>
                         </div>
                     </div>
@@ -64,14 +71,20 @@
                         
                         <!-- Departemen -->
                         <div class="mb-6">
-                            <label class="block text-sm font-medium mb-2">Departemen/Disiplin Ilmu</label>
-                            <div class="border-2 border-gray-200 rounded-lg p-1">
-                                <select class="w-full rounded-lg border-0 focus:ring-0 bg-gray-50/50">
+                            <label class="block text-sm font-medium mb-2 text-gray-900">Departemen/Disiplin Ilmu</label>
+                            <div class="relative">
+                                <select class="w-full h-12 px-4 rounded-[20px] border-2 border-[#637F26]/30 bg-[#F5F7F0] text-gray-900 appearance-none cursor-pointer hover:border-[#637F26]/50 transition-colors focus:ring-0 focus:border-[#637F26]/70">
                                     <option>Cardiology</option>
                                     <option>Neurology</option>
                                     <option>Pediatrics</option>
                                     <option>Emergency Medicine</option>
                                 </select>
+                                <!-- Dropdown indicator -->
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
 
@@ -115,13 +128,16 @@
                             @endforeach
                         </div>
 
-                        <!-- Komentar -->
+                        <!-- Single Komentar Section - Keep only this one -->
                         <div class="mb-6">
-                            <h6 class="font-medium mb-2">Komentar Tambahan</h6>
-                            <div class="border-2 border-gray-200 rounded-lg">
-                                <textarea rows="4" 
-                                    class="w-full rounded-lg border-0 focus:ring-0 bg-gray-50/50"
-                                    placeholder="Masukkan komentar atau umpan baik tambahan untuk mahasiswa"></textarea>
+                            <h6 class="font-medium mb-2 text-gray-900">Komentar Tambahan</h6>
+                            <div class="border-2 border-gray-200 rounded-[20px] bg-white">
+                                <textarea 
+                                    rows="4" 
+                                    name="comment"
+                                    class="w-full rounded-[20px] border-0 focus:ring-0 bg-white px-4 py-3 text-gray-900 placeholder-gray-400"
+                                    placeholder="Masukkan komentar atau umpan balik tambahan untuk mahasiswa"
+                                    ></textarea>
                             </div>
                         </div>
 
@@ -139,25 +155,39 @@
                     </form>
                 </div>
 
-                <!-- Riwayat Penilaian -->
+                <!-- Riwayat Penilaian Section -->
                 <div>
-                    <div class="flex justify-between items-center mb-6">
-                        <h6 class="font-medium">Riwayat Penilaian</h6>
-                        <div class="flex items-center space-x-3">
-                            <button class="px-4 py-2 rounded-lg bg-[#F5F7F0] text-[#637F26] hover:bg-[#637F26]/10 transition-colors">
-                                Export ke Excel
-                            </button>
-                            <button class="px-4 py-2 rounded-lg bg-[#F5F7F0] text-[#637F26] hover:bg-[#637F26]/10 transition-colors">
-                                Export ke PDF
-                            </button>
-                        </div>
+                    <div class="border-b-2 border-gray-200 mb-6">
+                        <h6 class="text-xl font-medium pb-2">Riwayat Penilaian</h6>
                     </div>
 
-                    <div class="mb-4">
-                        <input type="search" 
-                               class="w-[480px] h-11 rounded-lg border-2 border-gray-200 pl-4 pr-4
-                                      focus:border-[#637F26] focus:ring focus:ring-[#637F26]/20"
-                               placeholder="Cari berdasarkan nama siswa">
+                    <!-- Search and Export Section -->
+                    <div class="flex items-center justify-between mb-6">
+                        <!-- Search Bar -->
+                        <div class="relative flex-1 max-w-[480px]">
+                            <input type="search" 
+                                   class="w-full h-12 rounded-[20px] border-2 border-gray-200 pl-4 pr-4 bg-gray-50/50
+                                          placeholder-gray-400 text-gray-600
+                                          focus:border-[#637F26]/30 focus:ring-0 focus:bg-white
+                                          transition-colors duration-200"
+                                   placeholder="Cari berdasarkan nama siswa">
+                        </div>
+                        
+                        <!-- Export Buttons -->
+                        <div class="flex gap-3">
+                            <button type="button" 
+                                    class="px-4 py-2.5 rounded-[20px] bg-[#F5F7F0] border-2 border-[#637F26]/30 
+                                           text-[#637F26] text-sm font-medium hover:bg-[#637F26]/10 
+                                           transition-colors duration-200">
+                                Ekspor ke Excel
+                            </button>
+                            <button type="button"
+                                    class="px-4 py-2.5 rounded-[20px] bg-[#F5F7F0] border-2 border-[#637F26]/30 
+                                           text-[#637F26] text-sm font-medium hover:bg-[#637F26]/10 
+                                           transition-colors duration-200">
+                                Ekspor ke PDF
+                            </button>
+                        </div>
                     </div>
 
                     <table class="w-full">
@@ -201,6 +231,34 @@
 
 @push('scripts')
 <script>
+function editAssessment(name, dept, period) {
+    // Update info cards
+    const infoCards = document.querySelectorAll('.bg-[#F5F7F0] p.text-sm');
+    infoCards[0].textContent = `${name} • ${dept}`;
+    infoCards[1].textContent = `${dept} • ${period}`;
+    
+    // Set department in select
+    const deptSelect = document.querySelector('select');
+    if (deptSelect) {
+        deptSelect.value = dept;
+    }
+    
+    // Clear previous scores
+    document.querySelectorAll('input[pattern="[0-9]*"]').forEach(input => {
+        input.value = '';
+        handleScoreInput(input);
+    });
+    
+    // Clear comment
+    document.querySelector('textarea').value = '';
+    
+    // Scroll to form
+    document.getElementById('form-penilaian').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+
 function handleScoreInput(input) {
     // Remove non-numeric characters
     input.value = input.value.replace(/[^0-9]/g, '');
