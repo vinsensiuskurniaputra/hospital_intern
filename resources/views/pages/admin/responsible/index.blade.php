@@ -10,7 +10,7 @@
         <div class="p-6 space-y-6">
             <!-- Summary Cards -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h1 class="text-2xl text-gray-800 pb-6">Responsibles</h1>
+                <h1 class="text-2xl text-gray-800 pb-6">PIC</h1>
                 {{-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Total Students -->
                     <div class="flex justify-between items-center">
@@ -84,7 +84,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Telp</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telp</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
                         </thead>

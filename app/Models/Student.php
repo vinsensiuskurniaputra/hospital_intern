@@ -75,4 +75,18 @@ class Student extends Model
         self::where('id', $id)->delete();
     }
 
+    public function presences()
+    {
+        return $this->hasMany(Presence::class);
+    }
+
+    public function attendanceExcuses()
+    {
+        return $this->hasMany(AttendanceExcuse::class);
+    }
+    public function grades()
+    {
+        return $this->hasMany(StudentGrade::class);
+    }
+
 }

@@ -3,6 +3,26 @@
 @section('title', 'Sign-in')
 
 @section('base-content')
+    <!-- Fixed Error Message -->
+    @if ($errors->any())
+        <div x-data="{ show: true }" x-show="show"
+            class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="p-4 flex items-start border-l-4 border-red-500 bg-red-50">
+                    <i class="bi bi-exclamation-circle text-red-500 mt-0.5"></i>
+                    <div class="ml-3 w-full">
+                        <p class="text-sm text-red-800 font-medium">{{ $errors->first() }}</p>
+                    </div>
+                    <button @click="show = false" class="text-gray-400 hover:text-gray-500">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="min-h-screen flex bg-gradient-to-br from-[#F5F7F0] to-[#E8EDE0]">
         <!-- Left side - Illustration -->
         <div class="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
@@ -35,9 +55,6 @@
                                 focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26] transition-all duration-200
                                 hover:border-[#637F26]"
                                 placeholder="Enter your username">
-                            @error('username')
-                                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <div class="space-y-2">
@@ -47,9 +64,6 @@
                                 focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26] transition-all duration-200
                                 hover:border-[#637F26]"
                                 placeholder="Enter your password">
-                            @error('password')
-                                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
