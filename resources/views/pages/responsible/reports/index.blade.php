@@ -145,7 +145,7 @@
                         <td class="py-3 px-4">
                             <div class="flex items-center">
                                 <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                <span class="text-sm">James N. McKinley</span>
+                                <span class="text-sm">Mahasiswa</span>
                             </div>
                         </td>
                         <td class="py-3 px-4 text-sm">FK - 01</td>
@@ -166,7 +166,7 @@
                         <td class="py-3 px-4">
                             <div class="flex items-center">
                                 <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                <span class="text-sm">James N. McKinley</span>
+                                <span class="text-sm">Mahasiswa</span>
                             </div>
                         </td>
                         <td class="py-3 px-4 text-sm">FK - 01</td>
@@ -187,7 +187,7 @@
                         <td class="py-3 px-4">
                             <div class="flex items-center">
                                 <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                <span class="text-sm">James N. McKinley</span>
+                                <span class="text-sm">Mahasiswa</span>
                             </div>
                         </td>
                         <td class="py-3 px-4 text-sm">FK - 01</td>
@@ -218,20 +218,20 @@
                             <div class="flex items-center">
                                 <img class="h-10 w-10 rounded-full mr-3" src="/api/placeholder/40/40" alt="Profile">
                                 <div>
-                                    <p class="text-sm font-medium">Chris Friedely</p>
-                                    <p class="text-xs text-gray-500">Supermarket Vilanova</p>
+                                    <p class="text-sm font-medium">Vinsensius Kurnia Putra</p>
+                                    <p class="text-xs text-gray-500">Polines</p>
                                 </div>
                             </div>
                             <span class="text-lg font-medium">72</span>
                         </div>
                         
                         <!-- Student 2 (highlighted) -->
-                        <div class="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+                        <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <img class="h-10 w-10 rounded-full mr-3" src="/api/placeholder/40/40" alt="Profile">
                                 <div>
-                                    <p class="text-sm font-medium">Maggie Johnson</p>
-                                    <p class="text-xs text-gray-500">Oasis Organic Inc.</p>
+                                    <p class="text-sm font-medium">Mahasiswa</p>
+                                    <p class="text-xs text-gray-500">Undip</p>
                                 </div>
                             </div>
                             <span class="text-lg font-medium">72</span>
@@ -242,8 +242,8 @@
                             <div class="flex items-center">
                                 <img class="h-10 w-10 rounded-full mr-3" src="/api/placeholder/40/40" alt="Profile">
                                 <div>
-                                    <p class="text-sm font-medium">Gael Harry</p>
-                                    <p class="text-xs text-gray-500">New York Finest Fruits</p>
+                                    <p class="text-sm font-medium">Mahasiswa</p>
+                                    <p class="text-xs text-gray-500">Undip</p>
                                 </div>
                             </div>
                             <span class="text-lg font-medium">72</span>
@@ -254,8 +254,8 @@
                             <div class="flex items-center">
                                 <img class="h-10 w-10 rounded-full mr-3" src="/api/placeholder/40/40" alt="Profile">
                                 <div>
-                                    <p class="text-sm font-medium">Jenna Sullivan</p>
-                                    <p class="text-xs text-gray-500">Walmart</p>
+                                    <p class="text-sm font-medium">mahasiswa</p>
+                                    <p class="text-xs text-gray-500">Undip</p>
                                 </div>
                             </div>
                             <span class="text-lg font-medium">72</span>
@@ -279,7 +279,7 @@
                     
                     <!-- Yellow Header with updated styling -->
                     <div class="bg-amber-100 text-amber-800 text-sm font-medium px-4 py-2 rounded-lg mb-4">
-                        YEAR 2025 | Stase Bedah
+                        Tahun 2025 | Stase Bedah
                     </div>
                     
                     <!-- Top Performers Table -->
@@ -298,7 +298,7 @@
                                 <td class="py-3">
                                     <div class="flex items-center">
                                         <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">Jenice Salim</span>
+                                        <span class="text-sm">Mahasiswa</span>
                                     </div>
                                 </td>
                                 <td class="py-3 text-right text-sm">100</td>
@@ -322,7 +322,7 @@
                                 <td class="py-3">
                                     <div class="flex items-center">
                                         <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">James N. McKinley</span>
+                                        <span class="text-sm">Mahasiswa</span>
                                     </div>
                                 </td>
                                 <td class="py-3 text-right text-sm">96</td>
@@ -334,7 +334,7 @@
                                 <td class="py-3">
                                     <div class="flex items-center">
                                         <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">Steven Jayadi</span>
+                                        <span class="text-sm">Mahasiswa</span>
                                     </div>
                                 </td>
                                 <td class="py-3 text-right text-sm">96</td>
@@ -346,7 +346,7 @@
                                 <td class="py-3">
                                     <div class="flex items-center">
                                         <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">Jessica Wulan</span>
+                                        <span class="text-sm">Mahasiswa</span>
                                     </div>
                                 </td>
                                 <td class="py-3 text-right text-sm">90</td>
