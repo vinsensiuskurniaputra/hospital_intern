@@ -34,7 +34,7 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
-Route::middleware(['auth', 'menu'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('/profile', AdminProfileController::class)->names('admin.profile');
     Route::resource('/users/students', AdminStudentController::class)->names('admin.students');
