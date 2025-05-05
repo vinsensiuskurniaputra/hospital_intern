@@ -22,9 +22,11 @@ class MenuMiddleware
         $userRole = Auth::user()->roles()->first()->name;
 
         $profileRoute = '#';
-        if ($userRole == 'student') {
+        if ($userRole == 'admin') {
+            $profileRoute = route('admin.profile.index');
+        } elseif ($userRole == 'student') {
             $profileRoute = route('student.profile');
-        } elseif ($userRole == 'pic') {
+        }  elseif ($userRole == 'pic') {
             $profileRoute = route('student.profile');
         } else {
             // Default untuk admin atau role lain

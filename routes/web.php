@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminStaseController;
 use App\Http\Controllers\Admin\AdminCampusController;
+use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminPresenceController;
 use App\Http\Controllers\Admin\AdminScheduleController;
@@ -33,8 +34,9 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
-Route::middleware(['auth', 'menu'])->group(function () {
+Route::middleware(['auth', 'menu'])->prefix('admin')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::resource('/profile', AdminProfileController::class)->names('admin.profile');
     Route::resource('/users/students', AdminStudentController::class)->names('admin.students');
     Route::get('/students/filter', [AdminStudentController::class, 'filter'])->name('students.filter');
     Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
@@ -74,7 +76,11 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
   
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
+
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
+    Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
+    
+
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
 
