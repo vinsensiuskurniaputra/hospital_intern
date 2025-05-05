@@ -67,9 +67,6 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
 
     Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
-    Route::get('/admin/schedules/filter', [AdminScheduleController::class, 'filter'])->name('admin.schedules.filter');
-    Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
-  
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
@@ -90,35 +87,6 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Student\StudentGradeController::class, 'index'])->name('grades');
-    
-    // Profile
-    Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
-    
-    // Notifications
-    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationsController::class, 'index'])->name('notifications');
-});
-
-// Responsible Routes 
-Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\Responsible\ResponsibleDashboardController::class, 'index'])->name('dashboard');
-    
-    // Jadwal
-    Route::get('/schedule', [App\Http\Controllers\Responsible\ResponsibleScheduleController::class, 'index'])->name('schedule');
-    
-    // Presensi
-    Route::get('/attendance', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'index'])->name('attendance');
-    
-    // Profile
-    Route::get('/profile', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'index'])->name('profile');
-    
-    // Nilai
-    Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades');
-    
-    // Laporan & Rekapitulasi
-    Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
-    Route::resource('schedules', AdminScheduleController::class);
-    Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
 });
 
 
