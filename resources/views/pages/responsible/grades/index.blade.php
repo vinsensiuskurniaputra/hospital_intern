@@ -75,19 +75,14 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium mb-2 text-gray-900">Departemen/Disiplin Ilmu</label>
                             <div class="relative">
-                                <select class="w-full h-12 px-4 rounded-[20px] border-2 border-[#637F26]/30 bg-[#F5F7F0] text-gray-900 appearance-none cursor-pointer hover:border-[#637F26]/50 transition-colors focus:ring-0 focus:border-[#637F26]/70">
-                                    <option>Departemen Kulit</option>
-                                    <option>Departemen THT</option>
-                                    <option>Departemen Mata</option>
-                                    <option>Departemen Jantung</option>
-                                    <option>Departemen Saraf</option>
-                                    <option>Departemen Gigi</option>
-                                    <option>Departemen Anak</option>
-                                    <option>Departemen Paru</option>
-                                    <option>Departemen Bedah</option>
-                                    <option>Departemen Ortopedi</option>
-                                    <option>Departemen Urologi</option>
-                                    <option>Departemen Obstetri & Ginekologi</option>
+                                <select name="departement_id" 
+                                        class="w-full h-12 px-4 rounded-[20px] border-2 border-[#637F26]/30 bg-[#F5F7F0] 
+                                               text-gray-900 appearance-none cursor-pointer 
+                                               hover:border-[#637F26]/50 transition-colors 
+                                               focus:ring-0 focus:border-[#637F26]/70">
+                                    @foreach($departments as $department)
+                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                    @endforeach
                                 </select>
                                 <!-- Dropdown indicator -->
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">

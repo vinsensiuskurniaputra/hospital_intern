@@ -10,6 +10,7 @@ use App\Models\StudentGrade;
 use App\Models\Schedule;
 use App\Models\Stase;
 use App\Models\InternshipClass;
+use App\Models\Departement;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -17,6 +18,9 @@ class ResponsibleGradeController extends Controller
 {
     public function index()
     {
+        // Get all departments
+        $departments = Departement::orderBy('name')->get();
+        
         // Get current PIC's stase with departement relation
         $stase = Stase::where('responsible_user_id', Auth::id())
                      ->with(['departement'])
@@ -82,7 +86,12 @@ class ResponsibleGradeController extends Controller
                 return $grade;
             });
 
-        return view('pages.responsible.grades.index', compact('pendingStudents', 'gradeComponents', 'completedGrades'));
+        return view('pages.responsible.grades.index', compact(
+            'departments',
+            'pendingStudents',
+            'gradeComponents',
+            'completedGrades'
+        ));
     }
 
     // ...rest of the controller remains the same...
