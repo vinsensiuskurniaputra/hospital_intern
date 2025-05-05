@@ -25,7 +25,7 @@ class MenuMiddleware
         if ($userRole == 'student') {
             $profileRoute = route('student.profile');
         } elseif ($userRole == 'pic') {
-            $profileRoute = route('student.profile');
+            $profileRoute = route('responsible.profile');
         } else {
             // Default untuk admin atau role lain
             $profileRoute = route('home');
