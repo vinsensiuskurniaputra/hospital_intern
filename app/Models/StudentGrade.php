@@ -27,12 +27,5 @@ class StudentGrade extends Model
     {
         return $this->belongsTo(Stase::class);
     }
-    
-    /**
-     * Get the department for this grade
-     */
-    public function departement(): BelongsTo
-    {
-        return $this->belongsTo(Departement::class);
-    }
+
 }
