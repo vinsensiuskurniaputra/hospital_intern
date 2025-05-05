@@ -74,7 +74,11 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
   
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
+
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
+    Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
+    
+
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
 
