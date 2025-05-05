@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminPresenceController;
 use App\Http\Controllers\Admin\AdminScheduleController;
 use App\Http\Controllers\Admin\AdminUserAdminController;
+use App\Http\Controllers\General\NotificationController;
 use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminDepartementController;
 use App\Http\Controllers\Admin\AdminStudentGradeController;
@@ -30,6 +31,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 
 Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
@@ -63,8 +65,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::resource('/internships/stases', AdminStaseController::class)->names('admin.stases');
     Route::get('/stases/filter', [AdminStaseController::class, 'filter'])->name('stases.filter');
-
+    
     Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
+    Route::get('/internshipClasses/filter', [AdminInternshipClassController::class, 'filter'])->name('internshipClasses.filter');
 
     Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
     Route::get('/admin/schedules/filter', [AdminScheduleController::class, 'filter'])->name('admin.schedules.filter');
@@ -74,13 +77,15 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
+
+    Route::resource('/notification', NotificationController::class)->names('notification');
 });
 
 // Student Routes 
 Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/home', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard');
     
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule');
@@ -95,13 +100,13 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
     
     // Notifications
-    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationsController::class, 'index'])->name('notifications');
+    Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationController::class, 'index'])->name('notifications');
 });
 
 // Responsible Routes 
 Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')->group(function () {
     // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\Responsible\ResponsibleDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/home', [App\Http\Controllers\Responsible\ResponsibleDashboardController::class, 'index'])->name('dashboard');
     
     // Jadwal
     Route::get('/schedule', [App\Http\Controllers\Responsible\ResponsibleScheduleController::class, 'index'])->name('schedule');
@@ -119,6 +124,9 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
     Route::resource('schedules', AdminScheduleController::class);
     Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
+
+    // Notifications
+    Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
 });
 
 

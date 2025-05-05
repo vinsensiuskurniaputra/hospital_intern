@@ -8,7 +8,7 @@
             <div class="flex items-center p-4 border-b border-gray-200 min-h-[72px]">
                 <img src="{{ asset('images/logo.png') }}" :class="{ 'm-auto': !sidebarOpen }" alt="Medical Illustration"
                     class="drop-shadow-xl">
-                <h2 class="text-lg font-bold text-[#637F26] ml-2" :class="{ 'hidden': !sidebarOpen }">Sistem Magang RS
+                <h2 class="text-lg font-bold text-[#637F26] ml-2" :class="{ 'hidden': !sidebarOpen }">Hospital Intern
                 </h2>
             </div>
 
@@ -106,12 +106,29 @@
                         <!-- Right Side Nav Items -->
                         <div class="flex items-center space-x-4">
                             <!-- Notifications -->
-                            <button class="p-2 text-gray-500 hover:text-[#637F26] rounded-lg hover:bg-gray-100">
+                            @php
+                                $notificationRoute = '#';
+                                $userRole = Auth::user()->roles()->first()->name ?? '';
+
+                                if ($userRole == 'student') {
+                                    $notificationRoute = route('student.notifications');
+                                } elseif ($userRole == 'responsible') {
+                                    $notificationRoute = route('responsible.notifications');
+                                } else {
+                                    $notificationRoute = route('notification.index');
+                                }
+                            @endphp
+
+                            <a href="{{ $notificationRoute }}"
+                                class="p-2 text-gray-500 hover:text-[#637F26] rounded-lg hover:bg-gray-100">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                            </button>
+                                @php
+                                    $userRole = Auth::user()->roles()->first()->name ?? '';
+                                @endphp
+                            </a>
 
                             <!-- User Profile Dropdown -->
                             <div class="relative" x-data="{ open: false }">
@@ -129,11 +146,18 @@
                                     x-transition:enter-end="opacity-100 scale-100"
                                     class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
                                     style="display: none;">
-                                    <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                    <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+
+                                    <a href="{{ $profileRoute }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        Profile
+                                    </a>
+
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        Settings
+                                    </a>
+
                                     <hr class="my-2 border-gray-200">
+
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit"

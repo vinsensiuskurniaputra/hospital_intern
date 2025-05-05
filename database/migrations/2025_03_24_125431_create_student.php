@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('internship_class_id')->nullable()->constrained('internship_classes')->onDelete('set null');
             $table->foreignId('study_program_id')->constrained('study_programs')->onDelete('cascade');
             $table->string('nim')->unique();
-            $table->string('telp');
+            $table->string('telp')->nullable();
             $table->boolean('is_finished')->default(false);
             $table->timestamps();
         });

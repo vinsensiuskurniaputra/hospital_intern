@@ -10,8 +10,9 @@ class DepartementSeeder extends Seeder
     public function run()
     {
         $departments = [
-            ['name' => 'Departemen 1'],
-            ['name' => 'Departemen 2'],
+            ['name' => 'Keperawatan'],
+            ['name' => 'Kedokteran'],
+            ['name' => 'Departemen 3'],
             // Tambahkan data sesuai kebutuhan
         ];
 

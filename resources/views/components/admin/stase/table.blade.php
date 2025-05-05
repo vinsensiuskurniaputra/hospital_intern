@@ -8,6 +8,8 @@
             {{ $stase->detail }}</td>
         <td class="px-6 py-4 text-sm text-gray-900">
             {{ $stase->responsibleUser->user->name }}</td>
+        <td class="px-6 py-4 text-sm text-gray-900">
+            {{ $stase->departement->name }}</td>
 
         <td class="px-6 py-4 flex space-x-2 text-center whitespace-nowrap text-sm font-medium">
             <a href="{{ route('admin.stases.edit', $stase->id) }}" class="text-[#637F26] hover:text-[#85A832] ml-auto">
