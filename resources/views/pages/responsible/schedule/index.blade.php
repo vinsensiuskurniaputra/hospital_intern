@@ -58,12 +58,13 @@
 
 @push('scripts')
 <script>
-let selectedDate = null;
+let selectedDate = new Date().toISOString().split('T')[0]; // Set default selected date to today
 
 function generateCalendar(year, month) {
     const firstDay = new Date(year, month - 1, 1);
     const daysInMonth = new Date(year, month, 0).getDate();
     const startingDay = firstDay.getDay();
+    const today = new Date().toISOString().split('T')[0];
     
     // Get previous month's days
     const prevMonth = new Date(year, month - 2, 0);
@@ -83,11 +84,13 @@ function generateCalendar(year, month) {
     for (let day = 1; day <= daysInMonth; day++) {
         const date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         const isSelected = selectedDate === date;
+        const isToday = today === date;
         
         calendarHTML += `
             <div 
                 data-date="${date}"
                 class="text-center p-2 cursor-pointer transition-all duration-200 hover:bg-gray-50 rounded-lg calendar-day
+                    ${isToday ? 'today' : ''}
                     ${isSelected ? 'selected-date' : ''}"
                 onclick="selectDate('${date}', this)">
                 ${day}
@@ -114,6 +117,10 @@ function selectDate(date, element) {
     const previousSelected = document.querySelector('.calendar-day.selected-date');
     if (previousSelected) {
         previousSelected.classList.remove('selected-date');
+        // Keep the today class if it exists
+        if (previousSelected.classList.contains('today')) {
+            previousSelected.classList.add('today');
+        }
     }
     
     // Add selection to clicked date
@@ -123,45 +130,39 @@ function selectDate(date, element) {
 
 function loadSchedules(date) {
     const scheduleContainer = document.querySelector('#today-schedules');
-    console.log('Loading schedules for date:', date); // Debug log
-
+    
     fetch(`/responsible/schedule/get-schedules?date=${date}`)
         .then(response => response.json())
         .then(data => {
-            console.log('Full API Response:', data); // Debug log
-            
             if (!data.success) {
                 throw new Error(data.message || 'Terjadi kesalahan');
             }
-            
-            console.log('Debug info:', data.debug); // Debug log
-            console.log('Raw schedules:', data.schedules); // Debug log
 
             if (!data.schedules || data.schedules.length === 0) {
                 scheduleContainer.innerHTML = `
-                    <div class="text-gray-500 text-center py-4">
-                        Tidak ada jadwal untuk tanggal ini
+                    <div class="bg-gray-50 rounded-lg p-4 text-center flex items-center justify-center h-full">
+                        <div>
+                            <div class="text-gray-400 mb-2">
+                                <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div class="text-sm text-gray-500">Tidak ada jadwal untuk tanggal ini</div>
+                        </div>
                     </div>`;
                 return;
             }
 
             const schedulesHTML = data.schedules.map(schedule => `
-                <div class="bg-[#F5F7F0] rounded-lg p-4 mb-4">
-                    <h6 class="text-lg font-medium">${schedule.class_name}</h6>
-                    <div class="flex items-center gap-2 mt-2 text-gray-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>${schedule.time_range}</span>
-                    </div>
-                    <div class="text-gray-600 mt-1">${schedule.department}</div>
+                <div class="bg-[#F5F7F0] rounded-lg p-3 mb-2">
+                    <h6 class="text-base font-medium mb-1">${schedule.class_name}</h6>
+                    <div class="text-sm text-gray-600">${schedule.department}</div>
                 </div>
             `).join('');
             
             scheduleContainer.innerHTML = schedulesHTML;
         })
         .catch(error => {
-            console.error('Error details:', error); // Debug log
             scheduleContainer.innerHTML = `
                 <div class="text-red-500 text-center py-4">
                     ${error.message || 'Terjadi kesalahan saat memuat jadwal'}
@@ -182,9 +183,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Load today's schedules on page load
-    const today = new Date().toISOString().split('T')[0];
-    loadSchedules(today);
+    // Perbaikan selector tombol Batal
+    const cancelButton = document.querySelector('.calendar-cancel');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', function() {
+            const today = new Date();
+            const todayString = today.toISOString().split('T')[0];
+            
+            // Update month and year selects to today first
+            document.getElementById('month-select').value = today.getMonth() + 1;
+            document.getElementById('year-select').value = today.getFullYear();
+            
+            // Update selectedDate to today
+            selectedDate = todayString;
+            
+            // Generate calendar with today highlighted
+            generateCalendar(today.getFullYear(), today.getMonth() + 1);
+            
+            // Load today's schedules
+            loadSchedules(todayString);
+
+            // Find and update visual selection
+            const todayElement = document.querySelector(`[data-date="${todayString}"]`);
+            if (todayElement) {
+                const previousSelected = document.querySelector('.calendar-day.selected-date');
+                if (previousSelected) {
+                    previousSelected.classList.remove('selected-date');
+                }
+                todayElement.classList.add('selected-date');
+            }
+        });
+    }
+
+    // Load today's schedules and highlight today's date on calendar
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1;
+    
+    // Set initial year and month selects
+    document.getElementById('year-select').value = currentYear;
+    document.getElementById('month-select').value = currentMonth;
+    
+    // Generate calendar with today highlighted
+    generateCalendar(currentYear, currentMonth);
+    
+    // Load today's schedules
+    const todayString = today.toISOString().split('T')[0];
+    loadSchedules(todayString);
 });
 
 // Event listeners for month and year select
@@ -212,30 +257,33 @@ generateCalendar(
 
                     <!-- Cancel/Done Buttons -->
                     <div class="flex justify-end gap-2">
-                        <button class="px-4 py-2 rounded-lg border border-gray-300">Cancel</button>
-                        <button class="px-4 py-2 rounded-lg bg-[#637F26] text-white calendar-done">Done</button>
+                        <button class="calendar-cancel px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">Batal</button>
+                        <button class="px-4 py-2 rounded-lg bg-[#637F26] text-white hover:bg-[#4B601C] transition-colors calendar-done">Pilih Tanggal</button>
                     </div>
                 </div>
 
                 <!-- Right Side - Schedule Cards -->
-                <div id="today-schedules" class="flex-1 space-y-4">
-    @forelse($todaySchedules as $schedule)
-    <div class="bg-[#F5F7F0] rounded-lg p-4">
-        <h6 class="text-lg font-medium">{{ $schedule['class_name'] }}</h6>
-        <div class="flex items-center gap-2 mt-2 text-gray-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span>{{ $schedule['time_range'] }}</span>
-        </div>
-        <div class="text-gray-600 mt-1">{{ $schedule['department'] }}</div>
-    </div>
-    @empty
-    <div class="text-gray-500 text-center py-4">
-        Tidak ada jadwal untuk hari ini
-    </div>
-    @endforelse
-</div>
+                <div class="w-[calc(100%-400px-24px)]"> <!-- Hapus h-[400px] dari sini -->
+                    <div id="today-schedules" class="space-y-2"> <!-- Tambahkan space-y-2 untuk spacing yang konsisten -->
+                        @forelse($todaySchedules as $schedule)
+                        <div class="bg-[#F5F7F0] rounded-lg p-3">  <!-- Hapus mb-2 karena sudah menggunakan space-y-2 -->
+                            <h6 class="text-base font-medium mb-1">{{ $schedule['class_name'] }}</h6>
+                            <div class="text-sm text-gray-600">{{ $schedule['department'] }}</div>
+                        </div>
+                        @empty
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <div>
+                                <div class="text-gray-400 mb-2">
+                                    <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="text-sm text-gray-500">Tidak ada jadwal untuk hari ini</div>
+                            </div>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -260,7 +308,7 @@ generateCalendar(
             </svg>
         </div>
     </div>
-                    <button class="px-4 py-2 rounded-lg bg-[#637F26] text-white">Terapkan</button>
+                    <button class="px-4 py-2 rounded-lg bg-[#637F26] text-white hover:bg-[#4B601C] transition-colors calendar-done">Terapkan</button>
                 </div>
             </div>
 
@@ -306,7 +354,7 @@ generateCalendar(
 
             <!-- Print Button -->
             <div class="flex justify-end mt-4">
-                <button class="px-4 py-2 text-sm rounded-lg border bg-[#637F26] text-white">
+                <button class="px-4 py-2 rounded-lg bg-[#637F26] text-white hover:bg-[#4B601C] transition-colors calendar-done">
                     Cetak Jadwal
                 </button>
             </div>
@@ -327,9 +375,6 @@ generateCalendar(
         <div class="flex gap-3 mt-4">
             <button class="px-4 py-2 rounded-lg bg-[#637F26] text-white hover:bg-[#4B601C] transition-colors">
                 Lihat Mahasiswa
-            </button>
-            <button class="px-4 py-2 rounded-lg bg-[#637F26] text-white hover:bg-[#4B601C] transition-colors">
-                Edit Jadwal
             </button>
         </div>
     </div>
@@ -392,6 +437,14 @@ generateCalendar(
 
     .calendar-day.selected-date:hover {
         background-color: #637F26;
+    }
+
+    .calendar-day.today {
+        border: 2px solid #637F26;
+    }
+
+    .calendar-day.selected-date.today {
+        border: 2px solid #637F26;
     }
 </style>
 @endpush
