@@ -7,7 +7,7 @@
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <a href="{{ route('admin.schedules.index') }}" class="text-gray-400 hover:text-gray-600">
+                <a href="{{ route('presences.schedules.index') }}" class="text-gray-400 hover:text-gray-600">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -32,7 +32,7 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.schedules.store') }}" method="POST" class="max-w-4xl mx-auto">
+        <form action="{{ route('presences.schedules.store') }}" method="POST" class="max-w-4xl mx-auto">
             @csrf
 
             <div class="grid grid-cols-2 gap-6">
@@ -40,10 +40,12 @@
                     <!-- Kelas Magang -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Kelas Magang</label>
-                        <select name="internship_class_id" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
+                        <select name="internship_class_id" required class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
                             <option value="">Pilih Kelas Magang</option>
                             @foreach($internshipClasses as $class)
-                                <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                <option value="{{ $class->id }}" {{ old('internship_class_id') == $class->id ? 'selected' : '' }}>
+                                    {{ $class->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -51,15 +53,18 @@
                     <!-- Stase -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Stase</label>
-                        <select name="stase_id" id="stase_id" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
+                        <select name="stase_id" id="stase_id" required class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
                             <option value="">Pilih Stase</option>
                             @foreach($stases as $stase)
-                                <option value="{{ $stase->id }}">{{ $stase->name }}</option>
+                                <option value="{{ $stase->id }}" {{ old('stase_id') == $stase->id ? 'selected' : '' }}>
+                                    {{ $stase->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
+                </div>
 
-                    <!-- Departemen -->
+                <!-- Departemen
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Departemen</label>
                         <select name="departement_id" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
@@ -69,16 +74,9 @@
                             @endforeach
                         </select>
                     </div>
-                </div>
+                </div> -->
 
                 <div>
-                    <!-- Pembimbing (readonly, will be populated based on stase) -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Pembimbing Magang</label>
-                        <input type="text" id="pembimbing" class="w-full border border-gray-300 rounded-md px-3 py-2.5 bg-gray-50" readonly>
-                        <p class="mt-1 text-sm text-gray-500">Pembimbing ditentukan berdasarkan Stase yang dipilih</p>
-                    </div>
-
                     <!-- Additional Info -->
                     <div class="mb-6 p-4 bg-blue-50 rounded-md">
                         <h4 class="text-sm font-medium text-blue-800 mb-2">Informasi Penting</h4>
@@ -95,35 +93,20 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Periode Rotasi</label>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Tanggal Mulai</label>
-                        <input type="date" name="start_date" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
+                        <label class="block text-xs text-gray-500">Tanggal Mulai</label>
+                        <input type="date" name="start_date" required value="{{ old('start_date') }}" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500 mb-1">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Tanggal Selesai</label>
-                        <input type="date" name="end_date" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jam -->
-            <div class="mb-8">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Jam Praktik</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Jam Mulai</label>
-                        <input type="time" name="start_time" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Jam Selesai</label>
-                        <input type="time" name="end_time" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
+                        <label class="block text-xs text-gray-500">Tanggal Selesai</label>
+                        <input type="date" name="end_date" required value="{{ old('end_date') }}" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500 mb-1">
                     </div>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-end gap-3 border-t pt-6">
-                <a href="{{ route('admin.schedules.index') }}" 
-                    class="px-6 py-2.5 text-sm font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors duration-200">
+                <a href="{{ route('presences.schedules.index') }}" 
+                    class="px-6 py-2.5 text-sm font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-50">
                     Cancel
                 </a>
                 <button type="submit" 
@@ -134,20 +117,4 @@
         </form>
     </div>
 </div>
-
-<script>
-document.getElementById('stase_id').addEventListener('change', function() {
-    const staseId = this.value;
-    if (staseId) {
-        // Fetch pembimbing data based on stase
-        fetch(`/admin/stases/${staseId}/responsible`)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('pembimbing').value = data.name;
-            });
-    } else {
-        document.getElementById('pembimbing').value = '';
-    }
-});
-</script>
 @endsection

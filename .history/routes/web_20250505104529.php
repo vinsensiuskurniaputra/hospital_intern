@@ -69,18 +69,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
     Route::get('/internshipClasses/filter', [AdminInternshipClassController::class, 'filter'])->name('internshipClasses.filter');
 
-    Route::middleware(['auth', 'menu'])->group(function () {
-        // Pastikan route filter-by-date didefinisikan sebelum resource route
-        Route::get('/presences/schedules/filter-by-date', [AdminScheduleController::class, 'filterByDate'])
-            ->name('presences.schedules.filter-by-date');
-        
-        Route::resource('/presences/schedules', AdminScheduleController::class)
-            ->names('presences.schedules');
-    });
-        
+    Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
+    Route::get('/admin/schedules/filter', [AdminScheduleController::class, 'filter'])->name('admin.schedules.filter');
     Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
-    Route::post('/presences/schedules', [AdminScheduleController::class, 'store'])
-        ->name('presences.schedules.store');
   
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
@@ -131,11 +122,6 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     
     // Laporan & Rekapitulasi
     Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
-    Route::resource('schedules', AdminScheduleController::class);
-    Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
-
-    // Notifications
-    Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
 });
 
 
