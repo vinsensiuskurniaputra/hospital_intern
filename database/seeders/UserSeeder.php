@@ -4,7 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Student; // Tambahkan import model Student jika diperlukan
+use App\Models\Student;
+use App\Models\ResponsibleUser;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -20,8 +21,7 @@ class UserSeeder extends Seeder
             'username' => 'admin',
             'name' => 'Administrator',
             'email' => 'admin@example.com',
-            'password' => bcrypt('password'), // Enkripsi password
-            'photo_profile_url' => 'https://ui-avatars.com/api/?name=Admin',
+            'password' => bcrypt('password'),
         ]);
 
         // Ambil ID Role Admin
@@ -35,8 +35,7 @@ class UserSeeder extends Seeder
             'username' => 'student',
             'name' => 'Student User',
             'email' => 'student@example.com',
-            'password' => bcrypt('password'), // Enkripsi password
-            'photo_profile_url' => 'https://ui-avatars.com/api/?name=Student+User',
+            'password' => bcrypt('password'),
         ]);
 
         // Ambil ID Role Student
@@ -66,6 +65,30 @@ class UserSeeder extends Seeder
         } catch (\Exception $e) {
             // Tangani jika ada error, misalnya kolom yang diperlukan belum ada
             $this->command->info('Error creating student profile: ' . $e->getMessage());
+        }
+
+        // Add responsible user
+        $responsible = User::create([
+            'username' => 'pj',
+            'name' => 'Dr. Responsible',
+            'email' => 'responsible@example.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        // Get responsible role
+        $responsibleRole = Role::where('name', 'pic')->first();
+
+        // Attach role to user
+        $responsible->roles()->attach($responsibleRole);
+
+        // Create responsible user profile
+        try {
+            ResponsibleUser::create([
+                'user_id' => $responsible->id,
+                'telp' => '081234567890',
+            ]);
+        } catch (\Exception $e) {
+            $this->command->info('Error creating responsible profile: ' . $e->getMessage());
         }
     }
 }

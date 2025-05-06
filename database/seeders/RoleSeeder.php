@@ -17,7 +17,7 @@ class RoleSeeder extends Seeder
         Role::insert([
             ['name' => 'admin'],
             ['name' => 'student'],
-            ['name' => 'responsible'],
+            ['name' => 'pic'],
         ]);
     }
 }

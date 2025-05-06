@@ -19,6 +19,7 @@ return new class extends Migration
 
         Schema::create('internship_classes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('campus_id')->constrained('campuses')->onDelete('cascade');
             $table->foreignId('class_year_id')->constrained('class_years')->onDelete('cascade');
             $table->string('name');
             $table->text('description')->nullable();
