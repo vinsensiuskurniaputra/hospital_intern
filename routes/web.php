@@ -59,21 +59,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
 
-<<<<<<< HEAD
     Route::get('/home/profile', [StudentProfileController::class, 'index'])->name('student-profile');
-=======
-    Route::get('/home/profile', [StudentProfileController::class, 'index']);
-
-    Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
-    Route::resource('/internships/stases', AdminStaseController::class)->names('admin.stases');
-    Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
-
-    Route::resource('/presences/schedules', AdminScheduleController::class)->names('admin.schedules');
-    Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
-    Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
-    Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
-    Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
->>>>>>> 2083b3f86d91d04be94695c0fc0b9800515428c6
 });
 
     
