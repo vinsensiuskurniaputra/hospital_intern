@@ -3,7 +3,19 @@
 @section('title', 'Jadwal Mahasiswa')
 
 @section('content')
-<div class="p-4">
+<div class="p-4" x-data="{
+    months: [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ],
+    currentMonth: 'November',
+    currentYear: '2024',
+    selectedDate: null,
+    getYears() {
+        const currentYear = new Date().getFullYear();
+        return Array.from({length: 10}, (_, i) => currentYear + i);
+    }
+}">
     <h5 class="text-xl font-semibold mb-4">Jadwal Magang</h5>
 
     <!-- Jadwal Hari Ini Section -->
@@ -16,11 +28,15 @@
             <div class="w-1/2">
                 <!-- Calendar Controls -->
                 <div class="flex gap-4 mb-6">
-                    <select class="form-select rounded-lg text-sm border-gray-300 w-40">
-                        <option>November</option>
+                    <select x-model="currentMonth" class="form-select rounded-lg text-sm border-gray-300 w-40">
+                        <template x-for="month in months" :key="month">
+                            <option :value="month" x-text="month"></option>
+                        </template>
                     </select>
-                    <select class="form-select rounded-lg text-sm border-gray-300 w-32">
-                        <option>2024</option>
+                    <select x-model="currentYear" class="form-select rounded-lg text-sm border-gray-300 w-32">
+                        <template x-for="year in getYears()" :key="year">
+                            <option :value="year" x-text="year"></option>
+                        </template>
                     </select>
                 </div>
 
@@ -39,61 +55,48 @@
 
                     <!-- Calendar Body -->
                     <div class="grid grid-cols-7">
-                        <!-- Week 1 -->
-                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400">30</div>
-                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400">31</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">1</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">2</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">3</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">4</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">5</div>
+                        <!-- Previous Month -->
+                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400 cursor-not-allowed">30</div>
+                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400 cursor-not-allowed">31</div>
 
-                        <!-- Week 2 -->
-                        <div class="aspect-square flex items-center justify-center text-sm">6</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">7</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">8</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">9</div>
-                        <div class="aspect-square flex items-center justify-center">
-                            <div class="w-8 h-8 rounded-full bg-[#637F26] text-white flex items-center justify-center text-sm">
-                                10
+                        <!-- Current Month Days -->
+                        <template x-for="date in 30" :key="date">
+                            <div
+                                class="aspect-square flex items-center justify-center cursor-pointer group"
+                                @click="selectedDate = date"
+                            >
+                                <div
+                                    class="w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all duration-200"
+                                    :class="{
+                                        'bg-[#637F26] text-white scale-105 shadow-md': selectedDate === date,
+                                        'hover:bg-[#F5F7F0] hover:text-[#637F26] hover:scale-105': selectedDate !== date
+                                    }"
+                                    x-text="date"
+                                ></div>
                             </div>
-                        </div>
-                        <div class="aspect-square flex items-center justify-center text-sm">11</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">12</div>
+                        </template>
 
-                        <!-- Week 3 -->
-                        <div class="aspect-square flex items-center justify-center text-sm">13</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">14</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">15</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">16</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">17</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">18</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">19</div>
-
-                        <!-- Week 4 -->
-                        <div class="aspect-square flex items-center justify-center text-sm">20</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">21</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">22</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">23</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">24</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">25</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">26</div>
-
-                        <!-- Week 5 -->
-                        <div class="aspect-square flex items-center justify-center text-sm">27</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">28</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">29</div>
-                        <div class="aspect-square flex items-center justify-center text-sm">30</div>
-                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400">1</div>
-                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400">2</div>
-                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400">3</div>
+                        <!-- Next Month -->
+                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400 cursor-not-allowed">1</div>
+                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400 cursor-not-allowed">2</div>
+                        <div class="aspect-square flex items-center justify-center text-sm text-gray-400 cursor-not-allowed">3</div>
                     </div>
                 </div>
 
                 <!-- Calendar Footer -->
                 <div class="flex justify-end gap-2 mt-4">
-                    <button class="px-4 py-2 text-sm rounded-lg text-gray-700 hover:bg-gray-100">Cancel</button>
-                    <button class="px-4 py-2 text-sm rounded-lg bg-[#637F26] text-white hover:bg-[#4f6420]">Done</button>
+                    <button
+                        @click="selectedDate = null"
+                        class="px-4 py-2 text-sm rounded-lg text-gray-700 hover:bg-gray-100"
+                    >
+                        Batalkan
+                    </button>
+                    <button
+                        class="px-4 py-2 text-sm rounded-lg bg-[#637F26] text-white hover:bg-[#4f6420]"
+                        @click="$dispatch('date-selected', { date: selectedDate })"
+                    >
+                        Selesai
+                    </button>
                 </div>
             </div>
 
