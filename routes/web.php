@@ -70,6 +70,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/internships/internshipClasses', AdminInternshipClassController::class)->names('admin.internshipClasses');
     Route::get('/internshipClasses/filter', [AdminInternshipClassController::class, 'filter'])->name('internshipClasses.filter');
+    Route::get('/internshipClasses/insertStudent', [AdminInternshipClassController::class, 'insertStudent'])->name('admin.internshipClasses.insertStudent');
+    Route::post('/internshipClasses/insertStudent', [AdminInternshipClassController::class, 'insertStudentStore'])->name('admin.internshipClasses.insertStudent.store');
 
     Route::middleware(['auth', 'menu'])->group(function () {
         // Pastikan route filter-by-date didefinisikan sebelum resource route
