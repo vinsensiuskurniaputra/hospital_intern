@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Stase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -18,6 +19,11 @@ class ResponsibleUser extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function stases(): BelongsToMany
+    {
+        return $this->belongsToMany(Stase::class, 'responsible_stase');
     }
 
 

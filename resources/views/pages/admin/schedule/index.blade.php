@@ -31,29 +31,33 @@
                     <!-- Calendar Controls -->
                     <div class="flex gap-2 mb-4">
                         <div class="relative flex-1">
-                            <select id="month-select" 
+                            <select id="month-select"
                                 class="form-select w-full pl-3 pr-8 py-1.5 text-sm rounded-lg border border-gray-300 appearance-none cursor-pointer">
-                                @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $index => $month)
-                                    <option value="{{ $index + 1 }}" {{ $index + 1 == date('n') ? 'selected' : '' }}>{{ $month }}</option>
+                                @foreach (['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $index => $month)
+                                    <option value="{{ $index + 1 }}" {{ $index + 1 == date('n') ? 'selected' : '' }}>
+                                        {{ $month }}</option>
                                 @endforeach
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
                                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
                         </div>
 
                         <div class="relative flex-1">
-                            <select id="year-select" 
+                            <select id="year-select"
                                 class="form-select w-full pl-3 pr-8 py-1.5 text-sm rounded-lg border border-gray-300 appearance-none cursor-pointer">
                                 @for ($year = 2000; $year <= 2026; $year++)
-                                    <option value="{{ $year }}" {{ $year == date('Y') ? 'selected' : '' }}>{{ $year }}</option>
+                                    <option value="{{ $year }}" {{ $year == date('Y') ? 'selected' : '' }}>
+                                        {{ $year }}</option>
                                 @endfor
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
                                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
                         </div>
@@ -62,8 +66,9 @@
                     <!-- Calendar Grid -->
                     <div class="bg-gray-50 rounded-lg p-2">
                         <div class="grid grid-cols-7 gap-0.5 mb-0.5">
-                            @foreach(['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] as $day)
-                                <div class="text-[10px] font-medium text-gray-500 text-center py-0.5 w-7">{{ $day }}</div>
+                            @foreach (['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] as $day)
+                                <div class="text-[10px] font-medium text-gray-500 text-center py-0.5 w-7">
+                                    {{ $day }}</div>
                             @endforeach
                         </div>
 
@@ -74,10 +79,12 @@
 
                     <!-- Calendar Buttons -->
                     <div class="flex justify-end gap-2 mt-3">
-                        <button class="calendar-cancel px-3 py-1.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+                        <button
+                            class="calendar-cancel px-3 py-1.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
                             Batal
                         </button>
-                        <button class="calendar-done px-3 py-1.5 text-sm rounded-lg bg-[#637F26] text-white hover:bg-[#85A832] transition-colors">
+                        <button
+                            class="calendar-done px-3 py-1.5 text-sm rounded-lg bg-[#637F26] text-white hover:bg-[#85A832] transition-colors">
                             Pilih Tanggal
                         </button>
                     </div>
@@ -87,8 +94,8 @@
                 <div class="lg:col-span-3">
                     <div class="space-y-2">
                         @forelse ($filteredSchedules as $schedule)
-                            <a href="{{ route('presences.schedules.show', $schedule->id) }}" 
-                               class="block bg-gray-50 rounded-lg p-3 hover:shadow-sm transition-all cursor-pointer">
+                            <a href="{{ route('presences.schedules.show', $schedule->id) }}"
+                                class="block bg-gray-50 rounded-lg p-3 hover:shadow-sm transition-all cursor-pointer">
                                 <div class="flex items-center justify-between">
                                     <!-- ... existing card content ... -->
                                 </div>
@@ -199,7 +206,11 @@
                                 <td class="py-3 px-4">{{ $schedule->internshipClass->classYear->class_year ?? 'N/A' }}
                                 </td>
                                 <td class="py-3 px-4">
-                                    {{ $schedule->stase->responsibleUser->user->name ?? 'N/A' }}
+                                    @foreach ($schedule->stase->responsibleUsers as $responsible)
+                                        <div class="py-3">
+                                            {{ $responsible->user->name }}
+                                        </div>
+                                    @endforeach
                                 </td>
                                 <td class="py-3 px-4">
                                     @if ($schedule->start_date && $schedule->end_date)
@@ -262,24 +273,24 @@
 
         function updateScheduleList(date) {
             fetch(`/presences/schedules/filter-by-date?date=${date}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    const scheduleList = document.querySelector('.lg\\:col-span-3 .space-y-2');
-                    let html = '';
-                    
-                    data.schedules.forEach(schedule => {
-                        html += `
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const scheduleList = document.querySelector('.lg\\:col-span-3 .space-y-2');
+                        let html = '';
+
+                        data.schedules.forEach(schedule => {
+                            html += `
                             <a href="/presences/schedules/${schedule.id}" 
                                class="block bg-gray-50 rounded-lg p-3 hover:shadow-sm transition-all cursor-pointer">
                                 <div class="flex items-center justify-between">
@@ -301,20 +312,22 @@
                                 </div>
                             </a>
                         `;
-                    });
-                    
-                    if (data.schedules.length === 0) {
-                        html = '<div class="text-center text-gray-500 py-4">Tidak ada jadwal pada tanggal ini</div>';
+                        });
+
+                        if (data.schedules.length === 0) {
+                            html =
+                                '<div class="text-center text-gray-500 py-4">Tidak ada jadwal pada tanggal ini</div>';
+                        }
+
+                        scheduleList.innerHTML = html;
                     }
-                    
-                    scheduleList.innerHTML = html;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                const scheduleList = document.querySelector('.lg\\:col-span-3 .space-y-2');
-                scheduleList.innerHTML = '<div class="text-center text-gray-500 py-4">Terjadi kesalahan saat memuat jadwal</div>';
-            });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const scheduleList = document.querySelector('.lg\\:col-span-3 .space-y-2');
+                    scheduleList.innerHTML =
+                        '<div class="text-center text-gray-500 py-4">Terjadi kesalahan saat memuat jadwal</div>';
+                });
         }
 
         // Add helper functions for date formatting
@@ -352,260 +365,269 @@
                 });
             }
         });
-
     </script>
 @endsection
 
 @push('styles')
-<style>
-    .form-select:focus, .form-input:focus {
-        outline: none;
-        border-color: #637F26;
-        ring-color: #F5F7F0;
-    }
+    <style>
+        .form-select:focus,
+        .form-input:focus {
+            outline: none;
+            border-color: #637F26;
+            ring-color: #F5F7F0;
+        }
 
-    .calendar-day {
-        transition: all 0.2s ease-in-out;
-        padding: 0.15rem; /* Mengurangi padding */
-        border-radius: 0.125rem; /* Mengurangi border radius */
-        width: 1.75rem; /* Tetapkan lebar spesifik */
-        height: 1.75rem; /* Tetapkan tinggi spesifik */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        cursor: pointer;
-        margin: 1px; /* Tambah margin kecil */
-    }
+        .calendar-day {
+            transition: all 0.2s ease-in-out;
+            padding: 0.15rem;
+            /* Mengurangi padding */
+            border-radius: 0.125rem;
+            /* Mengurangi border radius */
+            width: 1.75rem;
+            /* Tetapkan lebar spesifik */
+            height: 1.75rem;
+            /* Tetapkan tinggi spesifik */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin: 1px;
+            /* Tambah margin kecil */
+        }
 
-    /* Ubah container kalender */
-    #calendar-grid {
-        max-width: 280px; /* Batasi lebar maksimum */
-        margin: 0 auto;
-    }
+        /* Ubah container kalender */
+        #calendar-grid {
+            max-width: 280px;
+            /* Batasi lebar maksimum */
+            margin: 0 auto;
+        }
 
-    /* Mengatur jarak antar hari dalam minggu */
-    .grid-cols-7 {
-        gap: 0.125rem; /* Mengurangi gap */
-    }
+        /* Mengatur jarak antar hari dalam minggu */
+        .grid-cols-7 {
+            gap: 0.125rem;
+            /* Mengurangi gap */
+        }
 
-    /* Header hari */
-    .calendar-header {
-        padding: 0.15rem 0;
-    }
+        /* Header hari */
+        .calendar-header {
+            padding: 0.15rem 0;
+        }
 
-    /* Container utama kalender */
-    .rounded-lg.bg-gray-50.p-2 {
-        max-width: 300px; /* Batasi lebar maksimum container */
-        margin: 0 auto;
-    }
+        /* Container utama kalender */
+        .rounded-lg.bg-gray-50.p-2 {
+            max-width: 300px;
+            /* Batasi lebar maksimum container */
+            margin: 0 auto;
+        }
 
-    .calendar-day:hover {
-        background-color: #F5F7F0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+        .calendar-day:hover {
+            background-color: #F5F7F0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-    .calendar-day.selected-date {
-        background-color: #637F26;
-        color: white;
-    }
+        .calendar-day.selected-date {
+            background-color: #637F26;
+            color: white;
+        }
 
-    .calendar-day.today {
-        border: 2px solid #637F26;
-        font-weight: bold;
-    }
+        .calendar-day.today {
+            border: 2px solid #637F26;
+            font-weight: bold;
+        }
 
-    /* Styling untuk hari-hari dari bulan sebelum/sesudah */
-    .calendar-day.other-month {
-        color: #9CA3AF;
-        background-color: #F3F4F6;
-    }
+        /* Styling untuk hari-hari dari bulan sebelum/sesudah */
+        .calendar-day.other-month {
+            color: #9CA3AF;
+            background-color: #F3F4F6;
+        }
 
-    .calendar-day {
-        width: 1.75rem;
-        height: 1.75rem;
-        padding: 0.1rem;
-        border-radius: 0.125rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        cursor: pointer;
-    }
+        .calendar-day {
+            width: 1.75rem;
+            height: 1.75rem;
+            padding: 0.1rem;
+            border-radius: 0.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
 
-    #calendar-grid {
-        width: fit-content;
-        margin: 0 auto;
-    }
+        #calendar-grid {
+            width: fit-content;
+            margin: 0 auto;
+        }
 
-    .grid-cols-7 > * {
-        width: 1.75rem; /* Memastikan semua sel kalender memiliki lebar yang sama */
-    }
+        .grid-cols-7>* {
+            width: 1.75rem;
+            /* Memastikan semua sel kalender memiliki lebar yang sama */
+        }
 
-    /* ...existing calendar styles... */
-    .calendar-day {
-        width: 1.75rem;
-        height: 1.75rem;
-        padding: 0.1rem;
-        border-radius: 0.125rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        cursor: pointer;
-    }
+        /* ...existing calendar styles... */
+        .calendar-day {
+            width: 1.75rem;
+            height: 1.75rem;
+            padding: 0.1rem;
+            border-radius: 0.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
 
-    .calendar-day.other-month {
-        color: #9CA3AF;
-        background-color: #F3F4F6;
-        opacity: 0.5;
-    }
+        .calendar-day.other-month {
+            color: #9CA3AF;
+            background-color: #F3F4F6;
+            opacity: 0.5;
+        }
 
-    .calendar-day.today {
-        border: 1px solid #637F26;
-        font-weight: 600;
-    }
+        .calendar-day.today {
+            border: 1px solid #637F26;
+            font-weight: 600;
+        }
 
-    .calendar-day.selected-date {
-        background-color: #637F26;
-        color: white;
-    }
+        .calendar-day.selected-date {
+            background-color: #637F26;
+            color: white;
+        }
 
-    .calendar-day:hover:not(.other-month) {
-        background-color: #F5F7F0;
-    }
-</style>
+        .calendar-day:hover:not(.other-month) {
+            background-color: #F5F7F0;
+        }
+    </style>
 @endpush
 
 @push('scripts')
-<script>
-let selectedDate = new Date().toISOString().split('T')[0];
+    <script>
+        let selectedDate = new Date().toISOString().split('T')[0];
 
-function generateCalendar(year, month) {
-    const firstDay = new Date(year, month - 1, 1);
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const startingDay = firstDay.getDay();
-    const today = new Date().toISOString().split('T')[0];
-    
-    const prevMonth = new Date(year, month - 2, 0);
-    const prevMonthDays = prevMonth.getDate();
-    
-    let calendarHTML = '';
-    
-    // Previous month days
-    for (let i = startingDay - 1; i >= 0; i--) {
-        const prevDate = new Date(year, month - 2, prevMonthDays - i);
-        const dateString = prevDate.toISOString().split('T')[0];
-        calendarHTML += `
+        function generateCalendar(year, month) {
+            const firstDay = new Date(year, month - 1, 1);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const startingDay = firstDay.getDay();
+            const today = new Date().toISOString().split('T')[0];
+
+            const prevMonth = new Date(year, month - 2, 0);
+            const prevMonthDays = prevMonth.getDate();
+
+            let calendarHTML = '';
+
+            // Previous month days
+            for (let i = startingDay - 1; i >= 0; i--) {
+                const prevDate = new Date(year, month - 2, prevMonthDays - i);
+                const dateString = prevDate.toISOString().split('T')[0];
+                calendarHTML += `
             <div data-date="${dateString}" class="calendar-day other-month">
                 ${prevMonthDays - i}
             </div>`;
-    }
-    
-    // Current month days
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-        const isSelected = selectedDate === date;
-        const isToday = today === date;
-        
-        calendarHTML += `
+            }
+
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const isSelected = selectedDate === date;
+                const isToday = today === date;
+
+                calendarHTML += `
             <div 
                 data-date="${date}"
                 class="calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected-date' : ''}"
                 onclick="selectDate('${date}', this)">
                 ${day}
             </div>`;
-    }
-    
-    // Next month days
-    const totalDays = startingDay + daysInMonth;
-    const remainingDays = 42 - totalDays;
-    
-    for (let i = 1; i <= remainingDays; i++) {
-        const nextDate = new Date(year, month, i);
-        const dateString = nextDate.toISOString().split('T')[0];
-        calendarHTML += `
+            }
+
+            // Next month days
+            const totalDays = startingDay + daysInMonth;
+            const remainingDays = 42 - totalDays;
+
+            for (let i = 1; i <= remainingDays; i++) {
+                const nextDate = new Date(year, month, i);
+                const dateString = nextDate.toISOString().split('T')[0];
+                calendarHTML += `
             <div data-date="${dateString}" class="calendar-day other-month">
                 ${i}
             </div>`;
-    }
-    
-    document.getElementById('calendar-grid').innerHTML = calendarHTML;
-}
+            }
 
-// Update fungsi selectDate
-function selectDate(date, element) {
-    const previousSelected = document.querySelector('.calendar-day.selected-date');
-    if (previousSelected) {
-        previousSelected.classList.remove('selected-date');
-    }
-    element.classList.add('selected-date');
-    selectedDate = date;
+            document.getElementById('calendar-grid').innerHTML = calendarHTML;
+        }
 
-    // Update dropdown bulan dan tahun sesuai tanggal yang dipilih
-    const selectedDateObj = new Date(date);
-    const monthSelect = document.getElementById('month-select');
-    const yearSelect = document.getElementById('year-select');
-    
-    monthSelect.value = selectedDateObj.getMonth() + 1;
-    yearSelect.value = selectedDateObj.getFullYear();
-}
+        // Update fungsi selectDate
+        function selectDate(date, element) {
+            const previousSelected = document.querySelector('.calendar-day.selected-date');
+            if (previousSelected) {
+                previousSelected.classList.remove('selected-date');
+            }
+            element.classList.add('selected-date');
+            selectedDate = date;
 
-// Update event listener untuk initialization
-document.addEventListener('DOMContentLoaded', function() {
-    const monthSelect = document.getElementById('month-select');
-    const yearSelect = document.getElementById('year-select');
-    
-    // Month change handler
-    monthSelect.addEventListener('change', function() {
-        generateCalendar(
-            parseInt(yearSelect.value),
-            parseInt(this.value)
-        );
-    });
+            // Update dropdown bulan dan tahun sesuai tanggal yang dipilih
+            const selectedDateObj = new Date(date);
+            const monthSelect = document.getElementById('month-select');
+            const yearSelect = document.getElementById('year-select');
 
-    // Year change handler
-    yearSelect.addEventListener('change', function() {
-        generateCalendar(
-            parseInt(this.value),
-            parseInt(monthSelect.value)
-        );
-    });
+            monthSelect.value = selectedDateObj.getMonth() + 1;
+            yearSelect.value = selectedDateObj.getFullYear();
+        }
 
-    // Handle Pilih Tanggal button
-    const doneButton = document.querySelector('.calendar-done');
-    if (doneButton) {
-        doneButton.addEventListener('click', function() {
-            if (selectedDate) {
+        // Update event listener untuk initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const monthSelect = document.getElementById('month-select');
+            const yearSelect = document.getElementById('year-select');
+
+            // Month change handler
+            monthSelect.addEventListener('change', function() {
+                generateCalendar(
+                    parseInt(yearSelect.value),
+                    parseInt(this.value)
+                );
+            });
+
+            // Year change handler
+            yearSelect.addEventListener('change', function() {
+                generateCalendar(
+                    parseInt(this.value),
+                    parseInt(monthSelect.value)
+                );
+            });
+
+            // Handle Pilih Tanggal button
+            const doneButton = document.querySelector('.calendar-done');
+            if (doneButton) {
+                doneButton.addEventListener('click', function() {
+                    if (selectedDate) {
+                        updateScheduleList(selectedDate);
+                    }
+                });
+            }
+
+            // Handle Cancel button
+            const cancelButton = document.querySelector('.calendar-cancel');
+            if (cancelButton) {
+                cancelButton.addEventListener('click', function() {
+                    const today = new Date();
+                    selectedDate = today.toISOString().split('T')[0];
+                    monthSelect.value = today.getMonth() + 1;
+                    yearSelect.value = today.getFullYear();
+                    generateCalendar(today.getFullYear(), today.getMonth() + 1);
+                    updateScheduleList(selectedDate);
+                });
+            }
+
+            // Initialize calendar dengan tanggal hari ini
+            const today = new Date();
+            selectedDate = today.toISOString().split('T')[0];
+            generateCalendar(today.getFullYear(), today.getMonth() + 1);
+
+            // Set selected date visual untuk hari ini
+            const todayElement = document.querySelector(`[data-date="${selectedDate}"]`);
+            if (todayElement) {
+                selectDate(selectedDate, todayElement);
                 updateScheduleList(selectedDate);
             }
         });
-    }
-
-    // Handle Cancel button
-    const cancelButton = document.querySelector('.calendar-cancel');
-    if (cancelButton) {
-        cancelButton.addEventListener('click', function() {
-            const today = new Date();
-            selectedDate = today.toISOString().split('T')[0];
-            monthSelect.value = today.getMonth() + 1;
-            yearSelect.value = today.getFullYear();
-            generateCalendar(today.getFullYear(), today.getMonth() + 1);
-            updateScheduleList(selectedDate);
-        });
-    }
-
-    // Initialize calendar dengan tanggal hari ini
-    const today = new Date();
-    selectedDate = today.toISOString().split('T')[0];
-    generateCalendar(today.getFullYear(), today.getMonth() + 1);
-    
-    // Set selected date visual untuk hari ini
-    const todayElement = document.querySelector(`[data-date="${selectedDate}"]`);
-    if (todayElement) {
-        selectDate(selectedDate, todayElement);
-        updateScheduleList(selectedDate);
-    }
-});
-</script>
+    </script>
 @endpush
