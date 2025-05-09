@@ -14,20 +14,33 @@ class AdminScheduleController extends Controller
 {
     public function index()
     {
-        $schedules = Schedule::with([
+        $today = now()->format('Y-m-d');
+        
+        $allSchedules = Schedule::with([
             'internshipClass.classYear',
-            'stase',
-         ])->paginate(10); // Changed from get() to paginate()
+            'stase.departement',
+            'stase.responsibleUser.user'
+        ])->paginate(10);
 
+        $filteredSchedules = Schedule::with([
+            'internshipClass',
+            'stase.departement'
+        ])
+        ->whereDate('start_date', '<=', $today)
+        ->whereDate('end_date', '>=', $today)
+        ->get();
+
+        // Get departments for filter dropdown
         $departments = Departement::all();
-        $responsibles = ResponsibleUser::with('user')->whereHas('user')->get();
         $internshipClasses = InternshipClass::with('classYear')->get();
+        $responsibles = ResponsibleUser::with('user')->get();
 
         return view('pages.admin.schedule.index', compact(
-            'schedules',
+            'allSchedules',
+            'filteredSchedules',
             'departments',
-            'responsibles',
-            'internshipClasses'
+            'internshipClasses',
+            'responsibles'
         ));
     }
 
@@ -55,19 +68,28 @@ class AdminScheduleController extends Controller
         $validated = $request->validate([
             'internship_class_id' => 'required|exists:internship_classes,id',
             'stase_id' => 'required|exists:stases,id',
-            'departement_id' => 'required|exists:departements,id',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'required|date|after_or_equal:start_date'
+        ], [
+            'internship_class_id.required' => 'Kelas Magang harus dipilih',
+            'stase_id.required' => 'Stase harus dipilih',
+            'start_date.required' => 'Tanggal Mulai harus diisi',
+            'end_date.required' => 'Tanggal Selesai harus diisi',
+            'end_date.after_or_equal' => 'Tanggal Selesai harus setelah atau sama dengan Tanggal Mulai'
         ]);
 
-        // Add the current date as date_schedule
-        $validated['date_schedule'] = now()->toDateString();
+        try {
+            // Buat schedule langsung dari validated data
+            Schedule::create($validated);
 
-        Schedule::create($validated);
-
-        return redirect()
-            ->route('admin.schedules.index')
-            ->with('success', 'Jadwal berhasil ditambahkan');
+            return redirect()
+                ->route('presences.schedules.index')
+                ->with('success', 'Jadwal berhasil dibuat');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat membuat jadwal: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -103,18 +125,21 @@ class AdminScheduleController extends Controller
         $validated = $request->validate([
             'internship_class_id' => 'required|exists:internship_classes,id',
             'stase_id' => 'required|exists:stases,id',
-            'departement_id' => 'required|exists:departements,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
         ]);
 
-        $schedule->update($validated);
+        try {
+            $schedule->update($validated);
 
-        return redirect()
-            ->route('admin.schedules.index')
-            ->with('success', 'Schedule updated successfully');
+            return redirect()
+                ->route('presences.schedules.index')
+                ->with('success', 'Jadwal berhasil diperbarui');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat memperbarui jadwal');
+        }
     }
 
     /**
@@ -122,11 +147,15 @@ class AdminScheduleController extends Controller
      */
     public function destroy(Schedule $schedule)
     {
-        $schedule->delete();
+        try {
+            $schedule->delete();
 
-        return redirect()
-            ->route('admin.schedules.index')
-            ->with('success', 'Jadwal berhasil dihapus');
+            return redirect()
+                ->route('presences.schedules.index')
+                ->with('success', 'Jadwal berhasil dihapus');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat menghapus jadwal');
+        }
     }
 
     public function filter(Request $request)
@@ -155,5 +184,30 @@ class AdminScheduleController extends Controller
         ])->get();
         
         return view('components.admin.schedule.table', compact('schedules'))->render();
+    }
+
+    public function filterByDate(Request $request)
+    {
+        try {
+            $date = $request->date;
+
+            $schedules = Schedule::with([
+                'internshipClass',
+                'stase.departement'
+            ])
+            ->whereDate('start_date', '<=', $date)
+            ->whereDate('end_date', '>=', $date)
+            ->get();
+
+            return response()->json([
+                'success' => true,
+                'schedules' => $schedules
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error filtering schedules'
+            ]);
+        }
     }
 }

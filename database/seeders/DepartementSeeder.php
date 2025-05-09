@@ -13,6 +13,7 @@ class DepartementSeeder extends Seeder
             ['name' => 'Keperawatan'],
             ['name' => 'Kedokteran'],
             ['name' => 'Departemen 3'],
+            ['name' => 'Departemen 4'],
             // Tambahkan data sesuai kebutuhan
         ];
 

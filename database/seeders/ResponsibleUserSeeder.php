@@ -15,41 +15,30 @@ class ResponsibleUserSeeder extends Seeder
         // Create responsible users
         $responsibles = [
             [
-                'username' => 'dr.anak',
-                'name' => 'Dr. Anak',
-                'email' => 'dr.anak@hospital.test',
+                'username' => 'tirtamh',
+                'name' => 'dr. Tirta Mandira Hudhi',
+                'email' => 'tirta@hospital.test',
                 'password' => Hash::make('password'),
             ],
             [
                 'username' => 'dr.bedah',
-                'name' => 'Dr. Bedah',
-                'email' => 'dr.bedah@hospital.test',
+                'name' => 'dr. Dion Haryadi',
+                'email' => 'dionh@hospital.test',
                 'password' => Hash::make('password'),
             ],
             [
-                'username' => 'dr.gigi',
-                'name' => 'Dr. Gigi',
-                'email' => 'dr.gigi@hospital.test',
+                'username' => 'decsamh',
+                'name' => 'dr. DECSA MEDIKA HERTANTO, Sp.PD-KGH',
+                'email' => 'decsa@hospital.test',
                 'password' => Hash::make('password'),
             ],
             [
-                'username' => 'dr.mata',
-                'name' => 'Dr. Mata',
-                'email' => 'dr.mata@hospital.test',
+                'username' => 'ahwisdak',
+                'name' => 'dr. A.H. WISDA KUSUMA, Sp.U',
+                'email' => 'wisda@hospital.test',
                 'password' => Hash::make('password'),
             ],
-            [
-                'username' => 'dr.tht',
-                'name' => 'Dr. THT',
-                'email' => 'dr.tht@hospital.test',
-                'password' => Hash::make('password'),
-            ],
-            [
-                'username' => 'dr.saraf',
-                'name' => 'Dr. Saraf',
-                'email' => 'dr.saraf@hospital.test',
-                'password' => Hash::make('password'),
-            ],
+            
         ];
 
         $instructorRole = Role::where('name', 'pic')->first();
