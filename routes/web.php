@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\AdminInternshipClassController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
+use App\Http\Controllers\Responsible\ResponsibleScheduleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -94,6 +95,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
 
     Route::resource('/notification', NotificationController::class)->names('notification');
+
+    Route::get('/responsible/schedule/get-schedules', [ResponsibleScheduleController::class, 'getSchedules'])
+        ->name('responsible.schedule.get-schedules');
 });
 
 // Student Routes 
@@ -116,6 +120,8 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationController::class, 'index'])->name('notifications');
+    Route::post('/notifications/{id}/read', [App\Http\Controllers\Student\StudentNotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [App\Http\Controllers\Student\StudentNotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });
 
 // Responsible Routes 
@@ -124,7 +130,8 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     Route::get('/home', [App\Http\Controllers\Responsible\ResponsibleDashboardController::class, 'index'])->name('dashboard');
     
     // Jadwal
-    Route::get('/schedule', [App\Http\Controllers\Responsible\ResponsibleScheduleController::class, 'index'])->name('schedule');
+    Route::get('/schedule', [ResponsibleScheduleController::class, 'index'])->name('schedule.index');
+    Route::get('/schedule/get-schedules', [ResponsibleScheduleController::class, 'getSchedules'])->name('schedule.get-schedules');
     
     // Presensi
     Route::get('/attendance', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'index'])->name('attendance');

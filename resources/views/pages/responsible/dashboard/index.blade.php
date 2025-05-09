@@ -1,6 +1,12 @@
 @extends('layouts.auth')
 
 @section('content')
+    @if(isset($error))
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+        <p>{{ $error }}</p>
+    </div>
+    @endif
+
     <div class="p-6">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Left Column -->
@@ -25,16 +31,16 @@
                 <!-- Mahasiswa yang dibimbing -->
                 <div class="bg-white p-6 rounded-lg shadow-sm">
                     <h2 class="text-lg font-semibold mb-1">Mahasiswa yang dibimbing</h2>
-                    <div class="text-2xl font-bold mb-1">12</div>
+                    <div class="text-2xl font-bold mb-1">{{ $studentCount ?? 0 }}</div>
                     <p class="text-sm text-gray-500 mb-4">Mahasiswa dalam bimbingan anda</p>
                     <div class="flex justify-end">
-                        <button class="bg-[#637F26] hover:bg-[#566d1e] text-white px-4 py-2 rounded-md text-sm flex items-center transition-colors">
+                        <a href="{{ route('responsible.attendance') }}" class="bg-[#637F26] hover:bg-[#566d1e] text-white px-4 py-2 rounded-md text-sm flex items-center transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                             </svg>
                             Lihat Semua
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -43,77 +49,16 @@
                     <h2 class="text-lg font-semibold mb-4">Jadwal Hari Ini</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Jadwal 1 -->
+                        @forelse($todaySchedules as $schedule)
                         <div class="bg-gray-100 rounded-lg p-4 shadow">
-                            <h3 class="font-medium">Kelas FK-01</h3>
-                            <div class="flex items-center mt-1 text-sm text-gray-500">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                09:00 - 11:00
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1">Departemen Kesehatan</div>
+                            <h3 class="font-medium">{{ $schedule->internshipClass->name ?? 'Kelas' }}</h3>
+                            <div class="text-xs text-gray-500 mt-1">{{ $schedule->stase->name ?? 'Departemen' }}</div>
                         </div>
-
-                        <!-- Jadwal 2 -->
-                        <div class="bg-gray-100 rounded-lg p-4 shadow">
-                            <h3 class="font-medium">Kelas FK-01</h3>
-                            <div class="flex items-center mt-1 text-sm text-gray-500">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                10:00 - 12:00
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1">Departemen Kesehatan</div>
+                        @empty
+                        <div class="col-span-2 text-center p-6 text-gray-500">
+                            <p>Tidak ada jadwal untuk hari ini</p>
                         </div>
-
-                        <!-- Jadwal 3 -->
-                        <div class="bg-gray-100 rounded-lg p-4 shadow">
-                            <h3 class="font-medium">Kelas FK-01</h3>
-                            <div class="flex items-center mt-1 text-sm text-gray-500">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                10:00 - 11:00
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1">Departemen Kesehatan</div>
-                        </div>
-
-                        <!-- Jadwal 4 -->
-                        <div class="bg-gray-100 rounded-lg p-4 shadow">
-                            <h3 class="font-medium">Kelas FK-01</h3>
-                            <div class="flex items-center mt-1 text-sm text-gray-500">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                10:00 - 11:00
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1">Departemen Kesehatan</div>
-                        </div>
-
-                        <!-- Jadwal 5 -->
-                        <div class="bg-gray-100 rounded-lg p-4 shadow">
-                            <h3 class="font-medium">Kelas FK-01</h3>
-                            <div class="flex items-center mt-1 text-sm text-gray-500">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                08:00 - 11:00
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1">Departemen Kesehatan</div>
-                        </div>
-
-                        <!-- Jadwal 6 -->
-                        <div class="bg-gray-100 rounded-lg p-4 shadow">
-                            <h3 class="font-medium">Kelas FK-01</h3>
-                            <div class="flex items-center mt-1 text-sm text-gray-500">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                10:00 - 11:00
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1">Departemen Kesehatan</div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -126,14 +71,29 @@
                     
                     <div class="mb-3">
                         <div class="text-sm text-gray-600">Total Kehadiran</div>
-                        <div class="text-2xl font-bold">1000 Kehadiran</div>
+                        <div class="text-2xl font-bold">{{ array_sum($chartData['data'] ?? [0]) }} Kehadiran</div>
                         <div class="flex items-center mt-1">
-                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-md mr-2">Januari</span>
-                            <span class="flex items-center text-red-500 text-sm">
+                            @php
+                                $labels = $chartData['labels'] ?? ['Jan'];
+                                $lastMonthIndex = count($labels) - 1;
+                                $lastMonth = $lastMonthIndex >= 0 ? $labels[$lastMonthIndex] : 'Jan';
+                            @endphp
+                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-md mr-2">{{ $lastMonth }}</span>
+                            @php
+                                $dataArray = $chartData['data'] ?? [0, 0];
+                                $currentMonthIndex = count($dataArray) - 1;
+                                $prevMonthIndex = $currentMonthIndex - 1;
+                                
+                                $currentMonth = $currentMonthIndex >= 0 ? $dataArray[$currentMonthIndex] : 0;
+                                $previousMonth = $prevMonthIndex >= 0 ? $dataArray[$prevMonthIndex] : 0;
+                                
+                                $change = $previousMonth > 0 ? (($currentMonth - $previousMonth) / $previousMonth) * 100 : 0;
+                            @endphp
+                            <span class="flex items-center {{ $change >= 0 ? 'text-green-500' : 'text-red-500' }} text-sm">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M{{ $change >= 0 ? '13 7l5 5m0 0l-5 5m5-5H6' : '11 17l-5-5m0 0l5-5m-5 5h12' }}"></path>
                                 </svg>
-                                2,5%
+                                {{ number_format(abs($change), 1) }}%
                             </span>
                         </div>
                     </div>
@@ -148,75 +108,32 @@
                 <div class="bg-white p-6 rounded-lg shadow-sm">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-semibold">Mahasiswa yang harus dinilai</h2>
-                        <button class="bg-[#637F26] hover:bg-[#566d1e] text-white px-4 py-2 rounded-md text-sm flex items-center transition-colors">
+                        <a href="{{ route('responsible.grades') }}" class="bg-[#637F26] hover:bg-[#566d1e] text-white px-4 py-2 rounded-md text-sm flex items-center transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                             </svg>
                             Lihat Semua
-                        </button>
+                        </a>
                     </div>
                     
                     <div class="space-y-4">
-                        <!-- Student 1 -->
+                        @forelse($studentsToGrade as $student)
                         <div class="flex items-center py-3 border-b border-gray-100">
                             <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                <img src="https://ui-avatars.com/api/?name=Nama+Mahasiswa" alt="Student" class="w-full h-full object-cover">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($student->user->name ?? 'Student') }}" alt="Student" class="w-full h-full object-cover">
                             </div>
                             <div class="flex-grow">
-                                <p class="font-medium">Nama Mahasiswa</p>
+                                <p class="font-medium">{{ $student->user->name ?? 'Nama Mahasiswa' }}</p>
                             </div>
-                            <div class="text-sm text-gray-500 mr-4">Ujian 1</div>
-                            <div class="text-sm text-gray-500">Kelas FK-01</div>
+                            <div class="text-sm text-gray-500 mr-4">{{ $student->nim ?? 'NIM' }}</div>
+                            <div class="text-sm text-gray-500">{{ $student->internshipClass->name ?? 'Kelas' }}</div>
                         </div>
-
-                        <!-- Student 2 -->
-                        <div class="flex items-center py-3 border-b border-gray-100">
-                            <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                <img src="https://ui-avatars.com/api/?name=Nama+Mahasiswa" alt="Student" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-medium">Nama Mahasiswa</p>
-                            </div>
-                            <div class="text-sm text-gray-500 mr-4">Ujian 1</div>
-                            <div class="text-sm text-gray-500">Kelas FK-01</div>
+                        @empty
+                        <div class="text-center py-4 text-gray-500">
+                            <p>Tidak ada mahasiswa yang perlu dinilai</p>
                         </div>
-
-                        <!-- Student 3 -->
-                        <div class="flex items-center py-3 border-b border-gray-100">
-                            <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                <img src="https://ui-avatars.com/api/?name=Nama+Mahasiswa" alt="Student" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-medium">Nama Mahasiswa</p>
-                            </div>
-                            <div class="text-sm text-gray-500 mr-4">Ujian 1</div>
-                            <div class="text-sm text-gray-500">Kelas FK-01</div>
-                        </div>
-
-                        <!-- Student 4 -->
-                        <div class="flex items-center py-3 border-b border-gray-100">
-                            <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                <img src="https://ui-avatars.com/api/?name=Nama+Mahasiswa" alt="Student" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-medium">Nama Mahasiswa</p>
-                            </div>
-                            <div class="text-sm text-gray-500 mr-4">Ujian 1</div>
-                            <div class="text-sm text-gray-500">Kelas FK-01</div>
-                        </div>
-
-                        <!-- Student 5 -->
-                        <div class="flex items-center py-3">
-                            <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                <img src="https://ui-avatars.com/api/?name=Nama+Mahasiswa" alt="Student" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-medium">Nama Mahasiswa</p>
-                            </div>
-                            <div class="text-sm text-gray-500 mr-4">Ujian 1</div>
-                            <div class="text-sm text-gray-500">Kelas FK-01</div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -236,26 +153,23 @@
             </div>
 
             <div class="space-y-4">
-                <!-- Announcement 1 -->
-                <div class="border-b border-gray-100 pb-4">
-                    <h3 class="font-medium mb-1">Pergantian Jadwal</h3>
-                    <p class="text-sm text-gray-600 mb-1">Kelas FK-01 pada departemen kesehatan terjadi perubahan jadwal menjadi tanggal 12 januari</p>
-                    <div class="text-xs text-gray-400 text-right">09 Jul 2024 - 08:03</div>
+                @forelse($notifications as $notification)
+                <div class="border-b border-gray-100 pb-4 {{ $loop->last ? '' : 'border-b' }}">
+                    <h3 class="font-medium mb-1">{{ $notification->title ?? 'Notifikasi' }}</h3>
+                    <p class="text-sm text-gray-600 mb-1">{{ $notification->message ?? 'Tidak ada pesan' }}</p>
+                    <div class="text-xs text-gray-400 text-right">
+                        @if($notification->created_at)
+                            {{ $notification->created_at->format('d M Y - H:i') }}
+                        @else
+                            {{ now()->format('d M Y - H:i') }}
+                        @endif
+                    </div>
                 </div>
-
-                <!-- Announcement 2 -->
-                <div class="border-b border-gray-100 pb-4">
-                    <h3 class="font-medium mb-1">Pergantian Jadwal</h3>
-                    <p class="text-sm text-gray-600 mb-1">Kelas FK-01 pada departemen kesehatan terjadi perubahan jadwal menjadi tanggal 12 januari</p>
-                    <div class="text-xs text-gray-400 text-right">09 Jul 2024 - 08:03</div>
+                @empty
+                <div class="text-center py-4 text-gray-500">
+                    <p>Tidak ada notifikasi</p>
                 </div>
-
-                <!-- Announcement 3 -->
-                <div>
-                    <h3 class="font-medium mb-1">Pergantian Jadwal</h3>
-                    <p class="text-sm text-gray-600 mb-1">Kelas FK-01 pada departemen kesehatan terjadi perubahan jadwal menjadi tanggal 12 januari</p>
-                    <div class="text-xs text-gray-400 text-right">09 Jul 2024 - 08:03</div>
-                </div>
+                @endforelse
             </div>
         </div>
         
@@ -265,18 +179,15 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
-    // Pastikan script dijalankan setelah DOM selesai dimuat
     document.addEventListener('DOMContentLoaded', function() {
-        // Ambil elemen canvas untuk chart
         const ctx = document.getElementById('attendanceChart');
         
         if (ctx) {
             try {
-                // Ganti cara merender data dari PHP ke JavaScript
-                const labels = {!! json_encode(isset($chartData['labels']) ? $chartData['labels'] : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']) !!};
-                const chartData = {!! json_encode(isset($chartData['data']) ? $chartData['data'] : [800, 750, 880, 920, 870, 830, 900]) !!};
+                // Data dari controller
+                const labels = {!! json_encode($chartData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']) !!};
+                const chartData = {!! json_encode($chartData['data'] ?? [0, 0, 0, 0, 0, 0, 0]) !!};
                 
-                // Buat Chart baru dengan konfigurasi yang sudah ada
                 new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -287,14 +198,14 @@
                             borderColor: '#637F26',
                             backgroundColor: 'rgba(240, 240, 245, 0.7)',
                             pointBackgroundColor: function(context) {
-                                return context.dataIndex === 6 ? '#637F26' : 'transparent';
+                                return context.dataIndex === labels.length - 1 ? '#637F26' : 'transparent';
                             },
                             pointBorderColor: function(context) {
-                                return context.dataIndex === 6 ? '#fff' : 'transparent';
+                                return context.dataIndex === labels.length - 1 ? '#fff' : 'transparent';
                             },
                             pointBorderWidth: 2,
                             pointRadius: function(context) {
-                                return context.dataIndex === 6 ? 6 : 0;
+                                return context.dataIndex === labels.length - 1 ? 6 : 0;
                             },
                             fill: true,
                             tension: 0.4,
@@ -302,7 +213,6 @@
                         }]
                     },
                     options: {
-                        /* tidak ada perubahan di bagian options */
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
@@ -310,23 +220,35 @@
                                 display: false
                             },
                             tooltip: {
-                                enabled: true,
-                                /* opsi tooltip tidak berubah */
+                                callbacks: {
+                                    // Menampilkan jumlah kehadiran alih-alih persentase
+                                    label: function(context) {
+                                        return `${context.parsed.y} kehadiran`;
+                                    }
+                                }
                             }
                         },
-                        /* options lainnya tidak berubah */
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
                     }
                 });
-                
-                console.log('Chart berhasil dibuat');
             } catch (e) {
                 console.error('Error creating chart:', e);
                 ctx.parentNode.innerHTML = '<div class="p-4 text-center text-gray-500">Grafik tidak dapat ditampilkan: ' + e.message + '</div>';
             }
-        } else {
-            console.error('Canvas element "attendanceChart" not found');
         }
     });
 </script>
-@endpush
+    @endpush
 @endsection

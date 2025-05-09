@@ -112,7 +112,7 @@
 
                                 if ($userRole == 'student') {
                                     $notificationRoute = route('student.notifications');
-                                } elseif ($userRole == 'responsible') {
+                                } elseif ($userRole == 'pic') {
                                     $notificationRoute = route('responsible.notifications');
                                 } else {
                                     $notificationRoute = route('notification.index');
