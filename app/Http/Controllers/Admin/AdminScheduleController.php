@@ -19,7 +19,7 @@ class AdminScheduleController extends Controller
         $allSchedules = Schedule::with([
             'internshipClass.classYear',
             'stase.departement',
-            'stase.responsibleUser.user'
+            'stase.responsibleUsers.user',
         ])->paginate(10);
 
         $filteredSchedules = Schedule::with([

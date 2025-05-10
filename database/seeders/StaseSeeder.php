@@ -10,10 +10,10 @@ class StaseSeeder extends Seeder
     public function run(): void
     {
         $stases = [
-            ['name' => 'Stase Umum', 'responsible_user_id' => 1, 'departement_id' => 1],
-            ['name' => 'Stase Ortopedi', 'responsible_user_id' => 2, 'departement_id' => 1],
-            ['name' => 'Stase Penyakit Dalam', 'responsible_user_id' => 3, 'departement_id' => 1],
-            ['name' => 'Stase Urologi', 'responsible_user_id' => 4, 'departement_id' => 2],
+            ['name' => 'Stase Umum', 'departement_id' => 1],
+            ['name' => 'Stase Ortopedi', 'departement_id' => 1],
+            ['name' => 'Stase Penyakit Dalam', 'departement_id' => 1],
+            ['name' => 'Stase Urologi', 'departement_id' => 2],
 
         ];
 
