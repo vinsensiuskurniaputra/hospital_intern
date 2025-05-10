@@ -114,6 +114,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     
     // Presensi & Sertifikasi
     Route::get('/attendance', [App\Http\Controllers\Student\StudentAttendanceController::class, 'index'])->name('attendance');
+    Route::post('/attendance/checkout', [App\Http\Controllers\Student\StudentAttendanceController::class, 'checkOut'])->name('attendance.checkout');
     
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Student\StudentGradeController::class, 'index'])->name('grades');
@@ -139,6 +140,10 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     // Presensi
     Route::get('/attendance', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'index'])->name('attendance');
     
+    // API endpoints untuk presensi
+    Route::get('/attendance/students', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getStudentAttendance'])->name('attendance.students');
+    Route::post('/attendance/manual-add', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'addManualAttendance'])->name('attendance.manual-add');
+    
     // Profile
     Route::get('/profile', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'index'])->name('profile');
     
@@ -153,6 +158,19 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
 });
+
+// API Routes for presence (PIC/Responsible)
+Route::middleware(['auth'])->group(function () {
+    // PIC/Responsible routes for presence
+    Route::get('/presence/active-tokens', [App\Http\Controllers\General\HomeController::class, 'getActiveTokens']);
+    Route::post('/presence/generate-token', [App\Http\Controllers\General\HomeController::class, 'generatePresenceToken']);
+    
+    // Student routes for attendance
+    Route::post('/attendance/submit-token', [HomeController::class, 'submitAttendanceToken'])->name('attendance.submit-token');
+    Route::get('/attendance/check-today', [HomeController::class, 'checkTodayAttendance'])->name('attendance.check-today');
+    Route::post('/attendance/checkout', [HomeController::class, 'checkoutAttendance'])->name('attendance.checkout');
+});
+
 
 
 
