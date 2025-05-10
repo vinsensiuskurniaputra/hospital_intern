@@ -162,6 +162,13 @@ class AdminStudentController extends Controller
         return redirect()->route('admin.students.index')->with('success', 'Student deleted successfully');
     }
 
+    public function changeStatus(Student $student)
+    {
+        $student->is_finished = !$student->is_finished;
+        $student->save();
+        return redirect()->route('admin.students.index')->with('success', 'Student status updated successfully');
+    }
+
     public function filter(Request $request)
     {
         $query = Student::query();

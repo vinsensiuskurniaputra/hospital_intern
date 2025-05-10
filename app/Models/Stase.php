@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\ResponsibleUser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Stase extends Model
 {
@@ -14,11 +15,6 @@ class Stase extends Model
     protected $fillable = ['name', 'responsible_user_id', 'departement_id', 'detail'];
 
     protected $guarded = ['id'];
-
-    public function responsibleUser()
-    {
-        return $this->belongsTo(ResponsibleUser::class);
-    }
 
     public function departement()
     {
@@ -38,5 +34,10 @@ class Stase extends Model
     public function studentGrades()
     {
         return $this->hasMany(StudentGrade::class);
+    }
+
+    public function responsibleUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(responsibleUser::class, 'responsible_stase');
     }
 }

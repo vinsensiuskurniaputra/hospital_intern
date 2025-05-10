@@ -10,6 +10,8 @@
             {{ $internshipClass->classYear->class_year }}</td>
         <td class="px-6 py-4 text-sm text-gray-900">
             {{ $internshipClass->campus->name }}</td>
+        <td class="px-6 py-4 text-sm text-gray-900">
+            {{ $internshipClass->students->count() }}</td>
 
         <td class="px-6 py-4 flex space-x-2 text-center whitespace-nowrap text-sm font-medium">
             <a href="{{ route('admin.internshipClasses.edit', $internshipClass->id) }}"

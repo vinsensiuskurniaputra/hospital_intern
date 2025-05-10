@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Campus;
+use App\Models\Student;
 use App\Models\ClassYear;
 use Illuminate\Http\Request;
 use App\Models\InternshipClass;
@@ -118,5 +119,42 @@ class AdminInternshipClassController extends Controller
         $internshipClasses = $query->paginate(10);
 
         return view('components.admin.internship_class.table', compact('internshipClasses'))->render();
+    }
+
+    public function insertStudent()
+    {
+        $internshipClasses = InternshipClass::with('classYear')->get();
+        $students = Student::with(['user'])->whereDoesntHave('internshipClass')->get();
+        $studentsGroupedByCampus = $students->groupBy('study_program.campus_id');
+        $campuses = Campus::with('studyPrograms.Students')->get();
+        return view('pages.admin.internship_class.insert_student', compact('internshipClasses', 'studentsGroupedByCampus', 'campuses', 'students'));
+    }
+
+    public function insertStudentStore(Request $request)
+    {
+        // Validate the request
+        $validatedData = $request->validate([
+            'internship_class_id' => 'required|exists:internship_classes,id',
+            'students' => 'required|array',
+            'students.*' => 'exists:students,id'
+        ]);
+
+        try {
+            // Get the internship class
+            $internshipClass = InternshipClass::findOrFail($validatedData['internship_class_id']);
+
+            // Update the students' internship_class_id
+            Student::whereIn('id', $validatedData['students'])
+                ->update(['internship_class_id' => $internshipClass->id]);
+
+            return redirect()
+                ->route('admin.internshipClasses.index')
+                ->with('success', 'Students added to internship class successfully');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to add students to internship class. ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }
