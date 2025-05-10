@@ -2,27 +2,34 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 
 class PresenceSession extends Model
 {
     use HasFactory;
     
+    protected $table = 'presence_sessions';
+    
     protected $fillable = [
         'schedule_id',
         'token',
         'date',
-        'start_time',
-        'end_time'
+        'expiration_time',
+    ];
+    
+    // Ensure date fields are properly cast
+    protected $casts = [
+        'date' => 'date',
+        'expiration_time' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
     
     /**
      * Get the schedule that owns this presence session
      */
-    public function schedule(): BelongsTo
+    public function schedule()
     {
         return $this->belongsTo(Schedule::class);
     }
@@ -30,7 +37,7 @@ class PresenceSession extends Model
     /**
      * Get the presences for this session
      */
-    public function presences(): HasMany
+    public function presences()
     {
         return $this->hasMany(Presence::class, 'presence_sessions_id');
     }
@@ -38,7 +45,7 @@ class PresenceSession extends Model
     /**
      * Get the attendance excuses for this session
      */
-    public function attendanceExcuses(): HasMany
+    public function attendanceExcuses()
     {
         return $this->hasMany(AttendanceExcuse::class, 'presence_sessions_id');
     }
@@ -49,13 +56,6 @@ class PresenceSession extends Model
     public function isActive(): bool
     {
         $now = now();
-        $sessionDate = $this->date;
-        $startTime = $this->start_time;
-        $endTime = $this->end_time;
-        
-        $sessionStart = \Carbon\Carbon::parse("$sessionDate $startTime");
-        $sessionEnd = \Carbon\Carbon::parse("$sessionDate $endTime");
-        
-        return $now->between($sessionStart, $sessionEnd);
+        return $now <= $this->expiration_time;
     }
 }
