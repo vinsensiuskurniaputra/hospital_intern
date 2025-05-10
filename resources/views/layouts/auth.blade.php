@@ -211,3 +211,9 @@
         });
     </script>
 @endsection
+
+<head>
+    <!-- Kode head lainnya -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Kode head lainnya -->
+</head>

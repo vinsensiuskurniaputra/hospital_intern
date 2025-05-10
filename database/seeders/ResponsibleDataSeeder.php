@@ -43,8 +43,14 @@ class ResponsibleDataSeeder extends Seeder
         }
         
         // 2. Buat atau pastikan stase untuk responsible user ini
-        $stase = Stase::where('responsible_user_id', 3)->first();
-        
+        $responsibleUser = \App\Models\ResponsibleUser::where('user_id', 3)->first();
+        $stase = null;
+
+        if ($responsibleUser) {
+            // Coba ambil stase yang sudah terkait dengan responsible user
+            $stase = $responsibleUser->stases()->first();
+        }
+
         if (!$stase) {
             $this->command->info('Membuat stase untuk user ID 3');
             
@@ -63,9 +69,28 @@ class ResponsibleDataSeeder extends Seeder
             $stase = Stase::create([
                 'name' => 'Stase Neurologi',
                 'departement_id' => $departmentId,
-                'responsible_user_id' => 3,
                 'detail' => 'Stase untuk praktik neurologi'
             ]);
+            
+            // Hubungkan stase dengan responsible user melalui pivot table
+            if ($responsibleUser) {
+                $responsibleUser->stases()->attach($stase->id);
+            } else {
+                // Jika responsible user belum ada, buat dulu
+                $responsibleId = DB::table('responsible_users')->insertGetId([
+                    'user_id' => 3,
+                    'telp' => '08' . rand(1000000000, 9999999999),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+                
+                DB::table('responsible_stase')->insert([
+                    'responsible_user_id' => $responsibleId,
+                    'stase_id' => $stase->id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
         }
 
         $this->command->info('Menggunakan stase: ' . $stase->name);
@@ -163,46 +188,31 @@ class ResponsibleDataSeeder extends Seeder
         
         $this->command->info('Membuat jadwal untuk hari ini dan beberapa hari ke depan');
         
-        // Cek jadwal hari ini
-        $existingTodaySchedule = Schedule::where('stase_id', $stase->id)
-            ->whereDate('date_schedule', $today->toDateString())
-            ->exists();
-            
-        // Jika belum ada jadwal hari ini, buat jadwal baru
-        if (!$existingTodaySchedule) {
-            $morningSchedule = Schedule::create([
-                'internship_class_id' => $internshipClass->id,
-                'stase_id' => $stase->id,
-                'date_schedule' => $today->toDateString(),
-                'start_date' => $today->format('Y-m-d'),
-                'end_date' => $today->format('Y-m-d'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            
+        // Buat jadwal hari ini (single day)
+        $todaySchedule = $this->createScheduleIfNotOverlap(
+            $stase, 
+            $internshipClass,
+            $today->format('Y-m-d'),
+            $today->format('Y-m-d')
+        );
+
+        if ($todaySchedule) {
             // Buat sesi presensi untuk jadwal hari ini
-            $this->createPresenceSessions($morningSchedule, $today, [
+            $this->createPresenceSessions($todaySchedule, $today, [
                 ['start' => '08:00:00', 'end' => '10:30:00'],
                 ['start' => '10:45:00', 'end' => '12:30:00'],
             ]);
         }
         
-        // Buat jadwal besok jika belum ada
-        $existingTomorrowSchedule = Schedule::where('stase_id', $stase->id)
-            ->whereDate('date_schedule', $tomorrow->toDateString())
-            ->exists();
-            
-        if (!$existingTomorrowSchedule) {
-            $tomorrowSchedule = Schedule::create([
-                'internship_class_id' => $internshipClass->id,
-                'stase_id' => $stase->id,
-                'date_schedule' => $tomorrow->toDateString(),
-                'start_date' => $tomorrow->format('Y-m-d'),
-                'end_date' => $tomorrow->format('Y-m-d'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            
+        // Buat jadwal besok (single day)
+        $tomorrowSchedule = $this->createScheduleIfNotOverlap(
+            $stase, 
+            $internshipClass,
+            $tomorrow->format('Y-m-d'),
+            $tomorrow->format('Y-m-d')
+        );
+
+        if ($tomorrowSchedule) {
             // Buat sesi presensi untuk jadwal besok
             $this->createPresenceSessions($tomorrowSchedule, $tomorrow, [
                 ['start' => '07:30:00', 'end' => '10:00:00'],
@@ -211,50 +221,33 @@ class ResponsibleDataSeeder extends Seeder
             ]);
         }
         
-        // Buat jadwal lusa jika belum ada
-        $existingDayAfterTomorrow = Schedule::where('stase_id', $stase->id)
-            ->whereDate('date_schedule', $dayAfterTomorrow->toDateString())
-            ->exists();
-            
-        if (!$existingDayAfterTomorrow) {
-            $dayAfterTomorrowSchedule = Schedule::create([
-                'internship_class_id' => $internshipClass->id,
-                'stase_id' => $stase->id,
-                'date_schedule' => $dayAfterTomorrow->toDateString(),
-                'start_date' => $dayAfterTomorrow->format('Y-m-d'),
-                'end_date' => $dayAfterTomorrow->format('Y-m-d'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            
-            // Buat sesi presensi untuk jadwal lusa
-            $this->createPresenceSessions($dayAfterTomorrowSchedule, $dayAfterTomorrow, [
+        // Lusa (single day)
+        $dayAfterSchedule = $this->createScheduleIfNotOverlap(
+            $stase, 
+            $internshipClass,
+            $dayAfterTomorrow->format('Y-m-d'),
+            $dayAfterTomorrow->format('Y-m-d')
+        );
+
+        if ($dayAfterSchedule) {
+            $this->createPresenceSessions($dayAfterSchedule, $dayAfterTomorrow, [
                 ['start' => '08:30:00', 'end' => '11:00:00'],
                 ['start' => '13:30:00', 'end' => '16:00:00'],
             ]);
         }
         
-        // 6. Buat jadwal minggu depan (untuk melihat range tanggal)
-        $existingNextWeekSchedule = Schedule::where('stase_id', $stase->id)
-            ->whereDate('date_schedule', $nextWeek->toDateString())
-            ->exists();
-            
-        if (!$existingNextWeekSchedule) {
-            $weekRangeStart = $nextWeek->copy();
-            $weekRangeEnd = $nextWeek->copy()->addDays(4); // 5 hari (Senin-Jumat)
-            
-            $weekSchedule = Schedule::create([
-                'internship_class_id' => $internshipClass->id,
-                'stase_id' => $stase->id,
-                'date_schedule' => $nextWeek->toDateString(),
-                'start_date' => $weekRangeStart->format('Y-m-d'),
-                'end_date' => $weekRangeEnd->format('Y-m-d'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+        // Buat jadwal minggu depan (range 5 hari)
+        $weekRangeStart = $nextWeek->copy();
+        $weekRangeEnd = $nextWeek->copy()->addDays(4); // 5 hari (Senin-Jumat)
+
+        $weekSchedule = $this->createScheduleIfNotOverlap(
+            $stase, 
+            $internshipClass,
+            $weekRangeStart->format('Y-m-d'),
+            $weekRangeEnd->format('Y-m-d')
+        );
         
-        // 7. Buat atau ambil mahasiswa untuk kehadiran dan penilaian
+        // 6. Buat atau ambil mahasiswa untuk kehadiran dan penilaian
         $students = Student::take(10)->get();
         
         if ($students->isEmpty()) {
@@ -275,7 +268,7 @@ class ResponsibleDataSeeder extends Seeder
             $students = Student::take(10)->get();
         }
         
-        // 8. Buat data kehadiran untuk chart
+        // 7. Buat data kehadiran untuk chart
         $this->command->info('Membuat data kehadiran untuk 7 bulan terakhir');
         $this->generateAttendanceData($stase, $students);
         
@@ -289,14 +282,16 @@ class ResponsibleDataSeeder extends Seeder
                 'schedule_id' => $schedule->id,
                 'token' => 'TOKEN' . strtoupper(Str::random(6)),
                 'date' => $date->toDateString(),
-                'start_time' => $timeSlot['start'],
-                'end_time' => $timeSlot['end'],
+                'expiration_time' => $date->copy()->endOfDay(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
     }
     
+    /**
+     * Generate attendance data for historical reporting
+     */
     private function generateAttendanceData($stase, $students)
     {
         // Generate data untuk 7 bulan terakhir
@@ -307,16 +302,18 @@ class ResponsibleDataSeeder extends Seeder
             $startDate = $currentMonth->copy()->startOfMonth();
             $endDate = $currentMonth->copy()->endOfMonth();
             
-            // Buat sesi kehadiran dan jadwal untuk bulan ini jika belum ada
+            // PERUBAHAN: Buat sesi kehadiran dan jadwal untuk bulan ini jika belum ada
+            // Cari berdasarkan start_date dan end_date, bukan date_schedule
             $monthlySchedule = Schedule::where('stase_id', $stase->id)
-                ->whereDate('date_schedule', $startDate->toDateString())
+                ->where('start_date', '<=', $startDate->toDateString())
+                ->where('end_date', '>=', $startDate->toDateString())
                 ->first();
                 
             if (!$monthlySchedule) {
                 $monthlySchedule = Schedule::create([
                     'internship_class_id' => InternshipClass::first()->id,
                     'stase_id' => $stase->id,
-                    'date_schedule' => $startDate->toDateString(),
+                    // HAPUS: 'date_schedule' => $startDate->toDateString(),
                     'start_date' => $startDate->toDateString(),
                     'end_date' => $endDate->toDateString(),
                     'created_at' => $startDate,
@@ -348,8 +345,7 @@ class ResponsibleDataSeeder extends Seeder
                         'schedule_id' => $monthlySchedule->id,
                         'token' => 'HIST' . strtoupper(Str::random(6)),
                         'date' => $currentDate->toDateString(),
-                        'start_time' => '08:00:00',
-                        'end_time' => '16:00:00',
+                        'expiration_time' => $currentDate->copy()->endOfDay(),
                         'created_at' => $currentDate,
                         'updated_at' => $currentDate,
                     ]);
@@ -417,5 +413,42 @@ class ResponsibleDataSeeder extends Seeder
         } else {
             return 'absent';
         }
+    }
+    
+    private function createScheduleIfNotOverlap($stase, $internshipClass, $startDate, $endDate) 
+    {
+        // Cek apakah sudah ada jadwal yang overlap dengan tanggal ini
+        $existingOverlap = Schedule::where('stase_id', $stase->id)
+            ->where('internship_class_id', $internshipClass->id)
+            ->where(function($query) use ($startDate, $endDate) {
+                // Cek overlap
+                $query->where(function($q) use ($startDate, $endDate) {
+                    // Start date di antara range yang ada
+                    $q->where('start_date', '<=', $startDate)
+                      ->where('end_date', '>=', $startDate);
+                })->orWhere(function($q) use ($startDate, $endDate) {
+                    // End date di antara range yang ada
+                    $q->where('start_date', '<=', $endDate)
+                      ->where('end_date', '>=', $endDate);
+                })->orWhere(function($q) use ($startDate, $endDate) {
+                    // Range baru sepenuhnya mencakup range yang ada
+                    $q->where('start_date', '>=', $startDate)
+                      ->where('end_date', '<=', $endDate);
+                });
+            })
+            ->exists();
+            
+        if (!$existingOverlap) {
+            return Schedule::create([
+                'internship_class_id' => $internshipClass->id,
+                'stase_id' => $stase->id,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+        
+        return null;
     }
 }
