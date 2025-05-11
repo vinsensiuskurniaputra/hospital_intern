@@ -18,35 +18,33 @@
                     <h6 class="text-lg font-medium text-gray-900 mb-4">Mahasiswa Yang Menunggu Penilaian</h6>
                     
                     <div class="space-y-4">
-                        @forelse($pendingStudents as $pending)
+                        @foreach([
+                            ['Jeki Kebab', 'Departemen Jantung', 'Mei 15 - Juni 12'],
+                            ['Jeki Rendang', 'Departemen Saraf', 'Mei 10 - Juni 7'],
+                            ['Jeki DokDok', 'Departemen Anak', 'Mei 22 - Juni 19'],
+                            ['Jeki Demangki', 'Departemen Bedah', 'Mei 5 - Juni 2']
+                        ] as [$name, $dept, $period])
                         <div class="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm transition-all duration-200">
                             <div class="flex items-center space-x-3">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($pending->student->user->name) }}&background=F5F7F0&color=637F26" 
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($name) }}&background=F5F7F0&color=637F26" 
                                      class="h-10 w-10 rounded-full"
-                                     alt="{{ $pending->student->user->name }}">
+                                     alt="{{ $name }}">
                                 <div>
-                                    <p class="font-medium text-gray-900">{{ $pending->student->user->name }}</p>
-                                    <p class="text-sm text-gray-500">{{ $pending->departement->name }}</p>
+                                    <p class="font-medium text-gray-900">{{ $name }}</p>
+                                    <p class="text-sm text-gray-500">{{ $dept }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-4">
-                                <span class="text-sm text-gray-500">
-                                    {{ Carbon\Carbon::parse($pending->schedule->start_date)->format('d M') }} - 
-                                    {{ Carbon\Carbon::parse($pending->schedule->end_date)->format('d M') }}
-                                </span>
+                                <span class="text-sm text-gray-500">{{ $period }}</span>
                                 <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium">Belum Dinilai</span>
                                 <a href="#form-penilaian" 
-                                   onclick="editAssessment('{{ $pending->student->id }}', '{{ $pending->student->user->name }}', '{{ $pending->student->nim ?? 'N/A' }}', '{{ $pending->student->studyProgram->name ?? 'N/A' }}', '{{ $pending->departement->name }}', '{{ Carbon\Carbon::parse($pending->schedule->start_date)->format('d M') }} - {{ Carbon\Carbon::parse($pending->schedule->end_date)->format('d M') }}')"
+                                   onclick="editAssessment('{{ $name }}', '{{ $dept }}', '{{ $period }}')"
                                    class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">
-                                    Nilai
+                                    edit
                                 </a>
                             </div>
                         </div>
-                        @empty
-                        <div class="text-center py-4 text-gray-500">
-                            Tidak ada mahasiswa yang menunggu penilaian.
-                        </div>
-                        @endforelse
+                        @endforeach
                     </div>
                 </div>
 
@@ -75,14 +73,19 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium mb-2 text-gray-900">Departemen/Disiplin Ilmu</label>
                             <div class="relative">
-                                <select name="departement_id" 
-                                        class="w-full h-12 px-4 rounded-[20px] border-2 border-[#637F26]/30 bg-[#F5F7F0] 
-                                               text-gray-900 appearance-none cursor-pointer 
-                                               hover:border-[#637F26]/50 transition-colors 
-                                               focus:ring-0 focus:border-[#637F26]/70">
-                                    @foreach($departments as $department)
-                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
-                                    @endforeach
+                                <select class="w-full h-12 px-4 rounded-[20px] border-2 border-[#637F26]/30 bg-[#F5F7F0] text-gray-900 appearance-none cursor-pointer hover:border-[#637F26]/50 transition-colors focus:ring-0 focus:border-[#637F26]/70">
+                                    <option>Departemen Kulit</option>
+                                    <option>Departemen THT</option>
+                                    <option>Departemen Mata</option>
+                                    <option>Departemen Jantung</option>
+                                    <option>Departemen Saraf</option>
+                                    <option>Departemen Gigi</option>
+                                    <option>Departemen Anak</option>
+                                    <option>Departemen Paru</option>
+                                    <option>Departemen Bedah</option>
+                                    <option>Departemen Ortopedi</option>
+                                    <option>Departemen Urologi</option>
+                                    <option>Departemen Obstetri & Ginekologi</option>
                                 </select>
                                 <!-- Dropdown indicator -->
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
@@ -168,9 +171,9 @@
 
                     <!-- Search and Export Section -->
                     <div class="flex items-center justify-between mb-6">
+                        <!-- Search Bar -->
                         <div class="relative flex-1 max-w-[480px]">
                             <input type="search" 
-                                   id="search-grades"
                                    class="w-full h-12 rounded-[20px] border-2 border-gray-200 pl-4 pr-4 bg-gray-50/50
                                           placeholder-gray-400 text-gray-600
                                           focus:border-[#637F26]/30 focus:ring-0 focus:bg-white
@@ -205,29 +208,26 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            @forelse($completedGrades as $grade)
+                            @foreach([
+                                ['Jeki Rendang', 'Departemen Jantung', '1 April - 28 April', 'Sangat Baik (4.8/5)'],
+                                ['Jeki Kebab', 'Departemen Saraf', '15 Maret - 12 April', 'Baik (4.2/5)'],
+                                ['Jeki Ganteng', 'Departemen Anak', '5 Maret - 2 April', 'Sangat Baik (4.5/5)'],
+                                ['Jeki Demangki', 'Departemen Bedah', '10 Februari - 9 Maret', 'Memuaskan (3.7/5)']
+                            ] as [$name, $dept, $period, $score])
                             <tr class="hover:bg-gray-50">
                                 <td class="py-3">
                                     <div class="flex items-center">
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($grade->student->user->name) }}&background=F5F7F0&color=637F26" 
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($name) }}&background=F5F7F0&color=637F26" 
                                              class="h-8 w-8 rounded-full mr-3"
-                                             alt="{{ $grade->student->user->name }}">
-                                        <span class="font-medium">{{ $grade->student->user->name }}</span>
+                                             alt="{{ $name }}">
+                                        <span class="font-medium">{{ $name }}</span>
                                     </div>
                                 </td>
-                                <td class="py-3 text-gray-600">{{ $grade->stase->departement->name }}</td>
-                                <td class="py-3 text-gray-600">
-                                    {{ Carbon\Carbon::parse($grade->created_at)->format('j M - j M') }}
-                                </td>
-                                <td class="py-3 text-gray-600">{{ $grade->grade_text }}</td>
+                                <td class="py-3 text-gray-600">{{ $dept }}</td>
+                                <td class="py-3 text-gray-600">{{ $period }}</td>
+                                <td class="py-3 text-gray-600">{{ $score }}</td>
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="4" class="py-6 text-center text-gray-500">
-                                    Belum ada riwayat penilaian.
-                                </td>
-                            </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -239,10 +239,10 @@
 
 @push('scripts')
 <script>
-function editAssessment(id, name, nim, studyProgram, dept, period) {
+function editAssessment(name, dept, period) {
     // Update info cards
     const infoCards = document.querySelectorAll('.bg-[#F5F7F0] p.text-sm');
-    infoCards[0].textContent = `${name} • ${studyProgram} • NIM: ${nim}`;
+    infoCards[0].textContent = `${name} • ${dept}`;
     infoCards[1].textContent = `${dept} • ${period}`;
     
     // Set department in select
