@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 
 class UserScheduleSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         // 1. Cek apakah user ID 2 memiliki student
@@ -76,14 +79,27 @@ class UserScheduleSeeder extends Seeder
         // 3. PERBAIKAN: Buat jadwal baru tanpa menghapus jadwal yang ada
         // Cek jadwal yang sudah ada untuk mencegah duplikasi
         $this->command->info('Memeriksa jadwal yang sudah ada untuk kelas ' . $internshipClassId);
-        $existingDates = Schedule::where('internship_class_id', $internshipClassId)
-            ->pluck('date_schedule')
-            ->map(function($date) {
-                return Carbon::parse($date)->format('Y-m-d');
-            })
-            ->toArray();
         
-        $this->command->info('Ditemukan ' . count($existingDates) . ' jadwal yang sudah ada');
+        // PERUBAHAN: Gunakan start_date dan end_date untuk menentukan existing dates
+        $existingSchedules = Schedule::where('internship_class_id', $internshipClassId)
+            ->select('start_date', 'end_date')
+            ->get();
+            
+        $existingDates = [];
+        foreach ($existingSchedules as $schedule) {
+            $start = Carbon::parse($schedule->start_date);
+            $end = Carbon::parse($schedule->end_date);
+            $current = $start->copy();
+            
+            // Tambahkan semua tanggal dalam rentang ke array
+            while ($current->lte($end)) {
+                $existingDates[] = $current->format('Y-m-d');
+                $current->addDay();
+            }
+        }
+        $existingDates = array_unique($existingDates);
+        
+        $this->command->info('Ditemukan ' . count($existingDates) . ' tanggal jadwal yang sudah ada');
         
         // 4. Dapatkan semua stase yang tersedia
         $stases = Stase::all();
@@ -115,11 +131,18 @@ class UserScheduleSeeder extends Seeder
             ];
             
             foreach ($staseNames as $index => $name) {
-                Stase::create([
+                $stase = Stase::create([
                     'name' => $name,
                     'departement_id' => $departmentId,
-                    'responsible_user_id' => 1, // Set ke user ID yang valid
                     'detail' => 'Stase ' . $name,
+                ]);
+                
+                // Tambahkan relasi dengan responsible user
+                DB::table('responsible_stase')->insert([
+                    'responsible_user_id' => 1, // Sesuaikan dengan ID dari responsible_users, bukan users
+                    'stase_id' => $stase->id,
+                    'created_at' => now(),
+                    'updated_at' => now()
                 ]);
             }
             
@@ -145,48 +168,52 @@ class UserScheduleSeeder extends Seeder
         // Buat jadwal untuk 3 periode dengan stase yang berbeda
         $staseCount = $stases->count();
         $staseIndex = 0;
+        $addedScheduleCount = 0;
         
         // Jadwal untuk periode saat ini
-        $scheduleForCurrentMonth = [
-            'internship_class_id' => $internshipClassId,
-            'stase_id' => $stases[($staseIndex++) % $staseCount]->id,
-            'date_schedule' => $today->format('Y-m-d'), // Tanggal saat melakukan migrasi
-            'start_date' => $today->format('Y-m-d'),
-            'end_date' => $endOfCurrentMonth->format('Y-m-d'),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-        
-        // Hanya tambahkan jika belum ada jadwal pada tanggal yang sama
-        if (!in_array($today->format('Y-m-d'), $existingDates)) {
-            $scheduleData[] = $scheduleForCurrentMonth;
+        $currentStaseId = $stases[($staseIndex++) % $staseCount]->id;
+        if (!$this->checkScheduleOverlap($currentStaseId, $internshipClassId, $currentMonth->format('Y-m-d'), $endOfCurrentMonth->format('Y-m-d'))) {
+            Schedule::create([
+                'internship_class_id' => $internshipClassId,
+                'stase_id' => $currentStaseId,
+                'start_date' => $currentMonth->format('Y-m-d'),
+                'end_date' => $endOfCurrentMonth->format('Y-m-d'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $addedScheduleCount++;
         }
         
         // Jadwal untuk bulan depan
-        if (!in_array($nextMonth->format('Y-m-d'), $existingDates)) {
-            $scheduleData[] = [
+        $nextMonthStaseId = $stases[($staseIndex++) % $staseCount]->id;
+        if (!$this->checkScheduleOverlap($nextMonthStaseId, $internshipClassId, $nextMonth->format('Y-m-d'), $endOfNextMonth->format('Y-m-d'))) {
+            Schedule::create([
                 'internship_class_id' => $internshipClassId,
-                'stase_id' => $stases[($staseIndex++) % $staseCount]->id,
-                'date_schedule' => $nextMonth->format('Y-m-d'),
+                'stase_id' => $nextMonthStaseId,
                 'start_date' => $nextMonth->format('Y-m-d'),
                 'end_date' => $endOfNextMonth->format('Y-m-d'),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ];
+            ]);
+            $addedScheduleCount++;
         }
         
         // Jadwal untuk dua bulan dari sekarang
-        if (!in_array($twoMonthsLater->format('Y-m-d'), $existingDates)) {
-            $scheduleData[] = [
+        $twoMonthStaseId = $stases[($staseIndex++) % $staseCount]->id;
+        if (!$this->checkScheduleOverlap($twoMonthStaseId, $internshipClassId, $twoMonthsLater->format('Y-m-d'), $endOfTwoMonths->format('Y-m-d'))) {
+            Schedule::create([
                 'internship_class_id' => $internshipClassId,
-                'stase_id' => $stases[($staseIndex++) % $staseCount]->id,
-                'date_schedule' => $twoMonthsLater->format('Y-m-d'),
+                'stase_id' => $twoMonthStaseId,
                 'start_date' => $twoMonthsLater->format('Y-m-d'),
                 'end_date' => $endOfTwoMonths->format('Y-m-d'),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ];
+            ]);
+            $addedScheduleCount++;
         }
+        
+        // Informasi hasil
+        $this->command->info('Berhasil membuat ' . $addedScheduleCount . ' jadwal baru untuk user ID 2 (tanpa duplikasi).');
         
         // 6. Tambahkan beberapa jadwal per minggu untuk bulan ini (lebih detail)
         $weekStart = $today->copy()->startOfWeek();
@@ -197,7 +224,6 @@ class UserScheduleSeeder extends Seeder
             $scheduleData[] = [
                 'internship_class_id' => $internshipClassId,
                 'stase_id' => $stases[($staseIndex++) % $staseCount]->id,
-                'date_schedule' => $weekStart->format('Y-m-d'),
                 'start_date' => $weekStart->format('Y-m-d'),
                 'end_date' => $weekEnd->format('Y-m-d'),
                 'created_at' => now(),
@@ -213,7 +239,6 @@ class UserScheduleSeeder extends Seeder
             $scheduleData[] = [
                 'internship_class_id' => $internshipClassId,
                 'stase_id' => $stases[($staseIndex++) % $staseCount]->id,
-                'date_schedule' => $nextWeekStart->format('Y-m-d'),
                 'start_date' => $nextWeekStart->format('Y-m-d'),
                 'end_date' => $nextWeekEnd->format('Y-m-d'),
                 'created_at' => now(),
@@ -235,7 +260,6 @@ class UserScheduleSeeder extends Seeder
                 $scheduleData[] = [
                     'internship_class_id' => $internshipClassId,
                     'stase_id' => $stases[rand(0, $staseCount - 1)]->id,
-                    'date_schedule' => $dateStr,
                     'start_date' => $dateStr,
                     'end_date' => $dateStr, // Jadwal satu hari
                     'created_at' => now(),
@@ -247,10 +271,34 @@ class UserScheduleSeeder extends Seeder
         // 8. Masukkan semua jadwal ke database
         $added = 0;
         foreach ($scheduleData as $schedule) {
-            Schedule::create($schedule);
-            $added++;
+            // Gunakan checkScheduleOverlap untuk memastikan tidak ada duplikasi sebelum menambahkan
+            if (!$this->checkScheduleOverlap($schedule['stase_id'], $schedule['internship_class_id'], 
+                                            $schedule['start_date'], $schedule['end_date'])) {
+                Schedule::create($schedule);
+                $added++;
+            }
         }
         
         $this->command->info('Berhasil membuat ' . $added . ' jadwal baru untuk user ID 2 (tanpa menghapus jadwal lama).');
+    }
+    
+    private function checkScheduleOverlap($staseId, $internshipClassId, $startDate, $endDate)
+    {
+        return Schedule::where('stase_id', $staseId)
+            ->where('internship_class_id', $internshipClassId)
+            ->where(function($query) use ($startDate, $endDate) {
+                // Cek overlap dengan range yang sudah ada
+                $query->where(function($q) use ($startDate, $endDate) {
+                    $q->where('start_date', '<=', $startDate)
+                      ->where('end_date', '>=', $startDate);
+                })->orWhere(function($q) use ($startDate, $endDate) {
+                    $q->where('start_date', '<=', $endDate)
+                      ->where('end_date', '>=', $endDate);
+                })->orWhere(function($q) use ($startDate, $endDate) {
+                    $q->where('start_date', '>=', $startDate)
+                      ->where('end_date', '<=', $endDate);
+                });
+            })
+            ->exists();
     }
 }

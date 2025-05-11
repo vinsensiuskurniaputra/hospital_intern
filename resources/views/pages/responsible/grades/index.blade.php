@@ -19,10 +19,10 @@
                     
                     <div class="space-y-4">
                         @foreach([
-                            ['Jeki Kebab', 'Cardiology', 'Mei 15 - Juni 12'],
-                            ['Jeki Rendang', 'Neurology', 'Mei 10 - Juni 7'],
-                            ['Jeki DokDok', 'Pediatrics', 'Mei 22 - Juni 19'],
-                            ['Jeki Demangki', 'Emergency Medicine', 'Mei 5 - Juni 2']
+                            ['Jeki Kebab', 'Departemen Jantung', 'Mei 15 - Juni 12'],
+                            ['Jeki Rendang', 'Departemen Saraf', 'Mei 10 - Juni 7'],
+                            ['Jeki DokDok', 'Departemen Anak', 'Mei 22 - Juni 19'],
+                            ['Jeki Demangki', 'Departemen Bedah', 'Mei 5 - Juni 2']
                         ] as [$name, $dept, $period])
                         <div class="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm transition-all duration-200">
                             <div class="flex items-center space-x-3">
@@ -36,7 +36,7 @@
                             </div>
                             <div class="flex items-center space-x-4">
                                 <span class="text-sm text-gray-500">{{ $period }}</span>
-                                <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium">Tertunda</span>
+                                <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium">Belum Dinilai</span>
                                 <a href="#form-penilaian" 
                                    onclick="editAssessment('{{ $name }}', '{{ $dept }}', '{{ $period }}')"
                                    class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">
@@ -58,11 +58,11 @@
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-[#F5F7F0] p-5 rounded-[20px] border-2 border-[#637F26]/30">
                             <h6 class="font-medium mb-2 text-gray-900">Informasi Mahasiswa</h6>
-                            <p class="text-sm text-gray-600">Emma Johnson • Medical Year 3 • Student ID: MED202</p>
+                            <p class="text-sm text-gray-600">Jeki Kebab • Tahun ke-3 Kedokteran • NIM: 2141720001</p>
                         </div>
                         <div class="bg-[#F5F7F0] p-5 rounded-[20px] border-2 border-[#637F26]/30">
                             <h6 class="font-medium mb-2 text-gray-900">Detail Rotasi</h6>
-                            <p class="text-sm text-gray-600">Cardiology • Dr. James Wilson • May 15 - Jun 12, 2023</p>
+                            <p class="text-sm text-gray-600">Departemen Jantung • dr. Budi Santoso • 15 Mei - 12 Jun, 2023</p>
                         </div>
                     </div>
 
@@ -74,10 +74,18 @@
                             <label class="block text-sm font-medium mb-2 text-gray-900">Departemen/Disiplin Ilmu</label>
                             <div class="relative">
                                 <select class="w-full h-12 px-4 rounded-[20px] border-2 border-[#637F26]/30 bg-[#F5F7F0] text-gray-900 appearance-none cursor-pointer hover:border-[#637F26]/50 transition-colors focus:ring-0 focus:border-[#637F26]/70">
-                                    <option>Cardiology</option>
-                                    <option>Neurology</option>
-                                    <option>Pediatrics</option>
-                                    <option>Emergency Medicine</option>
+                                    <option>Departemen Kulit</option>
+                                    <option>Departemen THT</option>
+                                    <option>Departemen Mata</option>
+                                    <option>Departemen Jantung</option>
+                                    <option>Departemen Saraf</option>
+                                    <option>Departemen Gigi</option>
+                                    <option>Departemen Anak</option>
+                                    <option>Departemen Paru</option>
+                                    <option>Departemen Bedah</option>
+                                    <option>Departemen Ortopedi</option>
+                                    <option>Departemen Urologi</option>
+                                    <option>Departemen Obstetri & Ginekologi</option>
                                 </select>
                                 <!-- Dropdown indicator -->
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
@@ -92,10 +100,10 @@
                         <div class="mb-6">
                             <h6 class="font-medium mb-4">Evaluasi Kinerja</h6>
                             @foreach([
-                                'Keahlian' => 'Ability to perform clinical tasks and procedures',
-                                'Komunikasi' => 'Effectiveness in communicating with the medical team',
-                                'Profesionalisme' => 'Punctuality, responsibility, and professional conduct',
-                                'Kemampuan dalam merawat pasien' => 'Ability to handle patients with care and empathy'
+                                'Keahlian' => 'Kemampuan dalam melakukan tugas dan prosedur klinis',
+                                'Komunikasi' => 'Efektivitas dalam berkomunikasi dengan tim medis',
+                                'Profesionalisme' => 'Ketepatan waktu, tanggung jawab, dan perilaku profesional',
+                                'Kemampuan dalam merawat pasien' => 'Kemampuan menangani pasien dengan perhatian dan empati'
                             ] as $title => $desc)
                             <div class="border-2 rounded-lg p-5 mb-4 bg-white hover:shadow-md transition-all duration-300">
                                 <div class="flex justify-between items-center gap-8">
@@ -119,7 +127,7 @@
                                                 inputmode="numeric"
                                                 oninput="handleScoreInput(this)">
                                             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <span class="text-sm font-medium text-gray-400 score-placeholder">Masukan nilai</span>
+                                                <span class="text-sm font-medium text-gray-400 score-placeholder">Masukkan nilai</span>
                                             </div>
                                         </div>
                                     </div>
@@ -144,11 +152,11 @@
                         <!-- Action Buttons -->
                         <div class="flex space-x-3 mb-8">
                             <button type="submit" name="action" value="draft"
-                                    class="px-4 py-2 bg-[#F5F7F0] text-[#637F26] rounded hover:bg-[#637F26]/10 transition-colors">
+                                    class="px-6 py-2 bg-[#F5F7F0] text-[#637F26] rounded-full border-2 border-[#637F26]/30 hover:bg-[#637F26]/10 transition-colors">
                                 Simpan Konsep
                             </button>
                             <button type="submit" name="action" value="submit"
-                                    class="px-4 py-2 bg-[#F5F7F0] text-[#637F26] rounded hover:bg-[#637F26]/10 transition-colors">
+                                    class="px-6 py-2 bg-[#F5F7F0] text-[#637F26] rounded-full border-2 border-[#637F26]/30 hover:bg-[#637F26]/10 transition-colors">
                                 Simpan & Kirim Penilaian
                             </button>
                         </div>
@@ -193,18 +201,18 @@
                     <table class="w-full">
                         <thead>
                             <tr class="border-b border-gray-200">
-                                <th class="text-left py-3 font-medium text-[#637F26]">Mahasiswa</th>
-                                <th class="text-left py-3 font-medium text-[#637F26]">Departemen</th>
-                                <th class="text-left py-3 font-medium text-[#637F26]">Periode</th>
-                                <th class="text-left py-3 font-medium text-[#637F26]">Nilai</th>
+                                <th class="text-left py-3 font-medium text-black">Mahasiswa</th>
+                                <th class="text-left py-3 font-medium text-black">Departemen</th>
+                                <th class="text-left py-3 font-medium text-black">Periode</th>
+                                <th class="text-left py-3 font-medium text-black">Nilai</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             @foreach([
-                                ['Jeki Rendang', 'Cardiology', 'April 1 - April 28', 'Luar biasa (4.8/5)'],
-                                ['Jeki Kebab', 'Neurology', 'Maret 15 - April 12', 'Baik (4.2/5)'],
-                                ['Jeki Ganteng', 'Pediatrics', 'Maret 5 - April 2', 'Sangat Baik (4.5/5)'],
-                                ['Jeki Demangki', 'Emergency Medicine', 'Februari 10 - Maret 9', 'Memuaskan (3.7/5)']
+                                ['Jeki Rendang', 'Departemen Jantung', '1 April - 28 April', 'Sangat Baik (4.8/5)'],
+                                ['Jeki Kebab', 'Departemen Saraf', '15 Maret - 12 April', 'Baik (4.2/5)'],
+                                ['Jeki Ganteng', 'Departemen Anak', '5 Maret - 2 April', 'Sangat Baik (4.5/5)'],
+                                ['Jeki Demangki', 'Departemen Bedah', '10 Februari - 9 Maret', 'Memuaskan (3.7/5)']
                             ] as [$name, $dept, $period, $score])
                             <tr class="hover:bg-gray-50">
                                 <td class="py-3">

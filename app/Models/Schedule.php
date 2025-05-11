@@ -12,14 +12,13 @@ class Schedule extends Model
     protected $fillable = [
         'internship_class_id',
         'stase_id',
-        'date_schedule',
         'start_date',
-        'end_date',
+        'end_date'
     ];
 
     protected $dates = [
         'start_date',
-        'end_date',
+        'end_date'
     ];
 
     public function internshipClass()
@@ -30,5 +29,10 @@ class Schedule extends Model
     public function stase()
     {
         return $this->belongsTo(Stase::class);
+    }
+
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class, 'departement_id');
     }
 }
