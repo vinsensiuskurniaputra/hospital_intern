@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Schedule;
 use App\Models\Stase;
+use App\Models\InternshipClass;
 use App\Models\Presence;
 use App\Models\PresenceSession;
 use Carbon\Carbon;
@@ -15,292 +16,235 @@ use Illuminate\Support\Facades\Auth;
 class ResponsibleAttendanceController extends Controller
 {
     /**
-     * Display attendance management page for responsible
+     * Display the responsible attendance page.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $user = Auth::user();
-        $userId = $user->id;
+        // Get the logged in responsible user
+        $responsibleUser = Auth::user()->responsibleUser;
         
-        // Get stases that this responsible manages
-        $stases = Stase::where('responsible_user_id', $userId)->get();
+        // Get all stases this responsible user is assigned to
+        $stases = $responsibleUser->stases;
         
-        // Initialize variables - ensure they're never null
-        $staseIds = $stases->pluck('id')->toArray();
-        $schedules = collect(); // Empty collection instead of null
-        $activeSessions = collect();
-        $studentCounts = [];
+        // Get default stase (first one)
+        $defaultStase = $stases->first();
         
-        // Only proceed if there are stases
-        if (count($staseIds) > 0) {
-            // Get schedules for these stases
-            $schedules = Schedule::whereIn('stase_id', $staseIds)
-                ->with(['stase', 'internshipClass'])
-                ->orderBy('start_date', 'desc')
-                ->get();
-            
-            // Get today's active sessions
-            $today = Carbon::now()->format('Y-m-d');
-            $activeSessions = PresenceSession::whereIn('schedule_id', $schedules->pluck('id')->toArray())
-                ->whereDate('date', $today)
-                ->get();
-            
-            // Count students for each stase
-            foreach ($stases as $stase) {
-                // Get schedules for this stase
-                $staseSchedules = $schedules->where('stase_id', $stase->id);
-                
-                // Get unique internship class IDs from these schedules
-                $classIds = $staseSchedules->pluck('internship_class_id')->filter()->unique()->toArray();
-                
-                // Count students in these classes
-                $count = !empty($classIds) ? Student::whereIn('internship_class_id', $classIds)->count() : 0;
-                $studentCounts[$stase->id] = $count;
-            }
+        // Get today's date for default filtering
+        $today = Carbon::now()->format('Y-m-d');
+        
+        // Get internship classes associated with the default stase through schedules
+        $internshipClasses = collect();
+        
+        if ($defaultStase) {
+            $internshipClasses = InternshipClass::whereHas('schedules', function($query) use ($defaultStase) {
+                $query->where('stase_id', $defaultStase->id);
+            })->get();
         }
         
-        return view('pages.responsible.attendance.index', [
-            'stases' => $stases, 
-            'schedules' => $schedules,
-            'activeSessions' => $activeSessions,
-            'studentCounts' => $studentCounts
-        ]);
+        // Get default internship class (first one)
+        $defaultClass = $internshipClasses->first();
+        
+        // Get students from the default class
+        $students = collect();
+        
+        if ($defaultClass) {
+            $students = Student::where('internship_class_id', $defaultClass->id)
+                ->with(['user', 'studyProgram', 'presences' => function($query) use ($today) {
+                    $query->whereDate('date_entry', $today);
+                }])
+                ->get();
+        }
+        
+        return view('pages.responsible.attendance.index', compact(
+            'stases',
+            'defaultStase',
+            'internshipClasses',
+            'defaultClass',
+            'today',
+            'students'
+        ));
     }
     
     /**
-     * Get students attendance for a specific schedule
+     * Get students based on stase, class, and date filter
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
     public function getStudentAttendance(Request $request)
     {
-        $scheduleId = $request->schedule_id;
+        $request->validate([
+            'stase_id' => 'required|exists:stases,id',
+            'class_id' => 'required|exists:internship_classes,id',
+            'date' => 'required|date',
+        ]);
         
-        // Validate schedule exists and belongs to this responsible
-        $schedule = Schedule::findOrFail($scheduleId);
-        $stase = Stase::findOrFail($schedule->stase_id);
+        $staseId = $request->stase_id;
+        $classId = $request->class_id;
+        $date = $request->date;
         
-        if ($stase->responsible_user_id != Auth::id()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Anda tidak memiliki akses ke jadwal ini'
-            ], 403);
-        }
-        
-        // Get date parameter or use today
-        $date = $request->date ?? Carbon::now()->format('Y-m-d');
-        
-        // Get presence session for this schedule and date
-        $presenceSession = PresenceSession::where('schedule_id', $scheduleId)
-            ->whereDate('date', $date)
-            ->first();
-            
-        // Get students in this schedule's internship class
-        $students = Student::where('internship_class_id', $schedule->internship_class_id)
-            ->with('user')
+        // Get students from the selected class
+        $students = Student::where('internship_class_id', $classId)
+            ->with(['user', 'studyProgram', 'presences' => function($query) use ($date) {
+                $query->whereDate('date_entry', $date);
+            }])
             ->get();
             
-        $attendanceData = [];
-        
-        foreach ($students as $student) {
-            $presence = null;
-            
-            if ($presenceSession) {
-                $presence = Presence::where('student_id', $student->id)
-                    ->where('presence_sessions_id', $presenceSession->id)
-                    ->whereDate('date_entry', $date)
-                    ->first();
-            }
-            
-            $attendanceData[] = [
-                'student_id' => $student->id,
-                'name' => $student->user->name,
-                'nim' => $student->nim,
-                'present' => $presence ? true : false,
-                'check_in' => $presence ? $presence->time_check_in : null,
-                'check_out' => $presence ? $presence->time_check_out : null,
-                'status' => $presence ? $presence->status : 'absent'
-            ];
-        }
-        
         return response()->json([
-            'status' => true,
-            'data' => [
-                'schedule' => [
-                    'id' => $schedule->id,
-                    'stase' => $stase->name,
-                    'class' => $schedule->internshipClass->name ?? 'Unknown',
-                    'date' => $date
-                ],
-                'session' => $presenceSession ? [
-                    'id' => $presenceSession->id,
-                    'token' => $presenceSession->token,
-                    'start_time' => $presenceSession->start_time,
-                    'end_time' => $presenceSession->end_time,
-                ] : null,
-                'students' => $attendanceData
-            ]
+            'success' => true,
+            'students' => $students,
         ]);
     }
     
     /**
-     * Add manual attendance for a student
+     * Get internship classes based on stase filter
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
-    public function addManualAttendance(Request $request)
+    public function getInternshipClasses(Request $request)
+    {
+        $request->validate([
+            'stase_id' => 'required|exists:stases,id',
+        ]);
+        
+        $staseId = $request->stase_id;
+        
+        // Get internship classes associated with the selected stase through schedules
+        $internshipClasses = InternshipClass::whereHas('schedules', function($query) use ($staseId) {
+            $query->where('stase_id', $staseId);
+        })->get();
+        
+        return response()->json([
+            'success' => true,
+            'classes' => $internshipClasses,
+        ]);
+    }
+
+    /**
+     * Update attendance status for a student
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateAttendance(Request $request)
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
-            'schedule_id' => 'required|exists:schedules,id',
             'date' => 'required|date',
-            'check_in' => 'required',
-            'check_out' => 'required',
-            'status' => 'required|in:present,late,excused,absent'
+            'status' => 'required|in:present,sick,excused,absent',
         ]);
         
-        // Validate schedule belongs to this responsible
-        $schedule = Schedule::findOrFail($request->schedule_id);
-        $stase = Stase::findOrFail($schedule->stase_id);
+        $studentId = $request->student_id;
+        $date = $request->date;
+        $status = $request->status;
         
-        if ($stase->responsible_user_id != Auth::id()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Anda tidak memiliki akses ke jadwal ini'
-            ], 403);
+        // Check if attendance record exists
+        $presence = Presence::where('student_id', $studentId)
+            ->whereDate('date_entry', $date)
+            ->first();
+            
+        $previousStatus = null;
+        
+        if ($presence) {
+            $previousStatus = $presence->status;
+            $presence->update([
+                'status' => $status,
+            ]);
+        } else {
+            // Create new attendance record
+            $presence = Presence::create([
+                'student_id' => $studentId,
+                'status' => $status,
+                'date_entry' => $date,
+                'check_in' => now()->format('H:i:s'),
+                'check_out' => now()->format('H:i:s'),
+                // Need to set presence_sessions_id
+                'presence_sessions_id' => $this->getOrCreatePresenceSessionId($studentId, $date),
+            ]);
         }
         
-        // Get or create presence session
-        $presenceSession = PresenceSession::firstOrCreate(
+        // Get presence session ID from the presence record
+        $presenceSessionId = $presence->presence_sessions_id;
+        
+        // Handle sick or excused status - create/update attendance_excuse record
+        if ($status === 'sick' || $status === 'excused') {
+            // Handle file upload for proof
+            $letterUrl = null;
+            if ($request->hasFile('proof_file')) {
+                $file = $request->file('proof_file');
+                $filename = time() . '.' . $file->getClientOriginalExtension();
+                $letterUrl = $file->storeAs('attendance_proofs', $filename, 'public');
+            }
+            
+            // Create or update attendance excuse record with approved status
+            \App\Models\AttendanceExcuse::updateOrCreate(
+                [
+                    'student_id' => $studentId,
+                    'presence_sessions_id' => $presenceSessionId,
+                ],
+                [
+                    'detail' => $request->description ?? ($status === 'sick' ? 'Sakit' : 'Izin'),
+                    'letter_url' => $letterUrl,
+                    'status' => 'approved', // Automatically approve since PIC is creating it
+                ]
+            );
+        }
+        // If previously sick/excused but now something else (like absent), delete the excuse record
+        else if ($previousStatus === 'sick' || $previousStatus === 'excused') {
+            \App\Models\AttendanceExcuse::where('student_id', $studentId)
+                ->where('presence_sessions_id', $presenceSessionId)
+                ->delete();
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Attendance updated successfully',
+        ]);
+    }
+
+    /**
+     * Helper method to get or create a presence session ID
+     * 
+     * @param int $studentId
+     * @param string $date
+     * @return int
+     */
+    private function getOrCreatePresenceSessionId($studentId, $date)
+    {
+        // Try to find the existing presence session for this student's class on this date
+        $student = Student::with('internshipClass.schedules')->findOrFail($studentId);
+        $classId = $student->internship_class_id;
+        
+        // Find schedule for this class
+        $schedule = Schedule::where('internship_class_id', $classId)->first();
+        
+        if (!$schedule) {
+            // If no schedule exists, create a default one
+            $schedule = Schedule::create([
+                'internship_class_id' => $classId,
+                'stase_id' => 1, // Default stase ID, replace with actual logic if needed
+                'date' => $date,
+                'start_time' => '08:00:00',
+                'end_time' => '16:00:00',
+            ]);
+        }
+        
+        // Find or create presence session for this schedule and date
+        $presenceSession = \App\Models\PresenceSession::firstOrCreate(
             [
                 'schedule_id' => $schedule->id,
-                'date' => $request->date,
+                'date' => $date,
             ],
             [
-                'token' => strtoupper(substr(md5(uniqid()), 0, 6)),
-                'expiration_time' => Carbon::parse($request->date)->endOfDay(), // Gunakan end of day
+                'token' => \Illuminate\Support\Str::random(10),
+                'start_time' => $schedule->start_time ?? '08:00:00',
+                'end_time' => $schedule->end_time ?? '16:00:00',
             ]
         );
         
-        // Check if student already has attendance for this session
-        $existingPresence = Presence::where('student_id', $request->student_id)
-            ->where('presence_sessions_id', $presenceSession->id)
-            ->whereDate('date_entry', $request->date)
-            ->first();
-            
-        if ($existingPresence) {
-            $existingPresence->update([
-                'time_check_in' => Carbon::parse($request->check_in)->format('H:i:s'),
-                'time_check_out' => Carbon::parse($request->check_out)->format('H:i:s'),
-                'status' => $request->status,
-            ]);
-            
-            $presence = $existingPresence;
-        } else {
-            $presence = Presence::create([
-                'student_id' => $request->student_id,
-                'presence_sessions_id' => $presenceSession->id,
-                'date_entry' => $request->date,
-                'time_check_in' => Carbon::parse($request->check_in)->format('H:i:s'),
-                'time_check_out' => Carbon::parse($request->check_out)->format('H:i:s'),
-                'status' => $request->status,
-            ]);
-        }
-        
-        return response()->json([
-            'status' => true,
-            'message' => 'Presensi berhasil ditambahkan',
-            'data' => [
-                'presence_id' => $presence->id,
-                'check_in' => $presence->time_check_in,
-                'check_out' => $presence->time_check_out,
-                'status' => $presence->status
-            ]
-        ]);
-    }
-    
-    /**
-     * Get attendance statistics for a stase
-     */
-    public function getAttendanceStatistics(Request $request)
-    {
-        $staseId = $request->stase_id;
-        $userId = Auth::id();
-        
-        // Validate stase belongs to this responsible
-        $stase = Stase::where('id', $staseId)
-            ->where('responsible_user_id', $userId)
-            ->firstOrFail();
-            
-        // Get schedules for this stase
-        $schedules = Schedule::where('stase_id', $staseId)
-            ->pluck('id')
-            ->toArray();
-            
-        // Get presence sessions for these schedules
-        $sessionIds = PresenceSession::whereIn('schedule_id', $schedules)
-            ->pluck('id')
-            ->toArray();
-            
-        // Get attendance statistics
-        $totalStudents = Student::whereHas('presences', function($query) use ($sessionIds) {
-                $query->whereIn('presence_sessions_id', $sessionIds);
-            })
-            ->count();
-            
-        $presentCount = Presence::whereIn('presence_sessions_id', $sessionIds)
-            ->where('status', 'present')
-            ->count();
-            
-        $lateCount = Presence::whereIn('presence_sessions_id', $sessionIds)
-            ->where('status', 'late')
-            ->count();
-            
-        $excusedCount = Presence::whereIn('presence_sessions_id', $sessionIds)
-            ->where('status', 'excused')
-            ->count();
-            
-        $absentCount = Presence::whereIn('presence_sessions_id', $sessionIds)
-            ->where('status', 'absent')
-            ->count();
-            
-        // Get attendance by date (last 7 days)
-        $lastWeekDates = [];
-        $attendanceByDate = [];
-        
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $lastWeekDates[] = $date;
-            
-            $dayPresent = Presence::whereIn('presence_sessions_id', $sessionIds)
-                ->whereDate('date_entry', $date)
-                ->where('status', 'present')
-                ->count();
-                
-            $dayTotal = Presence::whereIn('presence_sessions_id', $sessionIds)
-                ->whereDate('date_entry', $date)
-                ->count();
-                
-            $attendanceByDate[] = [
-                'date' => $date,
-                'formatted_date' => Carbon::parse($date)->format('d M'),
-                'present' => $dayPresent,
-                'total' => $dayTotal
-            ];
-        }
-        
-        return response()->json([
-            'status' => true,
-            'data' => [
-                'stase' => [
-                    'id' => $stase->id,
-                    'name' => $stase->name
-                ],
-                'total_students' => $totalStudents,
-                'statistics' => [
-                    'present' => $presentCount,
-                    'late' => $lateCount,
-                    'excused' => $excusedCount,
-                    'absent' => $absentCount
-                ],
-                'by_date' => $attendanceByDate
-            ]
-        ]);
+        return $presenceSession->id;
     }
 }
