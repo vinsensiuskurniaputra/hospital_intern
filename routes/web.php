@@ -42,13 +42,16 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/students/filter', [AdminStudentController::class, 'filter'])->name('students.filter');
     Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
     Route::put('/students/{student}/change-status', [AdminStudentController::class, 'changeStatus'])->name('students.change_status');
+    Route::get('/download-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.downloadTemplate');
 
     Route::resource('/users/admins', AdminUserAdminController::class)->names('admin.admins');
     Route::get('/admins/filter', [AdminUserAdminController::class, 'filter'])->name('admins.filter');
 
     Route::resource('/users/responsibles', AdminResponsibleUserController::class)->names('admin.responsibles');
     Route::get('/responsibles/filter', [AdminResponsibleUserController::class, 'filter'])->name('responsibles.filter');
-    
+    Route::get('/responsibles/download-template', [AdminResponsibleUserController::class, 'downloadTemplate'])->name('responsibles.downloadTemplate');
+    Route::post('/responsibles/import', [AdminResponsibleUserController::class, 'import'])->name('responsibles.import');
+
     Route::resource('/permissions/users', AdminUserAuthorizationController::class)->names('admin.user_authorizations');
     Route::get('/users/filter', [AdminUserAuthorizationController::class, 'filter'])->name('users.filter');
     

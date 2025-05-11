@@ -154,4 +154,80 @@ class AdminResponsibleUserController extends Controller
 
         return view('components.admin.responsible.table', compact('responsibles'))->render();
     }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|mimes:csv,txt',
+        ]);
+
+
+        $file = $request->file('file');
+        $rows = array_map('str_getcsv', file($file));
+        $headers = array_map('strtolower', array_map('trim', $rows[0]));
+        unset($rows[0]); 
+
+        $inserted = 0;
+        $skipped = 0;
+
+        foreach ($rows as $row) {
+            $row = array_combine($headers, $row);
+
+            // Skip jika username atau nim sudah ada
+            if (User::where('username', $row['username'])->orWhere('email', $row['email'])->exists()) {
+                $skipped++;
+                continue;
+            }
+
+            // Buat user
+            $user = User::addUser([
+                'username' => $row['username'],
+                'name' => $row['name'],
+                'email' => $row['email'] ?? null,
+                'password' => 'password',
+                'photo_profile_url' => null,
+            ]);
+
+            // Tambahkan role reposnible
+            $reposnibleRole = Role::where('name', 'pic')->first();
+            $user->roles()->attach($reposnibleRole);
+
+            // Buat reposnible
+            ResponsibleUser::create([
+                'user_id' => $user->id,
+                'telp' => $row['telp'],
+            ]);
+
+            $inserted++;
+        }
+
+        return redirect()->route('admin.responsibles.index')->with('success', "Import selesai: {$inserted} data ditambahkan, {$skipped} dilewati karena duplikat.");
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="pic_import_template.csv"',
+        ];
+
+        // Header sesuai dengan array keys yang digunakan di fungsi import()
+        $columns = [
+            'username',
+            'name',
+            'email',
+            'telp'
+        ];
+
+        $callback = function () use ($columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            // Contoh baris data kosong (atau dummy) sebagai panduan
+            fputcsv($file, ['johndoe', 'John Doe', 'john@example.com', '08123456789']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
