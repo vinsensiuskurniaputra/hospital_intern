@@ -16,6 +16,9 @@ use App\Models\PresenceSession;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -98,8 +101,15 @@ class HomeController extends Controller
                 ]);
             }
             
-            // Mengambil stase yang dipegang oleh PIC ini
-            $staseIds = Stase::where('responsible_user_id', $userId)->pluck('id')->toArray();
+            // PERUBAHAN DISINI: Mengambil stase yang dipegang oleh PIC ini melalui relasi many-to-many
+            $staseIds = [];
+            if ($responsible) {
+                // Gunakan relasi many-to-many melalui tabel pivot
+                $staseIds = DB::table('responsible_stase')
+                    ->where('responsible_user_id', $responsible->id)
+                    ->pluck('stase_id')
+                    ->toArray();
+            }
             
             if (empty($staseIds)) {
                 Log::info('PIC user does not have any stase: ' . $userId);
@@ -113,14 +123,18 @@ class HomeController extends Controller
             
             // 1. Data jadwal hari ini (dari stase yang dipegang PIC)
             $today = Carbon::now()->format('Y-m-d');
-            $todaySchedules = Schedule::whereIn('stase_id', $staseIds)
-                ->where(function($query) use ($today) {
-                    $query->whereDate('date_schedule', $today)
-                          ->orWhere(function($q) use ($today) {
-                              $q->where('start_date', '<=', $today)
-                                ->where('end_date', '>=', $today);
-                          });
-                })
+            
+            // Gunakan hanya start_date dan end_date
+            $scheduleIds = Schedule::whereIn('stase_id', $staseIds)
+                ->where('start_date', '<=', $today)
+                ->where('end_date', '>=', $today)
+                ->pluck('id')
+                ->unique()
+                ->values()
+                ->toArray();
+            
+            // Kemudian ambil data lengkap
+            $todaySchedules = Schedule::whereIn('id', $scheduleIds)
                 ->with(['stase', 'internshipClass'])
                 ->take(6)
                 ->get();
@@ -212,9 +226,14 @@ class HomeController extends Controller
     private function studentDashboard()
     {
         try {
-            // Dapatkan data student berdasarkan user yang login
-            $student = Student::where('user_id', Auth::id())->with('user')->first();
+            // Get logged in user
+            $user = Auth::user();
+            $userId = Auth::id();
             
+            // Get student data
+            $student = Student::where('user_id', $userId)->first();
+            
+
             // Default values jika terjadi error atau data kosong
             $attendanceStats = [
                 'total' => 0,
@@ -226,6 +245,13 @@ class HomeController extends Controller
             $todaySchedules = collect([]);
             $notifications = collect([]);
             $recentGrades = collect([]);
+            
+            // Get hospital coordinates from config
+            $hospitalCoordinates = [
+                'name' => config('location.hospital.name'),
+                'latitude' => config('location.hospital.latitude'),
+                'longitude' => config('location.hospital.longitude')
+            ];
             
             if ($student) {
                 // Statistik Kehadiran
@@ -259,33 +285,30 @@ class HomeController extends Controller
                 try {
                     $today = Carbon::now()->format('Y-m-d');
                     
-                    // Cek apakah tabel Schedule ada
+                    // Gunakan rentang tanggal start_date dan end_date untuk menentukan jadwal hari ini
                     if (Schema::hasTable('schedules')) {
-                        // Berdasarkan informasi, kolom tanggal bisa bernama 'date' atau 'date_schedule'
-                        // Cek kedua kolom untuk memastikan fleksibilitas
-                        $dateColumn = Schema::hasColumn('schedules', 'date') ? 'date' : 
-                                     (Schema::hasColumn('schedules', 'date_schedule') ? 'date_schedule' : 'date');
+                        // Student's internship class ID
+                        $internshipClassId = $student->internship_class_id;
                         
-                        $todaySchedules = Schedule::whereDate($dateColumn, $today)
-                            ->with(['stase'])
-                            ->orderBy('id')
-                            ->get();
-                            
-                        // Jika kosong, buat data dummy
+                        // Get today's schedules based on start_date and end_date range
+                        $todaySchedules = Schedule::where(function($query) use ($today) {
+                            $query->where('start_date', '<=', $today)
+                                  ->where('end_date', '>=', $today);
+                        })
+                        ->when($internshipClassId, function($query) use ($internshipClassId) {
+                            $query->where('internship_class_id', $internshipClassId);
+                        })
+                        ->with(['stase', 'internshipClass', 'responsibleUser.user'])
+                        ->orderBy('id')
+                        ->get();
+                        
+                        // Jika kosong, tampilkan pesan tidak ada jadwal
                         if ($todaySchedules->isEmpty()) {
-                            $todaySchedules = collect([
-                                (object)[
-                                    'stase' => (object)['name' => 'Tidak ada jadwal hari ini']
-                                ]
-                            ]);
+                            $todaySchedules = collect([]);
                         }
                     } else {
                         // Tabel belum ada, buat data dummy
-                        $todaySchedules = collect([
-                            (object)[
-                                'stase' => (object)['name' => 'Jadwal belum tersedia']
-                            ]
-                        ]);
+                        $todaySchedules = collect([]);
                     }
                 } catch (\Exception $e) {
                     Log::error('Error loading schedules: ' . $e->getMessage());
@@ -327,17 +350,42 @@ class HomeController extends Controller
                 }
             }
             
-            return view('pages.student.dashboard.index', [
-                'attendanceStats' => $attendanceStats,
-                'todaySchedules' => $todaySchedules,
-                'notifications' => $notifications,
-                'recentGrades' => $recentGrades,
-                'student' => $student
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Dashboard error: ' . $e->getMessage());
+            // Get today's schedules
+            $today = Carbon::now()->format('Y-m-d');
             
-            // Return view with empty data if something went wrong
+            
+            $internshipClassId = $student ? $student->internship_class_id : null;
+            
+            
+            // Debug SQL query (dump raw SQL query for schedules)
+            $query = Schedule::where(function($query) use ($today) {
+                $query->where('start_date', '<=', $today)
+                      ->where('end_date', '>=', $today);
+            })
+            ->when($internshipClassId, function($query) use ($internshipClassId) {
+                $query->where('internship_class_id', $internshipClassId);
+            });
+            
+            
+            // Execute query and log results
+            $todaySchedules = $query->with(['stase', 'internshipClass'])
+                ->orderBy('id')
+                ->get();
+                
+            
+            
+            return view('pages.student.dashboard.index', compact(
+                'todaySchedules', 
+                'student',
+                'notifications',
+                'recentGrades',
+                'attendanceStats',
+                'hospitalCoordinates'
+            ));
+        } catch (\Exception $e) {
+            \Log::error('Error in studentDashboard: ' . $e->getMessage());
+            
+            // Error handling code...
             return view('pages.student.dashboard.index', [
                 'attendanceStats' => [
                     'total' => 0,
@@ -351,5 +399,611 @@ class HomeController extends Controller
                 'student' => null
             ])->with('error', 'Terjadi kesalahan saat memuat dashboard.');
         }
+    }
+    
+    /**
+     * Generate token for attendance
+     */
+    public function generatePresenceToken(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'schedule_id' => 'required|exists:schedules,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi gagal: ' . $validator->errors()->first()
+                ]);
+            }
+
+            // Cek apakah schedule dimiliki oleh PIC ini
+            $userId = Auth::id();
+            $schedule = Schedule::with(['stase', 'internshipClass'])->find($request->schedule_id);
+
+            if (!$schedule) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Jadwal tidak ditemukan'
+                ]);
+            }
+
+            // Dapatkan data responsible user berdasarkan user ID
+            $responsible = ResponsibleUser::where('user_id', $userId)->first();
+            
+            if (!$responsible) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data penanggung jawab tidak ditemukan'
+                ]);
+            }
+            
+            // Cek apakah PIC ini memiliki akses ke stase tersebut melalui tabel pivot
+            $hasAccess = DB::table('responsible_stase')
+                ->where('responsible_user_id', $responsible->id)
+                ->where('stase_id', $schedule->stase_id)
+                ->exists();
+                
+            if (!$hasAccess) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Anda tidak memiliki akses untuk membuat kode presensi pada jadwal ini'
+                ]);
+            }
+
+            // Cek apakah sudah ada session aktif untuk jadwal ini hari ini
+            $today = Carbon::now()->format('Y-m-d');
+            $existingSession = PresenceSession::where('schedule_id', $schedule->id)
+                ->whereDate('date', $today)
+                ->first();
+                
+            if ($existingSession) {
+                // Cek apakah token masih berlaku
+                $now = Carbon::now();
+                $isExpired = false;
+                
+                if ($existingSession->expiration_time) {
+                    if ($existingSession->expiration_time instanceof Carbon) {
+                        $isExpired = $existingSession->expiration_time->lt($now);
+                    } else {
+                        $expiry = Carbon::parse($existingSession->expiration_time);
+                        $isExpired = $expiry->lt($now);
+                    }
+                }
+                
+                if (!$isExpired) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Sudah ada kode aktif untuk jadwal ini hari ini',
+                        'data' => [
+                            'token' => $existingSession->token,
+                            'expiration_time' => $existingSession->expiration_time instanceof Carbon 
+                                ? $existingSession->expiration_time->format('Y-m-d H:i:s')
+                                : Carbon::parse($existingSession->expiration_time)->format('Y-m-d H:i:s'),
+                            'schedule_name' => $schedule->internshipClass->name ?? 'Kelas',
+                            'stase_name' => $schedule->stase->name ?? 'Stase',
+                            'date' => $today
+                        ]
+                    ]);
+                }
+            }
+
+            // Generate token unik
+            $token = strtoupper(Str::random(6));
+            
+            // Atur masa berlaku sampai akhir hari ini (23:59:59)
+            $expirationTime = Carbon::now()->endOfDay();
+
+            if ($existingSession) {
+                // Update session yang ada
+                $existingSession->update([
+                    'token' => $token,
+                    'expiration_time' => $expirationTime
+                ]);
+                $session = $existingSession;
+            } else {
+                // Buat session baru
+                $session = PresenceSession::create([
+                    'schedule_id' => $schedule->id,
+                    'token' => $token,
+                    'date' => $today,
+                    'expiration_time' => $expirationTime
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Token berhasil dibuat',
+                'data' => [
+                    'token' => $token,
+                    'expiration_time' => $expirationTime->format('Y-m-d H:i:s'),
+                    'schedule_name' => $schedule->internshipClass->name ?? 'Kelas',
+                    'stase_name' => $schedule->stase->name ?? 'Stase',
+                    'date' => $today
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error generating token: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat membuat token: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Get active tokens for the responsible user
+     */
+    public function getActiveTokens()
+    {
+        try {
+            $userId = Auth::id();
+            $today = Carbon::now()->format('Y-m-d');
+            Log::info("Getting active tokens for user ID: {$userId}, today: {$today}");
+            
+            // Dapatkan responsible user
+            $responsible = ResponsibleUser::where('user_id', $userId)->first();
+            
+            if (!$responsible) {
+                Log::warning("Responsible user not found for user ID: {$userId}");
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data penanggung jawab tidak ditemukan'
+                ]);
+            }
+            
+            Log::info("Found responsible user with ID: {$responsible->id}");
+            
+            // Dapatkan stase IDs dari tabel pivot
+            $staseIds = DB::table('responsible_stase')
+                ->where('responsible_user_id', $responsible->id)
+                ->pluck('stase_id')
+                ->toArray();
+        
+            Log::info("Found stase IDs: " . implode(', ', $staseIds ?: ['none']));
+        
+            // Jika tidak ada stase, kembalikan array kosong
+            if (empty($staseIds)) {
+                return response()->json([
+                    'status' => true,
+                    'data' => [
+                        'active_tokens' => [],
+                        'schedule_options' => []
+                    ]
+                ]);
+            }
+            
+            // Dapatkan semua jadwal terkait stase tersebut hari ini
+            $today = Carbon::now()->format('Y-m-d');
+            $scheduleIds = Schedule::whereIn('stase_id', $staseIds)
+                ->where('start_date', '<=', $today)
+                ->where('end_date', '>=', $today)
+                ->pluck('id')
+                ->unique()
+                ->values()
+                ->toArray();
+            
+            // Debug log
+            Log::info("Schedule IDs for today: " . implode(', ', $scheduleIds));
+            
+            // Ambil data lengkap
+            $schedules = Schedule::whereIn('id', $scheduleIds)
+                ->with(['stase', 'internshipClass'])
+                ->get();
+                
+            Log::info("Found {$schedules->count()} schedules for today");
+            
+            // Dapatkan semua sesi presensi aktif untuk jadwal tersebut
+            $now = Carbon::now();
+            $activeSessions = collect();
+            $activeScheduleIds = []; // Track schedules that already have active tokens
+            
+            foreach ($schedules as $schedule) {
+                $session = PresenceSession::where('schedule_id', $schedule->id)
+                    ->whereDate('date', $today)
+                    ->where(function($query) use ($now) {
+                        $query->whereNull('expiration_time')
+                            ->orWhere('expiration_time', '>', $now);
+                    })
+                    ->first();
+                    
+                if ($session) {
+                    $activeScheduleIds[] = $schedule->id;
+                    
+                    // Ensure expiration_time is properly processed
+                    $expirationTime = null;
+                    if ($session->expiration_time) {
+                        // If it's already a Carbon instance
+                        if ($session->expiration_time instanceof Carbon) {
+                            $expirationTime = $session->expiration_time->format('Y-m-d H:i:s');
+                        } 
+                        // If it's a string, try to parse it
+                        else {
+                            $expirationTime = Carbon::parse($session->expiration_time)->format('Y-m-d H:i:s');
+                        }
+                    }
+                    
+                    $activeSessions->push([
+                        'id' => $session->id,
+                        'token' => $session->token,
+                        'schedule_id' => $schedule->id,
+                        'schedule_name' => $schedule->internshipClass->name ?? 'Kelas',
+                        'stase_name' => $schedule->stase->name ?? 'Stase',
+                        'expiration_time' => $expirationTime,
+                        'created_at' => $session->created_at->format('Y-m-d H:i:s')
+                    ]);
+                }
+            }
+            
+            // Format schedule options - mark schedules with active tokens
+            $scheduleOptions = $schedules->map(function($schedule) use ($activeScheduleIds) {
+                return [
+                    'id' => $schedule->id,
+                    'name' => ($schedule->internshipClass->name ?? 'Kelas') . ' - ' . ($schedule->stase->name ?? 'Stase'),
+                    'has_active_token' => in_array($schedule->id, $activeScheduleIds)
+                ];
+            })->toArray();
+            
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'active_tokens' => $activeSessions,
+                    'schedule_options' => $scheduleOptions
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Fatal error in getActiveTokens: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat memuat data: ' . $e->getMessage(),
+                'data' => [
+                    'active_tokens' => [],
+                    'schedule_options' => []
+                ]
+            ]);
+        }
+    }
+    
+    /**
+     * Student submits attendance token
+     */
+    public function submitAttendanceToken(Request $request)
+    {
+        try {
+            // Log input untuk debugging
+            Log::info('Submit token request:', $request->all());
+            
+            $validator = Validator::make($request->all(), [
+                'token' => 'required|string',
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'device_info' => 'nullable|string|max:255'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi gagal: ' . $validator->errors()->first()
+                ]);
+            }
+
+            // Cari token di database
+            $token = strtoupper($request->token);
+            $now = Carbon::now();
+            $today = $now->format('Y-m-d');
+            
+            $session = PresenceSession::where('token', $token)
+                ->whereDate('date', $today)
+                ->where(function($query) use ($now) {
+                    $query->whereNull('expiration_time')
+                          ->orWhere('expiration_time', '>=', $now);
+                })
+                ->first();
+                
+            if (!$session) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Token tidak valid atau sudah kadaluwarsa'
+                ]);
+            }
+            
+            // Dapatkan data mahasiswa
+            $student = Student::where('user_id', Auth::id())->first();
+            
+            if (!$student) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data mahasiswa tidak ditemukan'
+                ]);
+            }
+            
+            // Cek apakah mahasiswa terdaftar di kelas tersebut
+            $schedule = $session->schedule;
+            
+            // Validasi apakah mahasiswa terdaftar di jadwal ini
+            $isRegistered = false;
+            
+            // Cek dari relasi schedule->internshipClass->students
+            if ($schedule && $schedule->internshipClass) {
+                $isRegistered = DB::table('students')
+                    ->where('students.id', $student->id)
+                    ->where('students.internship_class_id', $schedule->internshipClass->id)
+                    ->exists();
+            }
+            
+            // Jika tidak terdaftar dan tidak ada exception mode, tolak
+            if (!$isRegistered && !config('presence.allow_any_student_to_any_schedule', false)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Anda tidak terdaftar pada jadwal ini'
+                ]);
+            }
+            
+            // Cek apakah student sudah presensi hari ini
+            $existingPresence = Presence::where('student_id', $student->id)
+                ->whereHas('presenceSession', function($query) use ($today) {
+                    $query->whereDate('date', $today);
+                })
+                ->exists();
+                
+            if ($existingPresence) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Anda sudah melakukan presensi hari ini'
+                ]);
+            }
+
+            // Periksa jika mahasiswa berada dalam radius yang diperbolehkan
+            $hospitalLatitude = config('location.hospital.latitude');
+            $hospitalLongitude = config('location.hospital.longitude');
+            
+            $distance = $this->calculateDistance(
+                $request->latitude, 
+                $request->longitude, 
+                $hospitalLatitude, 
+                $hospitalLongitude
+            );
+            
+            // Ubah nilai 12 menjadi 500
+            if ($distance > 500) { // Batasan radius 500 meter
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Anda berada di luar radius presensi yang diizinkan',
+                    'data' => [
+                        'distance' => round($distance),
+                        'max_radius' => 500
+                    ]
+                ]);
+            }
+            
+            // Catat presensi
+            $presence = Presence::create([
+                'student_id' => $student->id,
+                'presence_sessions_id' => $session->id,
+                'date_entry' => $today,
+                'check_in' => now()->format('H:i:s'),
+                'check_out' => '00:00:00', // Gunakan '00:00:00' sebagai placeholder
+                'status' => 'present',
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'device_info' => $request->device_info ?? 'Web Browser'
+            ]);
+            
+            Log::info('Presence created successfully', ['presence_id' => $presence->id]);
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Presensi berhasil',
+                'data' => [
+                    'presence_id' => $presence->id,
+                    'date' => $today,
+                    'check_in_time' => $presence->check_in,
+                    'token' => $token,
+                    'schedule' => [
+                        'class' => $schedule->internshipClass->name ?? 'Kelas',
+                        'stase' => $schedule->stase->name ?? 'Stase'
+                    ]
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in submitAttendanceToken: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Student checkout attendance
+     */
+    public function checkoutAttendance(Request $request)
+    {
+        try {
+            Log::info('Checkout request:', $request->all());
+            
+            $validator = Validator::make($request->all(), [
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'device_info' => 'nullable|string|max:255'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi gagal: ' . $validator->errors()->first()
+                ]);
+            }
+
+            // Dapatkan data mahasiswa
+            $student = Student::where('user_id', Auth::id())->first();
+            
+            if (!$student) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data mahasiswa tidak ditemukan'
+                ]);
+            }
+            
+            // Cari presensi hari ini yang belum checkout
+            $today = Carbon::now()->format('Y-m-d');
+            $presence = Presence::where('student_id', $student->id)
+                ->whereDate('date_entry', $today)
+                ->where(function($query) {
+                    $query->whereNull('check_out')
+                          ->orWhere('check_out', '00:00:00'); // Tambahkan kondisi untuk mengenali '00:00:00'
+                })
+                ->first();
+                
+            if (!$presence) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Tidak ditemukan presensi yang perlu checkout hari ini'
+                ]);
+            }
+            
+            // Periksa jarak dari lokasi rumah sakit
+            $hospitalLatitude = config('location.hospital.latitude');
+            $hospitalLongitude = config('location.hospital.longitude');
+            
+            $distance = $this->calculateDistance(
+                $request->latitude, 
+                $request->longitude, 
+                $hospitalLatitude, 
+                $hospitalLongitude
+            );
+            
+            if ($distance > 500) { // Batasan radius 500 meter
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Anda berada di luar radius presensi yang diizinkan',
+                    'data' => [
+                        'distance' => round($distance),
+                        'max_radius' => 500
+                    ]
+                ]);
+            }
+
+            // Update checkout time
+            $presence->check_out = now()->format('H:i:s');
+            $presence->save();
+            
+            // Tambahkan relasi untuk mendapatkan informasi jadwal
+            $presenceWithSession = Presence::with('presenceSession.schedule.stase', 'presenceSession.schedule.internshipClass')
+                ->find($presence->id);
+            
+            $scheduleName = '';
+            if ($presenceWithSession->presenceSession && $presenceWithSession->presenceSession->schedule) {
+                $schedule = $presenceWithSession->presenceSession->schedule;
+                $scheduleName = ($schedule->stase->name ?? 'Stase') . ' - ' . 
+                                ($schedule->internshipClass->name ?? 'Kelas');
+            }
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Checkout berhasil',
+                'data' => [
+                    'presence_id' => $presence->id,
+                    'check_in' => $presence->check_in,
+                    'check_out' => $presence->check_out,
+                    'schedule' => $scheduleName
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in checkoutAttendance: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Check if student has attendance today
+     */
+    public function checkTodayAttendance()
+    {
+        $userId = Auth::id();
+        $student = Student::where('user_id', $userId)->first();
+        
+        if (!$student) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data mahasiswa tidak ditemukan'
+            ], 404);
+        }
+        
+        $today = Carbon::now()->format('Y-m-d');
+        
+        // Cek apakah sudah ada presensi hari ini
+        $todayPresence = Presence::where('student_id', $student->id)
+            ->whereDate('date_entry', $today)
+            ->with('presenceSession.schedule.stase', 'presenceSession.schedule.internshipClass')
+            ->first();
+            
+        if ($todayPresence) {
+            $scheduleName = '';
+            $token = '';
+            if ($todayPresence->presenceSession && $todayPresence->presenceSession->schedule) {
+                $schedule = $todayPresence->presenceSession->schedule;
+                $staseName = $schedule->stase->name ?? 'Stase';
+                $className = $schedule->internshipClass->name ?? 'Kelas';
+                $scheduleName = "$staseName - $className";
+                $token = $todayPresence->presenceSession->token ?? '';
+            }
+            
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'has_attendance' => true,
+                    'presence_id' => $todayPresence->id,
+                    'check_in' => $todayPresence->check_in,
+                    'check_out' => $todayPresence->check_out,
+                    'needs_checkout' => $todayPresence->check_out === null,
+                    'token' => $token,
+                    'schedule' => $scheduleName
+                ]
+            ]);
+        }
+        
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'has_attendance' => false
+            ]
+        ]);
+    }
+    
+    /**
+     * Calculate distance between two coordinates using Haversine formula
+     */
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        // Convert degrees to radians
+        $lat1 = deg2rad($lat1);
+        $lon1 = deg2rad($lon1);
+        $lat2 = deg2rad($lat2);
+        $lon2 = deg2rad($lon2);
+        
+        // Haversine formula
+        $dlat = $lat2 - $lat1;
+        $dlon = $lon2 - $lon1;
+        $a = sin($dlat/2) * sin($dlat/2) + cos($lat1) * cos($lat2) * sin($dlon/2) * sin($dlon/2);
+        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+        
+        // Earth's radius in meters
+        $radius = 6371000;
+        
+        // Distance in meters
+        return $radius * $c;
     }
 }

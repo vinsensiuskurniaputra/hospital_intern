@@ -7,11 +7,16 @@
         <h1 class="text-xl font-semibold text-gray-800 mb-6">Laporan Rekapitulasi</h1>
         
         <!-- Filters -->
-        <div class="grid grid-cols-3 gap-4 mb-6">
+        <form id="filterForm" class="grid grid-cols-3 gap-4 mb-6">
             <div>
                 <div class="relative">
-                    <select class="w-full h-10 pl-3 pr-8 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Jurusan</option>
+                    <select name="study_program" id="study_program" class="w-full h-10 pl-3 pr-8 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="submitForm()">
+                        <option value="">Semua Jurusan</option>
+                        @foreach($studyPrograms as $program)
+                            <option value="{{ $program->id }}" {{ request('study_program') == $program->id ? 'selected' : '' }}>
+                                {{ $program->name }}
+                            </option>
+                        @endforeach
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,8 +28,13 @@
             
             <div>
                 <div class="relative">
-                    <select class="w-full h-10 pl-3 pr-8 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Tahun Angkatan</option>
+                    <select name="class_year" id="class_year" class="w-full h-10 pl-3 pr-8 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="submitForm()">
+                        <option value="">Semua Tahun Angkatan</option>
+                        @foreach($classYears as $year)
+                            <option value="{{ $year->id }}" {{ request('class_year') == $year->id ? 'selected' : '' }}>
+                                {{ $year->class_year }}
+                            </option>
+                        @endforeach
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,8 +46,13 @@
             
             <div>
                 <div class="relative">
-                    <select class="w-full h-10 pl-3 pr-8 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Kampus</option>
+                    <select name="campus" id="campus" class="w-full h-10 pl-3 pr-8 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="submitForm()">
+                        <option value="">Semua Kampus</option>
+                        @foreach($campuses as $campus)
+                            <option value="{{ $campus->id }}" {{ request('campus') == $campus->id ? 'selected' : '' }}>
+                                {{ $campus->name }}
+                            </option>
+                        @endforeach
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +61,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
         
         <!-- Search Bar -->
         <div class="mb-6">
@@ -65,50 +80,50 @@
             <table class="min-w-full">
                 <thead>
                     <tr class="border-b border-gray-100">
-                        <th class="py-3 px-4 font-medium">NIM</th>
-                        <th class="py-3 px-4 font-medium">Nama</th>
-                        <th class="py-3 px-4 font-medium">
-                            <div class="flex items-center">
+                        <th class="py-3 px-4 font-medium text-center">NIM</th>
+                        <th class="py-3 px-4 font-medium text-left">Nama</th>
+                        <th class="py-3 px-4 font-medium text-center">
+                            <div class="flex items-center justify-center">
                                 Kelas Magang
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </th>
-                        <th class="py-3 px-4 font-medium">
-                            <div class="flex items-center">
+                        <th class="py-3 px-4 font-medium text-center">
+                            <div class="flex items-center justify-center">
                                 Jurusan
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </th>
-                        <th class="py-3 px-4 font-medium">
-                            <div class="flex items-center">
+                        <th class="py-3 px-4 font-medium text-center">
+                            <div class="flex items-center justify-center">
                                 Kampus
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </th>
-                        <th class="py-3 px-4 font-medium">
-                            <div class="flex items-center">
+                        <th class="py-3 px-4 font-medium text-center">
+                            <div class="flex items-center justify-center">
                                 Tahun Angkatan
-                                <svg class="w-4 h-4 ml-1" fill="none" strotolong hapus line ke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </th>
-                        <th class="py-3 px-4 font-medium">
-                            <div class="flex items-center">
+                        <th class="py-3 px-4 font-medium text-center">
+                            <div class="flex items-center justify-center">
                                 Status
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </th>
-                        <th class="py-3 px-4 font-medium">
-                            <div class="flex items-center">
+                        <th class="py-3 px-4 font-medium text-center">
+                            <div class="flex items-center justify-center">
                                 Absen
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -118,89 +133,27 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
-                    <!-- Row 1 -->
+                    @foreach($students as $student)
                     <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-4 text-sm">3.34.23.2.24</td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-4 text-sm text-center">{{ $student->nim }}</td>
+                        <td class="py-3 px-4 text-left">
                             <div class="flex items-center">
-                                <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                <span class="text-sm">Vinsensius Kurnia Putra</span>
+                                <img class="h-8 w-8 rounded-full mr-3" src="{{ $student->user->photo_profile_url ?? '/api/placeholder/32/32' }}" alt="Profile">
+                                <span class="text-sm">{{ $student->user->name }}</span>
                             </div>
                         </td>
-                        <td class="py-3 px-4 text-sm">FK - 01</td>
-                        <td class="py-3 px-4 text-sm">Informatika</td>
-                        <td class="py-3 px-4 text-sm">Politeknik Negeri Semarang</td>
-                        <td class="py-3 px-4 text-sm">2025/2026</td>
-                        <td class="py-3 px-4 text-sm">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Non Active
+                        <td class="py-3 px-4 text-sm text-center">{{ $student->internshipClass->name }}</td>
+                        <td class="py-3 px-4 text-sm text-center">{{ $student->studyProgram->name }}</td>
+                        <td class="py-3 px-4 text-sm text-center">{{ $student->studyProgram->campus->name }}</td>
+                        <td class="py-3 px-4 text-sm text-center">{{ $student->internshipClass->classYear->class_year }}</td>
+                        <td class="py-3 px-4 text-sm text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student->is_finished ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                {{ $student->is_finished ? 'Non Active' : 'Active' }}
                             </span>
                         </td>
-                        <td class="py-3 px-4 text-sm">80%</td>
+                        <td class="py-3 px-4 text-sm text-center">{{ $student->attendance_percentage }}%</td>
                     </tr>
-                    
-                    <!-- Row 2 -->
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-4 text-sm">3.34.23.2.24</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                <span class="text-sm">James N. McKinley</span>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4 text-sm">FK - 01</td>
-                        <td class="py-3 px-4 text-sm">Kedokteran</td>
-                        <td class="py-3 px-4 text-sm">Universitas Diponegoro</td>
-                        <td class="py-3 px-4 text-sm">2025/2026</td>
-                        <td class="py-3 px-4 text-sm">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Active
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-sm">80%</td>
-                    </tr>
-                    
-                    <!-- Row 3 -->
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-4 text-sm">3.34.23.2.24</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                <span class="text-sm">James N. McKinley</span>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4 text-sm">FK - 01</td>
-                        <td class="py-3 px-4 text-sm">Kedokteran</td>
-                        <td class="py-3 px-4 text-sm">Universitas Diponegoro</td>
-                        <td class="py-3 px-4 text-sm">2025/2026</td>
-                        <td class="py-3 px-4 text-sm">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Active
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-sm">80%</td>
-                    </tr>
-                    
-                    <!-- Row 4 -->
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-4 text-sm">3.34.23.2.24</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                <span class="text-sm">James N. McKinley</span>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4 text-sm">FK - 01</td>
-                        <td class="py-3 px-4 text-sm">Kedokteran</td>
-                        <td class="py-3 px-4 text-sm">Universitas Diponegoro</td>
-                        <td class="py-3 px-4 text-sm">2025/2026</td>
-                        <td class="py-3 px-4 text-sm">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Active
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-sm">80%</td>
-                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -213,63 +166,18 @@
                 <div class="bg-slate-50 rounded-xl p-6 shadow-sm">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">Nilai Rata-Rata Mahasiswa</h2>
                     <div class="space-y-4">
-                        <!-- Student 1 -->
+                        @foreach($averageGrades as $grade)
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <img class="h-10 w-10 rounded-full mr-3" src="/api/placeholder/40/40" alt="Profile">
+                                <img class="h-10 w-10 rounded-full mr-3" src="{{ $grade->student->user->photo_profile_url ?? '/api/placeholder/40/40' }}" alt="Profile">
                                 <div>
-                                    <p class="text-sm font-medium">Chris Friedely</p>
-                                    <p class="text-xs text-gray-500">Supermarket Vilanova</p>
+                                    <p class="text-sm font-medium">{{ $grade->student->user->name }}</p>
+                                    <p class="text-xs text-gray-500">{{ $grade->student->studyProgram->campus->name }}</p>
                                 </div>
                             </div>
-                            <span class="text-lg font-medium">72</span>
+                            <span class="text-lg font-medium">{{ round($grade->average_grade) }}</span>
                         </div>
-                        
-                        <!-- Student 2 (highlighted) -->
-                        <div class="flex items-center justify-between bg-green-50 p-3 rounded-lg">
-                            <div class="flex items-center">
-                                <img class="h-10 w-10 rounded-full mr-3" src="/api/placeholder/40/40" alt="Profile">
-                                <div>
-                                    <p class="text-sm font-medium">Maggie Johnson</p>
-                                    <p class="text-xs text-gray-500">Oasis Organic Inc.</p>
-                                </div>
-                            </div>
-                            <span class="text-lg font-medium">72</span>
-                        </div>
-                        
-                        <!-- Student 3 -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <img class="h-10 w-10 rounded-full mr-3" src="/api/placeholder/40/40" alt="Profile">
-                                <div>
-                                    <p class="text-sm font-medium">Gael Harry</p>
-                                    <p class="text-xs text-gray-500">New York Finest Fruits</p>
-                                </div>
-                            </div>
-                            <span class="text-lg font-medium">72</span>
-                        </div>
-                        
-                        <!-- Student 4 -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <img class="h-10 w-10 rounded-full mr-3" src="/api/placeholder/40/40" alt="Profile">
-                                <div>
-                                    <p class="text-sm font-medium">Jenna Sullivan</p>
-                                    <p class="text-xs text-gray-500">Walmart</p>
-                                </div>
-                            </div>
-                            <span class="text-lg font-medium">72</span>
-                        </div>
-                        
-                        <!-- See More Link -->
-                        <div class="pt-2">
-                            <a href="#" class="text-sm text-blue-600 hover:underline flex items-center">
-                                Lihat semua
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </a>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
                 
@@ -279,7 +187,7 @@
                     
                     <!-- Yellow Header with updated styling -->
                     <div class="bg-amber-100 text-amber-800 text-sm font-medium px-4 py-2 rounded-lg mb-4">
-                        YEAR 2025 | Stase Bedah
+                        Tahun 2025 | Stase Gigi
                     </div>
                     
                     <!-- Top Performers Table -->
@@ -292,65 +200,18 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            <!-- Row 1 -->
+                            @foreach($topPerformers as $index => $performer)
                             <tr>
-                                <td class="py-3 text-sm">1</td>
+                                <td class="py-3 text-sm">{{ $index + 1 }}</td>
                                 <td class="py-3">
                                     <div class="flex items-center">
-                                        <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">Jenice Salim</span>
+                                        <img class="h-8 w-8 rounded-full mr-3" src="{{ $performer->student->user->photo_profile_url ?? '/api/placeholder/32/32' }}" alt="Profile">
+                                        <span class="text-sm">{{ $performer->student->user->name }}</span>
                                     </div>
                                 </td>
-                                <td class="py-3 text-right text-sm">100</td>
+                                <td class="py-3 text-right text-sm">{{ round($performer->average_grade) }}</td>
                             </tr>
-                            
-                            <!-- Row 2 -->
-                            <tr>
-                                <td class="py-3 text-sm">2</td>
-                                <td class="py-3">
-                                    <div class="flex items-center">
-                                        <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">Vinsensius Kurnia P</span>
-                                    </div>
-                                </td>
-                                <td class="py-3 text-right text-sm">98</td>
-                            </tr>
-                            
-                            <!-- Row 3 -->
-                            <tr>
-                                <td class="py-3 text-sm">3</td>
-                                <td class="py-3">
-                                    <div class="flex items-center">
-                                        <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">James N. McKinley</span>
-                                    </div>
-                                </td>
-                                <td class="py-3 text-right text-sm">96</td>
-                            </tr>
-                            
-                            <!-- Row 4 -->
-                            <tr>
-                                <td class="py-3 text-sm">4</td>
-                                <td class="py-3">
-                                    <div class="flex items-center">
-                                        <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">Steven Jayadi</span>
-                                    </div>
-                                </td>
-                                <td class="py-3 text-right text-sm">96</td>
-                            </tr>
-                            
-                            <!-- Row 5 -->
-                            <tr>
-                                <td class="py-3 text-sm">5</td>
-                                <td class="py-3">
-                                    <div class="flex items-center">
-                                        <img class="h-8 w-8 rounded-full mr-3" src="/api/placeholder/32/32" alt="Profile">
-                                        <span class="text-sm">Jessica Wulan</span>
-                                    </div>
-                                </td>
-                                <td class="py-3 text-right text-sm">90</td>
-                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -376,12 +237,14 @@
                             <svg class="w-full h-full" viewBox="0 0 120 120">
                                 <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="12"/>
                                 <circle cx="60" cy="60" r="54" fill="none" stroke="#0d9488" stroke-width="12"
-                                        stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="95"
+                                        stroke-linecap="round" 
+                                        stroke-dasharray="339.292" 
+                                        stroke-dashoffset="{{ 339.292 * (1 - ($overallAverage/100)) }}"
                                         transform="rotate(-90 60 60)"/>
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-xs text-gray-500">Completed</span>
-                                <span class="text-3xl font-bold text-gray-800">72%</span>
+                                <span class="text-xs text-gray-500">Average Grade</span>
+                                <span class="text-3xl font-bold text-gray-800">{{ round($overallAverage) }}%</span>
                             </div>
                         </div>
                     </div>

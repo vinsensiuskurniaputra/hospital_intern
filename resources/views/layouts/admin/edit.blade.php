@@ -31,7 +31,11 @@
         <form action="@yield('route')" method="POST" enctype="multipart/form-data"
             class="bg-white p-6 shadow-lg rounded-lg">
             @csrf
-            @method('PUT')
+            @hasSection('method')
+                @yield('method')
+            @else
+                @method('PUT')
+            @endif
 
             @if (isset($is_has_photo) && $is_has_photo)
                 <!-- Profile Picture Upload -->

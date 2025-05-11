@@ -7,7 +7,7 @@
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <a href="{{ route('admin.schedules.index') }}" class="text-gray-400 hover:text-gray-600">
+                <a href="{{ route('presences.schedules.index') }}" class="text-gray-400 hover:text-gray-600">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -39,7 +39,7 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Departemen</label>
                         <div class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-md">
-                            {{ $schedule->departement->name }}
+                            {{ $schedule->stase->departement->name }}
                         </div>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
                 </div>
             </div>
 
-            <!-- Jam -->
+            <!-- Jam
             <div class="mb-8">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Jam Praktik</label>
                 <div class="grid grid-cols-2 gap-4">
@@ -99,11 +99,11 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Back Button -->
             <div class="flex justify-end">
-                <a href="{{ route('admin.schedules.index') }}" 
+                <a href="{{ route('presences.schedules.index') }}" 
                     class="px-6 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
                     Kembali
                 </a>
