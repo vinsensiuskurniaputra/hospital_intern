@@ -14,7 +14,7 @@ class AdminCertificateController extends Controller
      */
     public function index()
     {
-        $students = Student::where('is_finished', true)->get();
+        $students = Student::where('is_finished', true)->paginate(10);   
         return view('pages.admin.certificate.index', compact('students'));
     }
 

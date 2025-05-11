@@ -108,21 +108,10 @@
                 </table>
             </div>
 
-            <!-- Enhanced Pagination -->
-            <div class="px-6 py-4 border-t border-gray-100">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm text-gray-500">Showing 1 to 5 of 25 entries</p>
-                    <div class="flex gap-2">
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-[#637F26]">Previous</button>
-                        <div class="flex gap-1">
-                            <button class="px-3 py-1 text-sm font-medium text-white bg-[#637F26] rounded-lg">1</button>
-                            <button class="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">2</button>
-                            <button class="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">3</button>
-                        </div>
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-[#637F26]">Next</button>
-                    </div>
-                </div>
-            </div>
+            <!-- Pagination -->
+            @include('components.general.pagination', [
+                'datas' => $students,
+            ])
         </div>
     </div>
 @endsection

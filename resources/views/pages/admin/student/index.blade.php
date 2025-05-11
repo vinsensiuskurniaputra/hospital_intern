@@ -246,7 +246,7 @@
             'title' => 'Students',
             'description' => 'Upload your CSV file to import student data',
             'action' => route('students.import'),
-            'template_url' => route('students.import'),
+            'template_url' => route('students.downloadTemplate'),
         ])
 
         @include('components.admin.student.add', [

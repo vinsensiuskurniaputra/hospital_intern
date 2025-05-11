@@ -3,7 +3,7 @@
 @section('title', 'Responsible Management')
 
 @section('content')
-    <div x-data="{ addModal: false }">
+    <div x-data="{ addModal: false, showImportModal: false }">
         <!-- Notification Messages -->
         @include('components.general.notification')
 
@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                             <div class="flex gap-3">
-                                <button
+                                <button @click="showImportModal = true"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
                                     <i class="bi bi-upload mr-2"></i>Import CSV
                                 </button>
@@ -103,6 +103,13 @@
 
             </div>
         </div>
+        @include('components.general.import_modal', [
+            'show' => 'showImportModal',
+            'title' => 'Responsible',
+            'description' => 'Upload your CSV file to import pic data',
+            'action' => route('responsibles.import'),
+            'template_url' => route('responsibles.downloadTemplate'),
+        ])
         @include('components.admin.responsible.add', [
             'show' => 'addModal',
         ])
