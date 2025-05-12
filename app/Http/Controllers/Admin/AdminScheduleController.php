@@ -44,9 +44,6 @@ class AdminScheduleController extends Controller
         ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $internshipClasses = InternshipClass::all();
@@ -60,9 +57,6 @@ class AdminScheduleController extends Controller
         ));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -72,16 +66,14 @@ class AdminScheduleController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date'
         ], [
             'internship_class_id.required' => 'Kelas Magang harus dipilih',
-            'stase_id.required' => 'Stase harus dipilih',
+            'stase_id.required' => 'Stase harus dipilih', 
             'start_date.required' => 'Tanggal Mulai harus diisi',
             'end_date.required' => 'Tanggal Selesai harus diisi',
             'end_date.after_or_equal' => 'Tanggal Selesai harus setelah atau sama dengan Tanggal Mulai'
         ]);
 
         try {
-            // Buat schedule langsung dari validated data
             Schedule::create($validated);
-
             return redirect()
                 ->route('presences.schedules.index')
                 ->with('success', 'Jadwal berhasil dibuat');
@@ -92,17 +84,11 @@ class AdminScheduleController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Schedule $schedule)
     {
         return view('pages.admin.schedule.show', compact('schedule'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Schedule $schedule)
     {
         $internshipClasses = InternshipClass::all();
@@ -117,9 +103,6 @@ class AdminScheduleController extends Controller
         ));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Schedule $schedule)
     {
         $validated = $request->validate([
@@ -131,7 +114,6 @@ class AdminScheduleController extends Controller
 
         try {
             $schedule->update($validated);
-
             return redirect()
                 ->route('presences.schedules.index')
                 ->with('success', 'Jadwal berhasil diperbarui');
@@ -142,14 +124,10 @@ class AdminScheduleController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Schedule $schedule)
     {
         try {
             $schedule->delete();
-
             return redirect()
                 ->route('presences.schedules.index')
                 ->with('success', 'Jadwal berhasil dihapus');
@@ -160,37 +138,64 @@ class AdminScheduleController extends Controller
 
     public function filter(Request $request)
     {
-        $query = Schedule::query();
+        $query = Schedule::with([
+            'internshipClass.classYear',
+            'stase.departement',
+            'stase.responsibleUser.user'
+        ]);
 
-        if ($request->has('department') && $request->department != '') {
-            $query->where('departement_id', $request->department);
-        }
-
-        if ($request->has('instructor') && $request->instructor != '') {
-            $query->where('responsible_user_id', $request->instructor);
-        }
-
-        if ($request->has('year') && $request->year != '') {
-            $query->whereHas('internshipClass.classYear', function($q) use ($request) {
-                $q->where('id', $request->year);
+        // Filter by department
+        if ($request->has('departemen') && $request->departemen) {
+            $query->whereHas('stase.departement', function($q) use ($request) {
+                $q->where('id', $request->departemen);
             });
         }
 
-        $schedules = $query->with([
-            'internshipClass.classYear',
-            'stase',
-            'departement',
-            'responsibleUser.user'
-        ])->get();
-        
-        return view('components.admin.schedule.table', compact('schedules'))->render();
+        // Filter by year
+        if ($request->has('tahun') && $request->tahun) {
+            $query->whereHas('internshipClass', function($q) use ($request) {
+                $q->where('id', $request->tahun);
+            });
+        }
+
+        // Filter by responsible
+        if ($request->has('pembimbing') && $request->pembimbing) {
+            $query->whereHas('stase.responsibleUser', function($q) use ($request) {
+                $q->where('id', $request->pembimbing);
+            });
+        }
+
+        // Filter by search term
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->whereHas('internshipClass', function($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%");
+                })
+                ->orWhereHas('stase', function($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%");
+                })
+                ->orWhereHas('stase.departement', function($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%");
+                })
+                ->orWhereHas('stase.responsibleUser.user', function($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%");
+                });
+            });
+        }
+
+        $schedules = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'schedules' => $schedules
+        ]);
     }
 
     public function filterByDate(Request $request)
     {
         try {
             $date = $request->date;
-
             $schedules = Schedule::with([
                 'internshipClass',
                 'stase.departement'
