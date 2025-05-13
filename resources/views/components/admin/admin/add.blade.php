@@ -2,7 +2,7 @@
     @click="{{ $show }} = false" x-cloak>
     <div class="bg-white p-6 shadow-lg lg:w-1/3 w-full h-screen overflow-y-scroll" @click.stop>
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-800">Add New Admin</h2>
+            <h2 class="text-xl font-semibold text-gray-800">Tambah Admin Baru</h2>
             <button @click="{{ $show }} = false" class="text-gray-500 hover:text-gray-700">
                 <i class="bi bi-x-lg"></i>
             </button>
@@ -14,7 +14,7 @@
 
             <!-- Profile Picture Upload -->
             <div x-data="imageUpload()" class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Foto Profil</label>
 
                 <!-- Upload Area -->
                 <div class="w-full border-2 border-dashed rounded-lg p-4 relative flex flex-col items-center justify-center"
@@ -53,7 +53,7 @@
             <!-- Other Form Fields -->
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengguna</label>
                     <input type="text" name="username" value="{{ old('username') }}" required
                         class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26]">
                     @error('username')
