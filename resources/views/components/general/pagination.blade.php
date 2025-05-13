@@ -1,19 +1,19 @@
 <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
     <div class="text-sm text-gray-500">
-        Showing {{ $datas->firstItem() }} to {{ $datas->lastItem() }} of
+        Menampilkan {{ $datas->firstItem() }} sampai {{ $datas->lastItem() }} dari
         {{ $datas->total() }}
-        entries
+        data
     </div>
     <div class="flex items-center gap-2">
         <!-- Previous Button -->
         @if ($datas->onFirstPage())
             <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                Previous
+                Sebelumnya
             </button>
         @else
             <a href="{{ $datas->previousPageUrl() }}"
                 class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                Previous
+                Sebelumnya
             </a>
         @endif
 
@@ -62,11 +62,11 @@
         @if ($datas->hasMorePages())
             <a href="{{ $datas->nextPageUrl() }}"
                 class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                Next
+                Selanjutnya
             </a>
         @else
             <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                Next
+                Selanjutnya
             </button>
         @endif
     </div>
