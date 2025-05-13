@@ -171,37 +171,41 @@ class AdminStudentController extends Controller
 
     public function filter(Request $request)
     {
-        $query = Student::query();
+        $query = Student::with(['certificate', 'user', 'studyProgram', 'internshipClass']);
 
-        if ($request->has('study_program') && $request->study_program != '') {
+        if ($request->filled('study_program')) {
             $query->whereHas('studyProgram', function ($q) use ($request) {
                 $q->where('id', $request->study_program);
             });
         }
 
-        if ($request->has('class_year') && $request->class_year != '') {
+        if ($request->filled('class_year')) {
             $query->whereHas('internshipClass.classYear', function ($q) use ($request) {
                 $q->where('class_year', $request->class_year);
             });
         }
 
-        if ($request->has('campus') && $request->campus != '') {
+        if ($request->filled('campus')) {
             $query->whereHas('studyProgram.campus', function ($q) use ($request) {
                 $q->where('id', $request->campus);
             });
         }
 
-        if ($request->has('search') && $request->search != '') {
+        if ($request->filled('search')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%')
-                ->orWhere('username', 'like', '%' . $request->search . '%');
+                    ->orWhere('email', 'like', '%' . $request->search . '%')
+                    ->orWhere('username', 'like', '%' . $request->search . '%');
             });
         }
 
-        $students = $query->paginate(10);
+        $students = $query->paginate(10)->withQueryString();
 
-        return view('components.admin.student.table', compact('students'))->render();
+        if ($request->ajax()) {
+            return view('components.admin.student.table', compact('students'))->render();
+        }
+
+        return view('pages.admin.student.index', compact('students'));
     }
 
     public function import(Request $request)
