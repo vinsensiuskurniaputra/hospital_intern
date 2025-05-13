@@ -162,6 +162,13 @@ class AdminStudentController extends Controller
         return redirect()->route('admin.students.index')->with('success', 'Student deleted successfully');
     }
 
+    public function changeStatus(Student $student)
+    {
+        $student->is_finished = !$student->is_finished;
+        $student->save();
+        return redirect()->route('admin.students.index')->with('success', 'Student status updated successfully');
+    }
+
     public function filter(Request $request)
     {
         $query = Student::query();
@@ -247,6 +254,36 @@ class AdminStudentController extends Controller
         }
 
         return redirect()->route('admin.students.index')->with('success', "Import selesai: {$inserted} data ditambahkan, {$skipped} dilewati karena duplikat.");
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="student_import_template.csv"',
+        ];
+
+        // Header sesuai dengan array keys yang digunakan di fungsi import()
+        $columns = [
+            'username',
+            'name',
+            'email',
+            'study_program_id',
+            'internship_class_id', // Optional
+            'nim',
+            'telp'
+        ];
+
+        $callback = function () use ($columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            // Contoh baris data kosong (atau dummy) sebagai panduan
+            fputcsv($file, ['johndoe', 'John Doe', 'john@example.com', '1', '', '123456789', '08123456789']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
 }

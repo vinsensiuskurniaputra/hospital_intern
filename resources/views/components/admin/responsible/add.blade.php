@@ -31,7 +31,7 @@
     ])
 
     @include('components.general.input_field', [
-        'label' => 'Telphone',
+        'label' => 'Telephone',
         'name' => 'telp',
         'type' => 'telp',
         'value' => old('telp'),

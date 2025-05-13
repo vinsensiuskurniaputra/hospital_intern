@@ -19,6 +19,7 @@ class InternshipClassFactory extends Factory
     {
         return [
             'class_year_id' => ClassYear::factory(),
+            'campus_id' => 1,
             'name' => $this->faker->word,
             'description' => $this->faker->sentence,
         ];

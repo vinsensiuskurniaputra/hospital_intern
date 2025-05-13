@@ -1,14 +1,32 @@
 @extends('layouts.app')
 
 @section('base-content')
-    <div class="flex" x-data="{ sidebarOpen: true, open: {}, userDropdownOpen: false }">
+    <div class="flex" x-data="{
+        sidebarOpen: true,
+        open: {},
+        userDropdownOpen: false,
+        searchTerm: '',
+        searchResults: [],
+        allMenus: {{ json_encode($menusSideBar->flatMap(fn($menu) => collect($menu->children ?? []))) }},
+    
+        searchMenus() {
+            if (!this.searchTerm) {
+                this.searchResults = [];
+                return;
+            }
+            const term = this.searchTerm.toLowerCase();
+            this.searchResults = this.allMenus
+                .filter(menu => menu.name.toLowerCase().includes(term))
+                .slice(0, 5);
+        }
+    }">
         <!-- Sidebar -->
         <aside :class="{ 'w-72': sidebarOpen, 'w-20': !sidebarOpen }"
             class="w-72 flex flex-col h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
             <div class="flex items-center p-4 border-b border-gray-200 min-h-[72px]">
                 <img src="{{ asset('images/logo.png') }}" :class="{ 'm-auto': !sidebarOpen }" alt="Medical Illustration"
                     class="drop-shadow-xl">
-                <h2 class="text-lg font-bold text-[#637F26] ml-2" :class="{ 'hidden': !sidebarOpen }">Sistem Magang RS
+                <h2 class="text-lg font-bold text-[#637F26] ml-2" :class="{ 'hidden': !sidebarOpen }">Hospital Intern
                 </h2>
             </div>
 
@@ -82,19 +100,36 @@
                         <div class="flex-1 max-w-lg">
                             @php
                                 $userRole = Auth::user()->roles()->first()->name ?? '';
-                                $hideSearchBar = in_array($userRole, ['student', 'responsible']);
+                                $hideSearchBar = in_array($userRole, ['student', 'pic']);
                             @endphp
 
                             @if (!$hideSearchBar)
                                 <div class="relative">
-                                    <input type="text"
+                                    <input type="text" x-model="searchTerm" @input="searchMenus" @focus="searchMenus"
+                                        @click.outside="searchResults = []"
                                         class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26] text-sm"
-                                        placeholder="Search...">
+                                        placeholder="Search menu...">
                                     <div class="absolute left-3 top-2.5 text-gray-400">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
+                                        <i class="bi bi-search"></i>
+                                    </div>
+
+                                    <!-- Search Results Dropdown -->
+                                    <div x-show="searchResults.length > 0"
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                        x-transition:enter-end="opacity-100 transform translate-y-0"
+                                        class="absolute left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
+                                        <template x-for="result in searchResults" :key="result.id">
+                                            <a :href="result.url"
+                                                class="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                                                <i :class="result.icon + ' w-5 h-5 text-gray-400 mr-3'"></i>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700" x-text="result.name"></p>
+                                                    <p class="text-xs text-gray-500"
+                                                        x-text="result.parent_id ? 'Sub Menu' : 'Main Menu'"></p>
+                                                </div>
+                                            </a>
+                                        </template>
                                     </div>
                                 </div>
                             @else
@@ -106,12 +141,29 @@
                         <!-- Right Side Nav Items -->
                         <div class="flex items-center space-x-4">
                             <!-- Notifications -->
-                            <button class="p-2 text-gray-500 hover:text-[#637F26] rounded-lg hover:bg-gray-100">
+                            @php
+                                $notificationRoute = '#';
+                                $userRole = Auth::user()->roles()->first()->name ?? '';
+
+                                if ($userRole == 'student') {
+                                    $notificationRoute = route('student.notifications');
+                                } elseif ($userRole == 'pic') {
+                                    $notificationRoute = route('responsible.notifications');
+                                } else {
+                                    $notificationRoute = route('notification.index');
+                                }
+                            @endphp
+
+                            <a href="{{ $notificationRoute }}"
+                                class="p-2 text-gray-500 hover:text-[#637F26] rounded-lg hover:bg-gray-100">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                            </button>
+                                @php
+                                    $userRole = Auth::user()->roles()->first()->name ?? '';
+                                @endphp
+                            </a>
 
                             <!-- User Profile Dropdown -->
                             <div class="relative" x-data="{ open: false }">
@@ -129,11 +181,18 @@
                                     x-transition:enter-end="opacity-100 scale-100"
                                     class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
                                     style="display: none;">
-                                    <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                    <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+
+                                    <a href="{{ $profileRoute }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        Profile
+                                    </a>
+
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        Settings
+                                    </a>
+
                                     <hr class="my-2 border-gray-200">
+
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit"
@@ -187,3 +246,9 @@
         });
     </script>
 @endsection
+
+<head>
+    <!-- Kode head lainnya -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Kode head lainnya -->
+</head>

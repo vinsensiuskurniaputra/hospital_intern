@@ -16,17 +16,17 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {{ $student->user->username }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {{ $student->internshipClass->name }}</td>
+            {{ $student->internshipClass->name ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {{ $student->studyProgram->name }}</td>
         <td class="px-6 py-4 whitespace-normal break-words max-w-sm text-sm text-gray-900">
             {{ $student->studyProgram->campus->name }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {{ $student->internshipClass->classYear->class_year }}</td>
+            {{ $student->internshipClass->classYear->class_year ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap">
             <span
-                class="px-2 py-1 text-xs font-medium rounded-full {{ $student->status == 0 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                {{ $student->status == 0 ? 'On Study' : 'Passed' }}
+                class="px-2 py-1 text-xs font-medium rounded-full {{ $student->is_finished == 0 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                {{ $student->is_finished == 0 ? 'On Study' : 'Passed' }}
             </span>
         </td>
         <td class="px-6 py-4 flex whitespace-nowrap text-right text-sm font-medium space-x-2">
@@ -39,6 +39,14 @@
                 @method('DELETE')
                 <button type="submit" class="text-red-500 hover:text-red-600">
                     <i class="bi bi-trash"></i>
+                </button>
+            </form>
+            <form id="change-status-{{ $student->id }}" action="{{ route('students.change_status', $student->id) }}"
+                method="POST" onsubmit="return confirm('Apakah Anda yakin ingin Mengedit Status student ini?');">
+                @csrf
+                @method('PUT')
+                <button type="submit" class="text-green-500 hover:text-green-600">
+                    <i class="bi bi-check"></i>
                 </button>
             </form>
         </td>

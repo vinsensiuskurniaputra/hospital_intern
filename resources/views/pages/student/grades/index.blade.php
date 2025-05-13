@@ -1,4 +1,4 @@
-@extends('layouts.student')
+@extends('layouts.auth')
 
 @section('title', 'Nilai Mahasiswa')
 

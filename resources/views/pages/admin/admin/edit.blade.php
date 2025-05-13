@@ -5,7 +5,7 @@
 @section('content')
     <div class="p-10">
         <div class="flex items-center mb-6">
-            <a href="{{ route('admin.students.index') }}"><i class="bi bi-chevron-left mr-4  fw-bold"></i></a>
+            <a href="{{ url()->previous() }}"><i class="bi bi-chevron-left mr-4  fw-bold"></i></a>
             <h2 class="text-2xl font-semibold text-gray-800">Edit Admin</h2>
         </div>
 

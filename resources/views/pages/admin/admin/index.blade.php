@@ -62,10 +62,6 @@
                                 </div>
                             </div>
                             <div class="flex gap-3">
-                                <button
-                                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="bi bi-upload mr-2"></i>Impor CSV
-                                </button>
                                 <button @click="addModal = true"
                                     class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
                                     <i class="bi bi-plus-lg mr-2"></i>Tambah Admin
