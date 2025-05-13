@@ -59,7 +59,7 @@
                             </div>
                             <select id="roleFilter"
                                 class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                                <option value="">All Role</option>
+                                <option value="">Semua Role</option>
                                 @foreach ($roles as $role)
                                     <option value="{{ $role->id }}">{{ $role->name }}</option>
                                 @endforeach
@@ -73,11 +73,11 @@
                     <table class="table-auto  ">
                         <thead class="bg-gray-50 border-y border-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Roles</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody id="TableBody" class="divide-y divide-gray-100">
