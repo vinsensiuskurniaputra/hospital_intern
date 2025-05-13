@@ -53,16 +53,6 @@ class AdminScheduleController extends Controller
                     })
                     ->orWhereHas('stase.departement', function($sq) use ($searchTerm) {
                         $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhereHas('internshipClass.classYear', function($sq) use ($searchTerm) {
-                        $sq->where('class_year', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhereHas('stase.responsibleUsers.user', function($sq) use ($searchTerm) {
-                        $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhere(function($sq) use ($searchTerm) {
-                        $sq->whereRaw("DATE_FORMAT(start_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"])
-                           ->orWhereRaw("DATE_FORMAT(end_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"]);
                     });
                 });
             }
@@ -202,22 +192,24 @@ class AdminScheduleController extends Controller
         ]);
 
         try {
-            $locale = app()->getLocale();
+            // Set locale to Indonesian
             \Carbon\Carbon::setLocale('id');
             
             // Get the original values before update
             $originalStaseId = $schedule->stase_id;
             $originalStartDate = $schedule->start_date;
             $originalEndDate = $schedule->end_date;
+
+            // Get original stase name
             $originalStaseName = $schedule->stase->name;
             
             // Update the schedule
             $schedule->update($validated);
 
-            // Reload the schedule
+            // Reload the schedule to get the new stase name
             $schedule->load('stase', 'internshipClass');
             
-            // Get names for notification
+            // Get class name and new stase name for notification
             $className = $schedule->internshipClass->name;
             $newStaseName = $schedule->stase->name;
 
@@ -226,9 +218,6 @@ class AdminScheduleController extends Controller
             $formattedEndDate = \Carbon\Carbon::parse($validated['end_date'])->translatedFormat('d F Y');
             $originalFormattedStartDate = \Carbon\Carbon::parse($originalStartDate)->translatedFormat('d F Y');
             $originalFormattedEndDate = \Carbon\Carbon::parse($originalEndDate)->translatedFormat('d F Y');
-
-            // Kembalikan locale ke setting awal
-            \Carbon\Carbon::setLocale($locale);
 
             // Check what changed and create appropriate notification message
             if ($originalStaseId != $validated['stase_id']) {
@@ -350,19 +339,6 @@ class AdminScheduleController extends Controller
                     })
                     ->orWhereHas('stase.departement', function($sq) use ($searchTerm) {
                         $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for class year
-                    ->orWhereHas('internshipClass.classYear', function($sq) use ($searchTerm) {
-                        $sq->where('class_year', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for responsible users (pembimbing)
-                    ->orWhereHas('stase.responsibleUsers.user', function($sq) use ($searchTerm) {
-                        $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for period dates
-                    ->orWhere(function($sq) use ($searchTerm) {
-                        $sq->whereRaw("DATE_FORMAT(start_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"])
-                           ->orWhereRaw("DATE_FORMAT(end_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"]);
                     });
                 });
                 

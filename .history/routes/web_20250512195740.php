@@ -83,9 +83,6 @@ Route::middleware(['auth', 'menu'])->group(function () {
         Route::get('/presences/schedules/filter-by-date', [AdminScheduleController::class, 'filterByDate'])
             ->name('presences.schedules.filter-by-date');
         
-        Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
-            ->name('presences.schedules.filter');
-
         Route::resource('/presences/schedules', AdminScheduleController::class)
             ->names('presences.schedules');
     });
@@ -93,8 +90,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
     Route::post('/presences/schedules', [AdminScheduleController::class, 'store'])
         ->name('presences.schedules.store');
-    Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
-        ->name('presences.schedules.filter');
+    Route::get('/presences/schedules/filter', [ScheduleController::class, 'filter'])->name('presences.schedules.filter');
   
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
 

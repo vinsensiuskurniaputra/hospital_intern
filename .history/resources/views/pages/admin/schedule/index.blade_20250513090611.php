@@ -170,9 +170,7 @@
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </div>
-                        <input type="text" 
-                            id="search-filter"
-                            placeholder="Cari"
+                        <input type="text" placeholder="Cari"
                             class="pl-10 w-full border border-gray-300 rounded-md py-2 px-4">
                     </div>
                 </div>
@@ -351,6 +349,7 @@
 
         // Update event listener untuk initialization
         document.addEventListener('DOMContentLoaded', function() {
+            // ... existing calendar initialization ...
 
             // Load jadwal hari ini sebagai default
             const today = new Date().toISOString().split('T')[0];
@@ -634,22 +633,10 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                }; 
-            }
-
             const departemenFilter = document.getElementById('departemen-filter');
             const tahunFilter = document.getElementById('tahun-filter');
             const pembimbingFilter = document.getElementById('pembimbing-filter');
-            const searchInput = document.getElementById('search-filter');
+            const searchInput = document.querySelector('input[type="text"]');
             const tbody = document.querySelector('tbody');
             const paginationContainer = document.querySelector('.px-6.py-4.border-t');
 
@@ -747,12 +734,7 @@
                 filter.addEventListener('change', debouncedFilter);
             });
 
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission if within a form
-                    applyFilters();
-                }
-            });
+            searchInput.addEventListener('input', debouncedFilter);
 
             // Attach pagination handlers on initial load
             if (paginationContainer) {
@@ -770,7 +752,6 @@
 
             if (urlParams.toString()) {
                 applyFilters();
-            }
-        }); 
+        });
     </script>
 @endpush

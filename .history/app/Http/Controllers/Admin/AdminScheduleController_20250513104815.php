@@ -53,16 +53,6 @@ class AdminScheduleController extends Controller
                     })
                     ->orWhereHas('stase.departement', function($sq) use ($searchTerm) {
                         $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhereHas('internshipClass.classYear', function($sq) use ($searchTerm) {
-                        $sq->where('class_year', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhereHas('stase.responsibleUsers.user', function($sq) use ($searchTerm) {
-                        $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhere(function($sq) use ($searchTerm) {
-                        $sq->whereRaw("DATE_FORMAT(start_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"])
-                           ->orWhereRaw("DATE_FORMAT(end_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"]);
                     });
                 });
             }
@@ -202,43 +192,26 @@ class AdminScheduleController extends Controller
         ]);
 
         try {
-            $locale = app()->getLocale();
-            \Carbon\Carbon::setLocale('id');
-            
             // Get the original values before update
             $originalStaseId = $schedule->stase_id;
             $originalStartDate = $schedule->start_date;
             $originalEndDate = $schedule->end_date;
-            $originalStaseName = $schedule->stase->name;
-            
+
             // Update the schedule
             $schedule->update($validated);
 
-            // Reload the schedule
-            $schedule->load('stase', 'internshipClass');
-            
-            // Get names for notification
+            // Get class name for notification
             $className = $schedule->internshipClass->name;
-            $newStaseName = $schedule->stase->name;
-
-            // Format dates in Indonesian
-            $formattedStartDate = \Carbon\Carbon::parse($validated['start_date'])->translatedFormat('d F Y');
-            $formattedEndDate = \Carbon\Carbon::parse($validated['end_date'])->translatedFormat('d F Y');
-            $originalFormattedStartDate = \Carbon\Carbon::parse($originalStartDate)->translatedFormat('d F Y');
-            $originalFormattedEndDate = \Carbon\Carbon::parse($originalEndDate)->translatedFormat('d F Y');
-
-            // Kembalikan locale ke setting awal
-            \Carbon\Carbon::setLocale($locale);
 
             // Check what changed and create appropriate notification message
             if ($originalStaseId != $validated['stase_id']) {
                 // Stase changed - create notifications for stase change
-                $studentMessage = "Stase pada jadwal praktikum \"{$className}\" telah diperbaharui dari \"{$originalStaseName}\" menjadi \"{$newStaseName}\", silahkan periksa halaman jadwal";
-                $responsibleMessage = "Jadwal Praktikum \"{$className}\" telah diperbaharui dari Stase \"{$originalStaseName}\" menjadi \"{$newStaseName}\", Pembimbing yang mungkin berkaitan dengan kelas tersebut silahkan periksa halaman jadwal";
+                $studentMessage = "Stase pada jadwal praktikum \"{$className}\" telah diperbaharui, silahkan periksa halaman jadwal";
+                $responsibleMessage = "Jadwal Praktikum \"{$className}\" telah diperbaharui, Pembimbing yang mungkin berkaitan dengan kelas tersebut silahkan periksa halaman jadwal";
             } else if ($originalStartDate != $validated['start_date'] || $originalEndDate != $validated['end_date']) {
                 // Period changed - create notifications for period change
-                $studentMessage = "Periode pada jadwal praktikum \"{$className}\" telah diperbaharui dari \"{$originalFormattedStartDate} s/d {$originalFormattedEndDate}\" menjadi \"{$formattedStartDate} s/d {$formattedEndDate}\", silahkan periksa halaman jadwal";
-                $responsibleMessage = "Jadwal Praktikum \"{$className}\" telah diperbaharui dari periode \"{$originalFormattedStartDate} s/d {$originalFormattedEndDate}\" menjadi \"{$formattedStartDate} s/d {$formattedEndDate}\", Pembimbing yang mungkin berkaitan dengan kelas tersebut silahkan periksa halaman jadwal";
+                $studentMessage = "Periode pada jadwal praktikum \"{$className}\" telah diperbaharui, silahkan periksa halaman jadwal";
+                $responsibleMessage = "Jadwal Praktikum \"{$className}\" telah diperbaharui, Pembimbing yang mungkin berkaitan dengan kelas tersebut silahkan periksa halaman jadwal";
             }
 
             // If there were changes that require notification
@@ -350,19 +323,6 @@ class AdminScheduleController extends Controller
                     })
                     ->orWhereHas('stase.departement', function($sq) use ($searchTerm) {
                         $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for class year
-                    ->orWhereHas('internshipClass.classYear', function($sq) use ($searchTerm) {
-                        $sq->where('class_year', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for responsible users (pembimbing)
-                    ->orWhereHas('stase.responsibleUsers.user', function($sq) use ($searchTerm) {
-                        $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for period dates
-                    ->orWhere(function($sq) use ($searchTerm) {
-                        $sq->whereRaw("DATE_FORMAT(start_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"])
-                           ->orWhereRaw("DATE_FORMAT(end_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"]);
                     });
                 });
                 

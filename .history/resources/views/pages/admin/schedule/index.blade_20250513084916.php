@@ -170,9 +170,7 @@
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </div>
-                        <input type="text" 
-                            id="search-filter"
-                            placeholder="Cari"
+                        <input type="text" placeholder="Cari"
                             class="pl-10 w-full border border-gray-300 rounded-md py-2 px-4">
                     </div>
                 </div>
@@ -351,6 +349,7 @@
 
         // Update event listener untuk initialization
         document.addEventListener('DOMContentLoaded', function() {
+            // ... existing calendar initialization ...
 
             // Load jadwal hari ini sebagai default
             const today = new Date().toISOString().split('T')[0];
@@ -631,48 +630,26 @@
             }
         });
     </script>
-    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                }; 
-            }
+        // ...existing calendar scripts...
 
+        // Add filter functionality
+        document.addEventListener('DOMContentLoaded', function() {
             const departemenFilter = document.getElementById('departemen-filter');
             const tahunFilter = document.getElementById('tahun-filter');
             const pembimbingFilter = document.getElementById('pembimbing-filter');
-            const searchInput = document.getElementById('search-filter');
+            const searchInput = document.querySelector('input[type="text"]');
             const tbody = document.querySelector('tbody');
-            const paginationContainer = document.querySelector('.px-6.py-4.border-t');
 
-            // Tambahkan fungsi untuk handle pagination click
-            function handlePaginationClick(e) {
-                e.preventDefault();
-                const url = new URL(e.target.href);
-                const params = new URLSearchParams(url.search);
-                
-                // Tambahkan filter yang aktif ke params
-                params.set('departemen', departemenFilter.value || '');
-                params.set('tahun', tahunFilter.value || '');
-                params.set('pembimbing', pembimbingFilter.value || '');
-                params.set('search', searchInput.value || '');
+            function applyFilters() {
+                const params = new URLSearchParams({
+                    departemen: departemenFilter.value,
+                    tahun: tahunFilter.value,
+                    pembimbing: pembimbingFilter.value,
+                    search: searchInput.value
+                });
 
-                // Update URL tanpa reload
-                window.history.pushState({}, '', `${url.pathname}?${params.toString()}`);
-                
-                fetchFilteredData(params);
-            }
-
-            // Fungsi untuk fetch data
-            function fetchFilteredData(params) {
+                // Show loading state
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="7" class="text-center py-4">
@@ -687,44 +664,63 @@
                     </tr>
                 `;
 
-                fetch(`/presences/schedules/filter?${params.toString()}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        tbody.innerHTML = data.html;
-                        if (paginationContainer && data.pagination) {
-                            paginationContainer.innerHTML = data.pagination;
-                            
-                            // Reattach pagination click handlers
-                            paginationContainer.querySelectorAll('a').forEach(link => {
-                                link.addEventListener('click', handlePaginationClick);
-                            });
+                fetch(`/presences/schedules/filter?${params}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            tbody.innerHTML = data.html;
+                            // Update pagination if needed
+                            const paginationContainer = document.querySelector('.pagination');
+                            if (paginationContainer && data.pagination) {
+                                paginationContainer.innerHTML = data.pagination;
+                            }
+                        } else {
+                            throw new Error(data.message || 'Error fetching data');
                         }
-                        
-                        // Reattach delete form handlers
-                        document.querySelectorAll('.delete-form').forEach(form => {
-                            form.addEventListener('submit', confirmDelete);
-                        });
-                    } else {
-                        throw new Error(data.message || 'Error fetching data');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-red-500">
-                                Terjadi kesalahan saat memuat data
-                            </td>
-                        </tr>
-                    `;
-                });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-red-500">
+                                    Terjadi kesalahan saat memuat data
+                                </td>
+                            </tr>
+                        `;
+                    });
             }
+
+            // Debounce function to prevent too many requests
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Apply debounced filter
+            const debouncedFilter = debounce(applyFilters, 300);
+
+            // Add event listeners
+            [departemenFilter, tahunFilter, pembimbingFilter].forEach(filter => {
+                filter.addEventListener('change', debouncedFilter);
+            });
+
+            searchInput.addEventListener('input', debouncedFilter);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const departemenFilter = document.getElementById('departemen-filter');
+            const tahunFilter = document.getElementById('tahun-filter');
+            const pembimbingFilter = document.getElementById('pembimbing-filter');
+            const searchInput = document.querySelector('input[type="text"]');
+            const tbody = document.querySelector('tbody');
 
             function applyFilters() {
                 const params = new URLSearchParams({
@@ -734,43 +730,73 @@
                     search: searchInput.value || ''
                 });
 
-                // Update URL dengan filter
-                window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
-                
-                fetchFilteredData(params);
+                // Show loading state
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <div class="flex items-center justify-center">
+                        <svg class="animate-spin h-5 w-5 text-gray-500 mr-2" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Loading...
+                    </div>
+                </td>
+            </tr>
+        `;
+
+                fetch(`/presences/schedules/filter?${params.toString()}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            tbody.innerHTML = data.html;
+                            const paginationContainer = document.querySelector('.pagination');
+                            if (paginationContainer && data.pagination) {
+                                paginationContainer.innerHTML = data.pagination;
+                            }
+                        } else {
+                            throw new Error(data.message || 'Error fetching data');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-red-500">
+                        Terjadi kesalahan saat memuat data: ${error.message}
+                    </td>
+                </tr>
+            `;
+                    });
             }
 
-            // Inisialisasi event listeners
+            // Debounce function
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+
             const debouncedFilter = debounce(applyFilters, 300);
 
+            // Add event listeners
             [departemenFilter, tahunFilter, pembimbingFilter].forEach(filter => {
                 filter.addEventListener('change', debouncedFilter);
             });
 
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission if within a form
-                    applyFilters();
-                }
-            });
-
-            // Attach pagination handlers on initial load
-            if (paginationContainer) {
-                paginationContainer.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', handlePaginationClick);
-                });
-            }
-
-            // Set initial filter values from URL if any
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('departemen')) departemenFilter.value = urlParams.get('departemen');
-            if (urlParams.has('tahun')) tahunFilter.value = urlParams.get('tahun');
-            if (urlParams.has('pembimbing')) pembimbingFilter.value = urlParams.get('pembimbing');
-            if (urlParams.has('search')) searchInput.value = urlParams.get('search');
-
-            if (urlParams.toString()) {
-                applyFilters();
-            }
-        }); 
+            searchInput.addEventListener('input', debouncedFilter);
+        });
     </script>
 @endpush

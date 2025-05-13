@@ -747,12 +747,7 @@
                 filter.addEventListener('change', debouncedFilter);
             });
 
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission if within a form
-                    applyFilters();
-                }
-            });
+            searchInput.addEventListener('input', debouncedFilter);
 
             // Attach pagination handlers on initial load
             if (paginationContainer) {

@@ -114,51 +114,45 @@
             <div class="p-6 border-b border-gray-100">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="relative flex-1">
-                        <select id="departemen-filter"
-                            class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
-                            <option value="">Departemen</option>
+                        <select id="departemen-filter" class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
+                            <option value="">Semua Departemen</option>
                             @foreach ($departments as $department)
-                                <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                <option value="{{ $department->name }}">{{ $department->name }}</option>
                             @endforeach
                         </select>
                         <div class="absolute right-3 top-3 pointer-events-none">
                             <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </div>
                     </div>
 
                     <div class="relative flex-1">
-                        <select id="tahun-filter"
-                            class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
-                            <option value="">Tahun Angkatan</option>
+                        <select id="tahun-filter" class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
+                            <option value="">Semua Tahun</option>
                             @foreach ($internshipClasses as $class)
-                                <option value="{{ $class->id }}">{{ $class->classYear->class_year }}</option>
+                                <option value="{{ $class->classYear->class_year }}">{{ $class->classYear->class_year }}</option>
                             @endforeach
                         </select>
                         <div class="absolute right-3 top-3 pointer-events-none">
                             <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </div>
                     </div>
 
                     <div class="relative flex-1">
-                        <select id="pembimbing-filter"
-                            class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
-                            <option value="">Pembimbing</option>
+                        <select id="pembimbing-filter" class="w-full border border-gray-300 rounded-md py-2 px-4 pr-8 appearance-none bg-white">
+                            <option value="">Semua Pembimbing</option>
                             @foreach ($responsibles as $responsible)
                                 @if ($responsible && $responsible->user)
-                                    <option value="{{ $responsible->id }}">{{ $responsible->user->name }}</option>
+                                    <option value="{{ $responsible->user->name }}">{{ $responsible->user->name }}</option>
                                 @endif
                             @endforeach
                         </select>
                         <div class="absolute right-3 top-3 pointer-events-none">
                             <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </div>
                     </div>
@@ -170,9 +164,7 @@
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </div>
-                        <input type="text" 
-                            id="search-filter"
-                            placeholder="Cari"
+                        <input type="text" placeholder="Cari"
                             class="pl-10 w-full border border-gray-300 rounded-md py-2 px-4">
                     </div>
                 </div>
@@ -351,6 +343,7 @@
 
         // Update event listener untuk initialization
         document.addEventListener('DOMContentLoaded', function() {
+            // ... existing calendar initialization ...
 
             // Load jadwal hari ini sebagai default
             const today = new Date().toISOString().split('T')[0];
@@ -631,146 +624,45 @@
             }
         });
     </script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                }; 
-            }
 
+    <script>
+        // Filter functionality
+        document.addEventListener('DOMContentLoaded', function() {
             const departemenFilter = document.getElementById('departemen-filter');
             const tahunFilter = document.getElementById('tahun-filter');
             const pembimbingFilter = document.getElementById('pembimbing-filter');
-            const searchInput = document.getElementById('search-filter');
-            const tbody = document.querySelector('tbody');
-            const paginationContainer = document.querySelector('.px-6.py-4.border-t');
+            const searchInput = document.querySelector('input[type="text"]');
 
-            // Tambahkan fungsi untuk handle pagination click
-            function handlePaginationClick(e) {
-                e.preventDefault();
-                const url = new URL(e.target.href);
-                const params = new URLSearchParams(url.search);
-                
-                // Tambahkan filter yang aktif ke params
-                params.set('departemen', departemenFilter.value || '');
-                params.set('tahun', tahunFilter.value || '');
-                params.set('pembimbing', pembimbingFilter.value || '');
-                params.set('search', searchInput.value || '');
-
-                // Update URL tanpa reload
-                window.history.pushState({}, '', `${url.pathname}?${params.toString()}`);
-                
-                fetchFilteredData(params);
-            }
-
-            // Fungsi untuk fetch data
-            function fetchFilteredData(params) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center py-4">
-                            <div class="flex items-center justify-center">
-                                <svg class="animate-spin h-5 w-5 text-gray-500 mr-2" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                </svg>
-                                Loading...
-                            </div>
-                        </td>
-                    </tr>
-                `;
-
-                fetch(`/presences/schedules/filter?${params.toString()}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        tbody.innerHTML = data.html;
-                        if (paginationContainer && data.pagination) {
-                            paginationContainer.innerHTML = data.pagination;
-                            
-                            // Reattach pagination click handlers
-                            paginationContainer.querySelectorAll('a').forEach(link => {
-                                link.addEventListener('click', handlePaginationClick);
-                            });
-                        }
-                        
-                        // Reattach delete form handlers
-                        document.querySelectorAll('.delete-form').forEach(form => {
-                            form.addEventListener('submit', confirmDelete);
-                        });
-                    } else {
-                        throw new Error(data.message || 'Error fetching data');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-red-500">
-                                Terjadi kesalahan saat memuat data
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-
-            function applyFilters() {
-                const params = new URLSearchParams({
-                    departemen: departemenFilter.value || '',
-                    tahun: tahunFilter.value || '',
-                    pembimbing: pembimbingFilter.value || '',
-                    search: searchInput.value || ''
-                });
-
-                // Update URL dengan filter
-                window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
-                
-                fetchFilteredData(params);
-            }
-
-            // Inisialisasi event listeners
-            const debouncedFilter = debounce(applyFilters, 300);
-
-            [departemenFilter, tahunFilter, pembimbingFilter].forEach(filter => {
-                filter.addEventListener('change', debouncedFilter);
-            });
-
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission if within a form
-                    applyFilters();
+            // Add event listeners to all filter controls
+            [departemenFilter, tahunFilter, pembimbingFilter, searchInput].forEach(filter => {
+                if (filter) {
+                    filter.addEventListener(filter.tagName === 'INPUT' ? 'input' : 'change', applyFilters);
                 }
             });
 
-            // Attach pagination handlers on initial load
-            if (paginationContainer) {
-                paginationContainer.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', handlePaginationClick);
+            function applyFilters() {
+                const departemen = departemenFilter.value;
+                const tahun = tahunFilter.value;
+                const pembimbing = pembimbingFilter.value;
+                const search = searchInput.value.toLowerCase();
+
+                // Get all table rows except header
+                const rows = document.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const departemenMatch = !departemen || row.children[2].textContent.includes(departemen);
+                    const tahunMatch = !tahun || row.children[3].textContent.includes(tahun);
+                    const pembimbingMatch = !pembimbing || row.children[4].textContent.includes(pembimbing);
+                    const searchMatch = !search || Array.from(row.children).some(cell => 
+                        cell.textContent.toLowerCase().includes(search)
+                    );
+
+                    // Show/hide row based on filter matches
+                    row.style.display = (departemenMatch && tahunMatch && pembimbingMatch && searchMatch) 
+                        ? '' 
+                        : 'none';
                 });
             }
-
-            // Set initial filter values from URL if any
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('departemen')) departemenFilter.value = urlParams.get('departemen');
-            if (urlParams.has('tahun')) tahunFilter.value = urlParams.get('tahun');
-            if (urlParams.has('pembimbing')) pembimbingFilter.value = urlParams.get('pembimbing');
-            if (urlParams.has('search')) searchInput.value = urlParams.get('search');
-
-            if (urlParams.toString()) {
-                applyFilters();
-            }
-        }); 
+        });
     </script>
 @endpush
