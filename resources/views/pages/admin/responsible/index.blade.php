@@ -15,7 +15,7 @@
                     <!-- Total Students -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Total Students</p>
+                            <p class="text-sm font-medium text-gray-500">Total Mahasiswa</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $studentCount }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -26,7 +26,7 @@
                     <!-- Total Departments -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Program Study</p>
+                            <p class="text-sm font-medium text-gray-500">Program Studi</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $studyPrograms->count() }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -37,7 +37,7 @@
                     <!-- Total Campuses -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Campuses</p>
+                            <p class="text-sm font-medium text-gray-500">Kampus</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $campuses->count() }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -65,7 +65,7 @@
                             <div class="flex gap-3">
                                 <button
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="bi bi-upload mr-2"></i>Import CSV
+                                    <i class="bi bi-upload mr-2"></i>Impor CSV
                                 </button>
                                 <button @click="addModal = true"
                                     class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">

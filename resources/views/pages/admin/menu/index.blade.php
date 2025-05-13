@@ -41,12 +41,12 @@
                     <table class="table-auto  ">
                         <thead class="bg-gray-50 border-y border-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Url</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Icon</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Parent</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tautan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ikon</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Induk</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Urutan</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody id="TableBody" class="divide-y divide-gray-100">
