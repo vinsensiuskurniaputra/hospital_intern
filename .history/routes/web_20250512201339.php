@@ -83,9 +83,6 @@ Route::middleware(['auth', 'menu'])->group(function () {
         Route::get('/presences/schedules/filter-by-date', [AdminScheduleController::class, 'filterByDate'])
             ->name('presences.schedules.filter-by-date');
         
-        Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
-            ->name('presences.schedules.filter');
-
         Route::resource('/presences/schedules', AdminScheduleController::class)
             ->names('presences.schedules');
     });

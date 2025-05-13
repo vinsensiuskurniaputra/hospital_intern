@@ -53,6 +53,7 @@ class AdminScheduleController extends Controller
                     })
                     ->orWhereHas('stase.departement', function($sq) use ($searchTerm) {
                         $sq->where('name', 'like', "%{$searchTerm}%");
+                        
                     })
                     ->orWhereHas('internshipClass.classYear', function($sq) use ($searchTerm) {
                         $sq->where('class_year', 'like', "%{$searchTerm}%");

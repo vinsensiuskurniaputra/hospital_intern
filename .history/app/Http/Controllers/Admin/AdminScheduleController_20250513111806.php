@@ -53,16 +53,6 @@ class AdminScheduleController extends Controller
                     })
                     ->orWhereHas('stase.departement', function($sq) use ($searchTerm) {
                         $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhereHas('internshipClass.classYear', function($sq) use ($searchTerm) {
-                        $sq->where('class_year', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhereHas('stase.responsibleUsers.user', function($sq) use ($searchTerm) {
-                        $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    ->orWhere(function($sq) use ($searchTerm) {
-                        $sq->whereRaw("DATE_FORMAT(start_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"])
-                           ->orWhereRaw("DATE_FORMAT(end_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"]);
                     });
                 });
             }
@@ -350,19 +340,6 @@ class AdminScheduleController extends Controller
                     })
                     ->orWhereHas('stase.departement', function($sq) use ($searchTerm) {
                         $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for class year
-                    ->orWhereHas('internshipClass.classYear', function($sq) use ($searchTerm) {
-                        $sq->where('class_year', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for responsible users (pembimbing)
-                    ->orWhereHas('stase.responsibleUsers.user', function($sq) use ($searchTerm) {
-                        $sq->where('name', 'like', "%{$searchTerm}%");
-                    })
-                    // Add search for period dates
-                    ->orWhere(function($sq) use ($searchTerm) {
-                        $sq->whereRaw("DATE_FORMAT(start_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"])
-                           ->orWhereRaw("DATE_FORMAT(end_date, '%d-%m-%Y') LIKE ?", ["%{$searchTerm}%"]);
                     });
                 });
                 
