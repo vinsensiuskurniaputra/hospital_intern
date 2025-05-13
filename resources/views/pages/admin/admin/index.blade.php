@@ -66,11 +66,11 @@
                             <div class="flex gap-3">
                                 <button
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="bi bi-upload mr-2"></i>Import CSV
+                                    <i class="bi bi-upload mr-2"></i>Impor CSV
                                 </button>
                                 <button @click="addModal = true"
                                     class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                                    <i class="bi bi-plus-lg mr-2"></i>Add Admin
+                                    <i class="bi bi-plus-lg mr-2"></i>Tambah Admin
                                 </button>
                             </div>
                         </div>
@@ -82,10 +82,10 @@
                     <table class="table-auto  ">
                         <thead class="bg-gray-50 border-y border-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pengguna</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody id="adminTableBody" class="divide-y divide-gray-100">
@@ -106,12 +106,12 @@
                         <!-- Previous Button -->
                         @if ($users->onFirstPage())
                             <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                                Previous
+                                Sebelumnya
                             </button>
                         @else
                             <a href="{{ $users->previousPageUrl() }}"
                                 class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                                Previous
+                                Sebelumnya
                             </a>
                         @endif
 
@@ -160,11 +160,11 @@
                         @if ($users->hasMorePages())
                             <a href="{{ $users->nextPageUrl() }}"
                                 class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                                Next
+                                Selanjutnya
                             </a>
                         @else
                             <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                                Next
+                                Selanjutnya
                             </button>
                         @endif
                     </div>

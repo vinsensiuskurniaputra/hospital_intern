@@ -70,7 +70,7 @@
             <!-- Other Form Fields -->
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengguna</label>
                     <input type="text" name="username" value="{{ old('username', $user->username) }}" required
                         class="w-full px-4 py-2 border rounded-lg @error('username') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
                     @error('username')
@@ -79,7 +79,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
                     <input type="text" name="name" value="{{ old('name', $user->name) }}" required
                         class="w-full px-4 py-2 border rounded-lg @error('name') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
                     @error('name')
@@ -97,7 +97,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
                     <input type="password" name="password" value="{{ old('password') }}"
                         class="w-full px-4 py-2 border rounded-lg @error('password') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
                     @error('password')
@@ -106,7 +106,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password Confirmation</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Kata Sandi</label>
                     <input type="password" name="password_confirmation" value="{{ old('password_confirmation') }}"
                         class="w-full px-4 py-2 border rounded-lg @error('password_confirmation') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
                     @error('password_confirmation')
@@ -119,11 +119,11 @@
                 <div class="flex items-center justify-end gap-3 pt-6">
                     <a href="{{ route('admin.admins.index') }}"
                         class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-600 rounded-lg hover:bg-red-50">
-                        Cancel
+                        Batal
                     </a>
                     <button type="submit"
                         class="px-4 py-2 text-sm font-medium text-white bg-green-700 rounded-lg hover:bg-green-800">
-                        Save Changes
+                        Simpan Perubahan
                     </button>
                 </div>
             </div>
