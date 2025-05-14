@@ -10,7 +10,7 @@
         <div class="p-6 space-y-6">
             <!-- Summary Cards -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h1 class="text-2xl text-gray-800 pb-6">Campuses</h1>
+                <h1 class="text-2xl text-gray-800 pb-6">Kampus</h1>
             </div>
 
             <!-- Main Content Card -->
@@ -49,7 +49,9 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detail</th>
+
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Program Studi</th>
+
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tindakan</th>
                             </tr>
                         </thead>

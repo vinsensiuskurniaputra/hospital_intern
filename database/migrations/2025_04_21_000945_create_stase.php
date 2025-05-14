@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('responsible_user_id')->constrained('responsible_users')->onDelete('cascade');
             $table->string('name');
-            $table->string('detai')->nullable();
+            $table->string('detail')->nullable();
             $table->timestamps();
         });
     }

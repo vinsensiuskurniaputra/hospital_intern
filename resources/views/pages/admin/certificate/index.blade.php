@@ -3,6 +3,6 @@
 @section('title', 'Certificate Management')
 
 @section('content')
-    <h1>Certificate</h1>
+    <h1>Sertifikat</h1>
 
 @endsection

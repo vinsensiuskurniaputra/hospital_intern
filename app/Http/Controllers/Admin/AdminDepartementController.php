@@ -13,7 +13,8 @@ class AdminDepartementController extends Controller
      */
     public function index()
     {
-        return view('pages.admin.departement.index');
+        $departements = Departement::paginate(10);
+        return view('pages.admin.departement.index', compact('departements'));
     }
 
     /**
@@ -29,7 +30,18 @@ class AdminDepartementController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+        ]);
+
+
+        Departement::create([
+            'name' => $validatedData['name'],
+            'description' => $validatedData['description'],
+        ]);
+
+        return redirect()->route('admin.departements.index')->with('success', 'Departement created successfully');
     }
 
     /**
@@ -45,7 +57,7 @@ class AdminDepartementController extends Controller
      */
     public function edit(Departement $departement)
     {
-        //
+        return view('pages.admin.departement.edit', compact('departement'));
     }
 
     /**
@@ -53,7 +65,18 @@ class AdminDepartementController extends Controller
      */
     public function update(Request $request, Departement $departement)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+        ]);
+
+
+        $departement->update([
+            'name' => $validatedData['name'],
+            'description' => $validatedData['description'],
+        ]);
+
+        return redirect()->route('admin.departements.index')->with('success', 'Departement updated successfully');
     }
 
     /**
@@ -61,6 +84,20 @@ class AdminDepartementController extends Controller
      */
     public function destroy(Departement $departement)
     {
-        //
+        $departement->delete();
+        return redirect()->route('admin.departements.index')->with('success', 'Departement deleted successfully');
+    }
+
+    public function filter(Request $request)
+    {
+        $query = Departement::query();
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $departements = $query->paginate(10);
+
+        return view('components.admin.departement.table', compact('departements'))->render();
     }
 }

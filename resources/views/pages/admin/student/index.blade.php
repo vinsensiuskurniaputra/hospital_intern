@@ -31,7 +31,9 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm font-medium text-red-800">
+
                             {{ session('error') ?? 'Ada yang salah dengan masukan Anda!' }}
+
                         </p>
                         @error('file')
                             <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -74,7 +76,9 @@
                     <!-- Total Campuses -->
                     <div class="flex justify-between items-center">
                         <div>
+
                             <p class="text-sm font-medium text-gray-500">Kampus</p>
+
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $campuses->count() }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">

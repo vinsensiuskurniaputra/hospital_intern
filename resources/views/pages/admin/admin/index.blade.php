@@ -33,7 +33,7 @@
                         <p class="text-sm font-medium text-red-800">
                             {{ session('error') ??
                                 "
-                                                                                                                                                                                                                                                            There is something wrong in your input !" }}
+                                                                                                                                                                                                                                                                                        There is something wrong in your input !" }}
                         </p>
                     </div>
                     <button @click="show = false" class="ml-auto text-red-500 hover:text-red-600">
@@ -46,7 +46,7 @@
         <div class="p-6 space-y-6">
             <!-- Summary Cards -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h1 class="text-2xl text-gray-800 pb-6">Admins</h1>
+                <h1 class="text-2xl text-gray-800 pb-6">Admin</h1>
             </div>
 
             <!-- Main Content Card -->

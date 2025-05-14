@@ -9,7 +9,9 @@
     }">
     <div class="bg-white p-6 shadow-lg lg:w-1/3 w-full h-screen overflow-y-scroll" @click.stop>
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-800">Tambah Siswa Baru</h2>
+
+            <h2 class="text-xl font-semibold text-gray-800">Tambah Mahasiswa Baru</h2>
+
             <button @click="{{ $show }} = false" class="text-gray-500 hover:text-gray-700">
                 <i class="bi bi-x-lg"></i>
             </button>
@@ -21,7 +23,9 @@
 
             <!-- Profile Picture Upload -->
             <div x-data="imageUpload()" class="mb-6">
+
                 <label class="block text-sm font-medium text-gray-700 mb-2">Foto Profil</label>
+
 
                 <!-- Upload Area -->
                 <div class="w-full border-2 border-dashed rounded-lg p-4 relative flex flex-col items-center justify-center"
@@ -44,7 +48,9 @@
                     <label x-show="!imageUrl"
                         class="flex flex-col items-center w-full p-6 cursor-pointer hover:bg-gray-100 transition rounded-lg">
                         <i class="bi bi-cloud-arrow-up text-3xl text-gray-400"></i>
+
                         <span class="mt-2 text-sm text-gray-500">Seret dan lepaskan fotomu di sini, atau</span>
+
                         <span class="mt-1 text-sm font-medium text-green-700">Telusuri Berkas</span>
                         <input type="file" name="photo_profile" class="hidden" x-ref="fileInput"
                             @change="handleFileSelect" accept="image/*">
@@ -60,7 +66,7 @@
             <!-- Other Form Fields -->
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengguna</label>
                     <input type="text" name="username" value="{{ old('username') }}" required
                         class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26]">
                     @error('username')
@@ -97,7 +103,7 @@
 
                 <!-- Campus Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Campus</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kampus</label>
                     <select x-init="new TomSelect($el, { create: false, sortField: 'text' })" x-model="selectedCampus"
                         @change="programStudies = allProgramStudies[selectedCampus] || []"
                         class="w-full px-4 py-2 border border-gray-200 rounded-lg">
@@ -110,7 +116,7 @@
 
                 <!-- Study Program -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Study Program</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Program Studi</label>
                     <select name="study_program_id" required class="w-full px-4 py-2 border border-gray-200 rounded-lg">
                         <option value="">Select Study Program</option>
                         <template x-for="study in programStudies" :key="study.id">
@@ -124,7 +130,7 @@
 
                 <!-- Class Year Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Class Year</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Masuk</label>
                     <select x-init="new TomSelect($el, { create: false, sortField: 'text' })" x-model="selectedClassYear"
                         @change="internshipClasses = allInternshipClasses[selectedClassYear] || []"
                         class="w-full px-4 py-2 border border-gray-200 rounded-lg">
@@ -137,7 +143,7 @@
 
                 <!-- Internship Class -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Internship Class</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas Magang</label>
                     <select name="internship_class_id" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
                         <option value="">Select Internship Class</option>
                         <template x-for="internshipClass in internshipClasses" :key="internshipClass.id">

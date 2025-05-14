@@ -24,7 +24,7 @@
                     <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F5F7F0]">
                         <i class="bi bi-file-earmark-arrow-up text-xl text-[#637F26]"></i>
                     </div>
-                    <h3 class="mt-4 text-lg font-semibold text-gray-900">Import {{ $title }}</h3>
+                    <h3 class="mt-4 text-lg font-semibold text-gray-900">Impor {{ $title }}</h3>
                     <p class="mt-1 text-sm text-gray-500">{{ $description ?? 'Upload your CSV file to import data' }}
                     </p>
                 </div>

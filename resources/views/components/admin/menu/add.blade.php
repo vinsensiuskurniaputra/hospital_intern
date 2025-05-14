@@ -30,7 +30,7 @@
     ])
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Parent</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Induk</label>
         <select name="parent_id"  class="w-full px-4 py-2 border border-gray-200 rounded-lg">
             <option value="">None</option>
             @foreach ($menus as $menu)
