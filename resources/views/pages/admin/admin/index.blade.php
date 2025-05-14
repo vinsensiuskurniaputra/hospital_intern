@@ -106,12 +106,12 @@
                         <!-- Previous Button -->
                         @if ($users->onFirstPage())
                             <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                                Previous
+                                Sebelumnya
                             </button>
                         @else
                             <a href="{{ $users->previousPageUrl() }}"
                                 class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                                Previous
+                                Sebelumnya
                             </a>
                         @endif
 
@@ -160,11 +160,11 @@
                         @if ($users->hasMorePages())
                             <a href="{{ $users->nextPageUrl() }}"
                                 class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                                Next
+                                Selanjutnya
                             </a>
                         @else
                             <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                                Next
+                                Selanjutnya
                             </button>
                         @endif
                     </div>

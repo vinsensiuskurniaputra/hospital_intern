@@ -49,7 +49,9 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detail</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Program Studit</th>
+
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Program Studi</th>
+
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tindakan</th>
                             </tr>
                         </thead>

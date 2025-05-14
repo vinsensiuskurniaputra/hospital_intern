@@ -65,11 +65,12 @@
                             <div class="flex gap-3">
                                 <button
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="bi bi-upload mr-2"></i>Import CSV
+                                    <i class="bi bi-upload mr-2"></i>Impor CSV
                                 </button>
                                 <button @click="addModal = true"
                                     class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
                                     <i class="bi bi-plus-lg mr-2"></i>Tambah Penanggung Jawab
+
                                 </button>
                             </div>
                         </div>
@@ -84,13 +85,10 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pengguna</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-<<<<<<< HEAD
+
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Telp</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
-=======
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telp</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
->>>>>>> 9c82e193c40f54f6e87e9d789a0cf88946e1c3e4
+
                             </tr>
                         </thead>
                         <tbody id="TableBody" class="divide-y divide-gray-100">
