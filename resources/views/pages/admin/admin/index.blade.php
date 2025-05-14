@@ -45,7 +45,7 @@
             <!-- Kartu Ringkasan -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
 
-                <h1 class="text-2xl text-gray-800 pb-6">Admin/h1>
+                <h1 class="text-2xl text-gray-800 pb-6">Admin</h1>
 
             </div>
 
@@ -81,7 +81,8 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
 
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pengguna</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pengguna
+                                </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
 
@@ -96,7 +97,8 @@
                 <!-- Navigasi Halaman -->
                 <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
                     <div class="text-sm text-gray-500">
-                        Menampilkan {{ $users->firstItem() }} sampai {{ $users->lastItem() }} dari total {{ $users->total() }} data
+                        Menampilkan {{ $users->firstItem() }} sampai {{ $users->lastItem() }} dari total
+                        {{ $users->total() }} data
                     </div>
                     <div class="flex items-center gap-2">
                         <!-- Tombol Sebelumnya -->
