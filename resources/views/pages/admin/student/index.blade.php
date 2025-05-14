@@ -31,7 +31,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm font-medium text-red-800">
-                            {{ session('error') ?? 'here is something wrong in your input !' }}
+                            {{ session('error') ?? 'Ada yang salah dalam masukan Anda!' }}
                         </p>
                         @error('file')
                             <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -47,12 +47,12 @@
         <div class="p-6 space-y-6">
             <!-- Summary Cards -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h1 class="text-2xl text-gray-800 pb-6">Students</h1>
+                <h1 class="text-2xl text-gray-800 pb-6">Mahasiswa</h1>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Total Students -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Total Students</p>
+                            <p class="text-sm font-medium text-gray-500">Total Mahasiswa</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $studentCount }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -63,7 +63,7 @@
                     <!-- Total Departments -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Program Study</p>
+                            <p class="text-sm font-medium text-gray-500">Program Studi</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $studyPrograms->count() }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -74,7 +74,7 @@
                     <!-- Total Campuses -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Campuses</p>
+                            <p class="text-sm font-medium text-gray-500">Kampus</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $campuses->count() }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -93,24 +93,30 @@
                         <div class="flex w-full overflow-x-auto items-center gap-4">
                             <!-- Filters -->
                             <select id="studyProgramFilter"
-                                class="filter-input px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                                <option value="">All Program Study</option>
+
+                                class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
+                                <option value="">Semua Program Studi</option>
+
                                 @foreach ($studyPrograms as $studyProgram)
                                     <option value="{{ $studyProgram->id }}">{{ $studyProgram->name }}</option>
                                 @endforeach
                             </select>
 
                             <select id="classYearFilter"
-                                class="filter-input px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                                <option value="">All Years</option>
+
+                                class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
+                                <option value="">Semua Tahun</option>
+
                                 @foreach ($classYears as $classYear)
                                     <option value="{{ $classYear->class_year }}">{{ $classYear->class_year }}</option>
                                 @endforeach
                             </select>
 
                             <select id="campusFilter"
-                                class="filter-input px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                                <option value="">All Campuses</option>
+
+                                class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
+                                <option value="">Semua Kampus</option>
+
                                 @foreach ($campuses as $campus)
                                     <option value="{{ $campus->id }}">{{ $campus->name }}</option>
                                 @endforeach
@@ -129,11 +135,11 @@
                             <div class="flex gap-3">
                                 <button @click="showImportModal = true"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="bi bi-upload mr-2"></i>Import CSV
+                                    <i class="bi bi-upload mr-2"></i>Impor CSV
                                 </button>
                                 <button @click="addStudent = true"
                                     class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                                    <i class="bi bi-plus-lg mr-2"></i>Add Student
+                                    <i class="bi bi-plus-lg mr-2"></i>Tambah Mahasiswa
                                 </button>
                             </div>
                         </div>
@@ -145,15 +151,15 @@
                     <table class="table-auto  ">
                         <thead class="bg-gray-50 border-y border-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mahasiswa</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIM</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Program Study
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Program Studi
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Campus</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Year</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kampus</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tahun</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody id="studentTableBody" class="divide-y divide-gray-100">
@@ -228,11 +234,11 @@
                         @if ($students->hasMorePages())
                             <a href="{{ $students->nextPageUrl() }}"
                                 class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                                Next
+                                Selanjutnya
                             </a>
                         @else
                             <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                                Next
+                                Selanjutnya
                             </button>
                         @endif
                     </div>

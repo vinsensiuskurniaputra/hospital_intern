@@ -1,6 +1,7 @@
 @extends('layouts.auth')
 
 @section('content')
+
     <div class="p-6">
         <div class="bg-white rounded-lg shadow">
             <!-- Profile Header -->
@@ -33,6 +34,7 @@
                                         <span>Start: 1 Januari 2025</span>
                                         <span>Selesai: 1 April 2025</span>
                                     </div>
+
                                 </div>
                             </div>
                         </div>

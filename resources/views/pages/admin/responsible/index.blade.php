@@ -15,7 +15,7 @@
                     <!-- Total Students -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Total Students</p>
+                            <p class="text-sm font-medium text-gray-500">Total Mahasiswa</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $studentCount }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -26,7 +26,7 @@
                     <!-- Total Departments -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Program Study</p>
+                            <p class="text-sm font-medium text-gray-500">Program Studi</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $studyPrograms->count() }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -37,7 +37,7 @@
                     <!-- Total Campuses -->
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Campuses</p>
+                            <p class="text-sm font-medium text-gray-500">Kampus</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $campuses->count() }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -65,11 +65,11 @@
                             <div class="flex gap-3">
                                 <button @click="showImportModal = true"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="bi bi-upload mr-2"></i>Import CSV
+                                    <i class="bi bi-upload mr-2"></i>Impor CSV
                                 </button>
                                 <button @click="addModal = true"
                                     class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                                    <i class="bi bi-plus-lg mr-2"></i>Add Responsible
+                                    <i class="bi bi-plus-lg mr-2"></i>Tambah Penanggung Jawab
                                 </button>
                             </div>
                         </div>
@@ -81,11 +81,13 @@
                     <table class="table-auto  ">
                         <thead class="bg-gray-50 border-y border-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pengguna</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telp</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Telp</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
+
                             </tr>
                         </thead>
                         <tbody id="TableBody" class="divide-y divide-gray-100">

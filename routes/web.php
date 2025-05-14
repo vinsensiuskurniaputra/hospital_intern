@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Student\StudentProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
@@ -66,7 +67,6 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
-    
     Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
     Route::get('/departements/filter', [AdminDepartementController::class, 'filter'])->name('departements.filter');
 
