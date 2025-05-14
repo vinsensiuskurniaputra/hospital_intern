@@ -570,29 +570,27 @@ function toggleStudentList() {
                     </div>
                 </div>
 
-                <!-- Right Side - Schedule Cards -->
-                <div class="w-[calc(100%-400px-24px)] flex items-center">
-                    <div id="today-schedules" class="w-full space-y-2">
-                        @forelse($todaySchedules as $schedule)
-                        <div class="bg-[#F5F7F0] rounded-lg p-3">
-                            <h6 class="text-base font-medium mb-1">{{ $schedule['class_name'] }}</h6>
-                            <div class="text-sm text-gray-600 mb-1">{{ $schedule['stase_name'] }}</div>
-                            <div class="text-sm text-gray-600">{{ $schedule['department'] }}</div>
-                        </div>
-                        @empty
-                        <div class="bg-gray-50 rounded-lg p-4 text-center">
-                            <div>
-                                <div class="text-gray-400 mb-2">
-                                    <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                </div>
-                                <div class="text-sm text-gray-500">Tidak ada jadwal untuk hari ini</div>
-                            </div>
-                        </div>
-                        @endforelse
-                    </div>
-                </div>
+<!-- Right Side - Schedule Cards -->
+<div class="w-[calc(100%-400px-24px)] flex items-start"> 
+    <div id="today-schedules" class="w-full space-y-2 mt-14"> <!-- Added mt-8 to align with days -->
+        @forelse($todaySchedules as $schedule)
+        <div class="bg-[#F5F7F0] rounded-lg p-3">
+            <h6 class="text-base font-medium mb-1">{{ $schedule->internshipClass->name ?? 'N/A' }}</h6>
+            <div class="text-sm text-gray-600 mb-1">{{ $schedule->stase->name ?? 'N/A' }}</div>
+            <div class="text-sm text-gray-600">{{ $schedule->stase->departement->name ?? 'N/A' }}</div>
+        </div>
+        @empty
+        <div class="bg-gray-50 rounded-lg p-4 text-center">
+            <div class="text-gray-400 mb-2">
+                <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <div class="text-sm text-gray-500">Tidak ada jadwal untuk hari ini</div>
+        </div>
+        @endforelse
+    </div>
+</div>
             </div>
         </div>
     </div>
@@ -636,26 +634,32 @@ function toggleStudentList() {
 
             <!-- Table -->
             <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-center text-sm font-bold text-gray-700 min-w-[150px]">Tanggal</th>
-                            <th class="px-6 py-3 text-center text-sm font-bold text-gray-700">Stase</th>
-                            <th class="px-6 py-3 text-center text-sm font-bold text-gray-700">Kelas</th>
-                            <th class="px-6 py-3 text-center text-sm font-bold text-gray-700">Departemen</th>
-                        </tr>
-                    </thead>
+                <table class="w-full border-collapse">
+<thead class="bg-gray-50">
+    <tr>
+        <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Tanggal</th>
+        <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Stase</th>
+        <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Kelas</th>
+        <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Departemen</th>
+    </tr>
+</thead>
                     <tbody class="divide-y divide-gray-200">
                         @forelse($schedules as $schedule)
-                        <tr>
-                            <td class="px-6 py-4 text-sm text-center">{{ Carbon\Carbon::parse($schedule->start_date)->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 text-sm text-center">{{ $schedule->stase->name ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 text-sm text-center">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 text-sm text-center">{{ $schedule->stase->departement->name ?? 'N/A' }}</td>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-8 py-4 text-sm text-center border border-gray-200">
+                                {{ 
+                                    Carbon\Carbon::parse($schedule->start_date)
+                                        ->locale('id')
+                                        ->isoFormat('D MMMM Y')
+                                }}
+                            </td>
+                            <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->stase->name ?? 'N/A' }}</td>
+                            <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
+                            <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->stase->departement->name ?? 'N/A' }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-4 text-sm text-center text-gray-500">
+                            <td colspan="4" class="px-8 py-4 text-sm text-center text-gray-500 border border-gray-200">
                                 Tidak ada jadwal yang ditemukan
                             </td>
                         </tr>
@@ -705,9 +709,6 @@ function toggleStudentList() {
                             <button 
                                 onclick="toggleStudentList()" 
                                 class="text-gray-500 hover:text-gray-700">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
                             </button>
                         </div>
                         
@@ -805,6 +806,32 @@ function toggleStudentList() {
         .no-print {
             display: none;
         }
+    }
+
+    /* Table styles */
+    table {
+        border-spacing: 0;
+        width: 100%;
+    }
+    
+    table td, table th {
+        border: 1px solid #e5e7eb;
+    }
+
+    thead tr th {
+        background-color: #f9fafb; /* Light gray for header */
+    }
+
+    tbody tr td {
+        background-color: #ffffff; /* White for content */
+    }
+
+    tbody tr:hover {
+        background-color: #f3f4f6;
+    }
+
+    tr:hover td {
+        background-color: #f3f4f6;
     }
 </style>
 @endpush
