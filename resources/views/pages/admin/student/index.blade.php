@@ -31,7 +31,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm font-medium text-red-800">
-                            {{ session('error') ?? 'here is something wrong in your input !' }}
+                            {{ session('error') ?? 'Ada yang salah dalam masukan Anda!' }}
                         </p>
                         @error('file')
                             <span class="text-red-500 text-sm">{{ $message }}</span>

@@ -26,7 +26,7 @@
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500">Total Dokkter</p>
+                        <p class="text-sm font-medium text-gray-500">Total Dokter</p>
                         <h3 class="text-2xl font-bold text-gray-800 mt-1">126</h3>
                     </div>
                     <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -59,8 +59,8 @@
                 <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Student Attendance</h3>
-                            <p class="text-sm text-gray-500">January - July 2024</p>
+                            <h3 class="text-lg font-semibold text-gray-800">Kehadiran Mahasiswa</h3>
+                            <p class="text-sm text-gray-500">Januari - Juli 2024</p>
                         </div>
                         <div class="text-right">
                             <p class="text-2xl font-bold text-gray-800">1,000</p>
@@ -79,8 +79,8 @@
                 <!-- Upcoming Schedule -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800">Upcoming Schedule</h3>
-                        <a href="#" class="text-sm text-[#637F26] hover:text-[#85A832]">View All</a>
+                        <h3 class="text-lg font-semibold text-gray-800">Jadwal Mendatang</h3>
+                        <a href="#" class="text-sm text-[#637F26] hover:text-[#85A832]">Lihat Semua</a>
                     </div>
                     <div class="space-y-4">
                         @php
@@ -120,7 +120,7 @@
 
                 <!-- User Activity Logs -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Recent Activity</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Aktivitas Terbaru</h3>
                     <div class="space-y-4">
                         @php
                             $activities = [
@@ -157,7 +157,7 @@
             <div class="space-y-6">
                 <!-- Task Management -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Pending Tasks</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Tugas yang Tertunda</h3>
                     <div class="space-y-4">
                         @php
                             $tasks = [
@@ -185,7 +185,7 @@
 
                 <!-- Important Notifications -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Important Notifications</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Notifikasi Penting</h3>
                     <div class="space-y-4">
                         @php
                             $notifications = [
@@ -217,7 +217,7 @@
                 <!-- Top Students -->
                 <div class="lg:col-span-1 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800">Top Performing Students</h3>
+                        <h3 class="text-lg font-semibold text-gray-800">Mahasiswa Berprestasi Terbaik</h3>
                     </div>
                     <div class="space-y-4">
                         @php
