@@ -93,24 +93,30 @@
                         <div class="flex w-full overflow-x-auto items-center gap-4">
                             <!-- Filters -->
                             <select id="studyProgramFilter"
+
                                 class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
                                 <option value="">Semua Program Studi</option>
+
                                 @foreach ($studyPrograms as $studyProgram)
                                     <option value="{{ $studyProgram->id }}">{{ $studyProgram->name }}</option>
                                 @endforeach
                             </select>
 
                             <select id="classYearFilter"
+
                                 class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
                                 <option value="">Semua Tahun</option>
+
                                 @foreach ($classYears as $classYear)
                                     <option value="{{ $classYear->class_year }}">{{ $classYear->class_year }}</option>
                                 @endforeach
                             </select>
 
                             <select id="campusFilter"
+
                                 class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
                                 <option value="">Semua Kampus</option>
+
                                 @foreach ($campuses as $campus)
                                     <option value="{{ $campus->id }}">{{ $campus->name }}</option>
                                 @endforeach
@@ -122,7 +128,7 @@
                             <div class="w-full lg:w-[360px]">
                                 <div class="relative">
                                     <input type="text" id="searchStudent" placeholder="Search students..."
-                                        class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26]">
+                                        class="filter-input w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26]">
                                     <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
                                 </div>
                             </div>
@@ -246,7 +252,7 @@
             'title' => 'Students',
             'description' => 'Upload your CSV file to import student data',
             'action' => route('students.import'),
-            'template_url' => route('students.import'),
+            'template_url' => route('students.downloadTemplate'),
         ])
 
         @include('components.admin.student.add', [
@@ -260,33 +266,70 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            function fetchStudents() {
-                var studyProgram = $('#studyProgramFilter').val();
-                var classYear = $('#classYearFilter').val();
-                var campus = $('#campusFilter').val();
-                var search = $('#searchStudent').val();
+            // Get initial filter values from URL or set empty
+            let currentFilters = {
+                study_program: new URLSearchParams(window.location.search).get('study_program') || '',
+                class_year: new URLSearchParams(window.location.search).get('class_year') || '',
+                campus: new URLSearchParams(window.location.search).get('campus') || '',
+                search: new URLSearchParams(window.location.search).get('search') || ''
+            };
+
+            // Set initial filter values in form
+            $('#studyProgramFilter').val(currentFilters.study_program);
+            $('#classYearFilter').val(currentFilters.class_year);
+            $('#campusFilter').val(currentFilters.campus);
+            $('#searchStudent').val(currentFilters.search);
+
+            function fetchStudents(page = 1) {
+                const filters = {
+                    ...currentFilters,
+                    page: page
+                };
+
+                // Remove empty filter values
+                Object.keys(filters).forEach(key => {
+                    if (!filters[key]) delete filters[key];
+                });
 
                 $.ajax({
-                    url: "{{ route('students.filter') }}", // Pastikan route ini dibuat
+                    url: "{{ route('students.filter') }}",
                     type: "GET",
-                    data: {
-                        study_program: studyProgram,
-                        class_year: classYear,
-                        campus: campus,
-                        search: search
-                    },
-                    success: function(data) {
-                        console.log(data);
-                        $('#studentTableBody').html(data);
+                    data: filters,
+                    success: function(response) {
+                        $('#studentTableBody').html(response);
+
+                        // Update URL without empty parameters
+                        const queryString = new URLSearchParams(filters).toString();
+                        const newUrl =
+                            `${window.location.pathname}${queryString ? '?' + queryString : ''}`;
+                        window.history.pushState({}, '', newUrl);
                     }
                 });
             }
 
-            // Event listener untuk setiap filter
-            $('#studyProgramFilter, #classYearFilter, #campusFilter, #searchStudent').on('change keyup',
-                function() {
-                    fetchStudents();
-                });
+            // Event listeners for filters
+            $('.filter-input').on('change keyup', function() {
+                const newFilters = {
+                    study_program: $('#studyProgramFilter').val(),
+                    class_year: $('#classYearFilter').val(),
+                    campus: $('#campusFilter').val(),
+                    search: $('#searchStudent').val()
+                };
+
+                // Only update if values actually changed
+                if (JSON.stringify(newFilters) !== JSON.stringify(currentFilters)) {
+                    currentFilters = newFilters;
+                    fetchStudents(1);
+                }
+            });
+
+            // Handle pagination clicks
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                const url = new URL($(this).attr('href'));
+                const page = url.searchParams.get('page');
+                fetchStudents(page);
+            });
         });
     </script>
 

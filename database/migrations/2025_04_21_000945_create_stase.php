@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('stases', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('responsible_user_id')->constrained('responsible_users')->onDelete('cascade');
+            $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
             $table->string('name');
-            $table->string('detai')->nullable();
+            $table->string('detail')->nullable();
             $table->timestamps();
+        });
+        Schema::create('responsible_stase', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('responsible_user_id')->nullable()->constrained('responsible_users')->onDelete('set null');
+            $table->foreignId('stase_id')->constrained('stases')->onDelete('cascade');
         });
     }
 
@@ -26,5 +31,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('stases');
+        Schema::dropIfExists('responsible_stase');
     }
 };
