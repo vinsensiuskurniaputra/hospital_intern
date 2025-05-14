@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+<<<<<<< HEAD
 use App\Models\Campus;
 use App\Models\ClassYear;
 use App\Models\InternshipClass;
@@ -47,3 +48,24 @@ class StudentProfileController extends Controller
         return view("pages.student.profile.index", compact('results'));
     }
 }
+=======
+use App\Models\Student;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class StudentProfileController extends Controller
+{
+    /**
+     * Display the student profile page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        $student = Student::where('user_id', $user->id)->first();
+        
+        return view('pages.student.profile.index', compact('user', 'student'));
+    }
+}
+>>>>>>> 9c82e193c40f54f6e87e9d789a0cf88946e1c3e4

@@ -84,8 +84,13 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pengguna</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+<<<<<<< HEAD
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Telp</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
+=======
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telp</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+>>>>>>> 9c82e193c40f54f6e87e9d789a0cf88946e1c3e4
                             </tr>
                         </thead>
                         <tbody id="TableBody" class="divide-y divide-gray-100">

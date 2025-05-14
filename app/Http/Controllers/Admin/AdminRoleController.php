@@ -15,7 +15,8 @@ class AdminRoleController extends Controller
     public function index()
     {
         $roles = Role::paginate(10);
-        return view('pages.admin.role.index', compact('roles'));
+        $menus = Menu::all();
+        return view('pages.admin.role.index', compact('roles', 'menus'));
     }
 
     /**
@@ -62,8 +63,9 @@ class AdminRoleController extends Controller
     public function edit(Role $role)
     {
         $role = $role;
+        $menus = Menu::where('parent_id', null)->get();
         
-        return view('pages.admin.role.edit', compact('role'));
+        return view('pages.admin.role.edit', compact('role', 'menus'));
     }
 
     /**
