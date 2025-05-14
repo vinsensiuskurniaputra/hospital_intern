@@ -8,7 +8,7 @@
             <div class="flex items-start gap-4">
                 <div class="relative">
                     <div class="w-24 h-24 bg-gray-200 rounded-full">
-                        <img src="{{ $user->photo ?? 'https://ui-avatars.com/api/?name=Ujang+Kedu' }}" 
+                        <img src="{{ $user->photo_profile_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) }}" 
                              alt="Profile Picture"
                              class="w-full h-full rounded-full">
                     </div>
@@ -18,8 +18,8 @@
                 </div>
                 <div class="flex-1 ml-4">
                     <div>
-                        <h1 class="text-2xl font-bold text-white">Ujang Kedu</h1>
-                        <p class="text-gray-100">{{ Auth::user()->roles()->first()->display_name }}</p>
+                        <h1 class="text-2xl font-bold text-white">{{ $user->name }}</h1>
+                        <p class="text-gray-100">{{ $user->roles()->first()->display_name }}</p>
                         <p class="text-gray-100 mt-1">Dokter Spesialisasi Bedah Saraf</p>
                     </div>
                 </div>
@@ -42,22 +42,22 @@
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm text-gray-600">Nama Lengkap</label>
-                    <input type="text" value="Ujang Kedu" 
+                    <input type="text" value="{{ $user->name }}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Alamat Email</label>
-                    <input type="text" value="martingarox123@gmail.com" 
+                    <input type="text" value="{{ $user->email }}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Nomor Induk Pegawai</label>
-                    <input type="email" value="112233445566" 
+                    <input type="email" value="1119999212121" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600">Nomor Telepon</label>
-                    <input type="text" value="056978151005" 
+                    <input type="text" value="{{ $responsible->telp }}" 
                            class="mt-1 block w-full p-2 border border-gray-200 rounded-lg bg-gray-50" readonly>
                 </div>
                 <div class="col-span-2">
