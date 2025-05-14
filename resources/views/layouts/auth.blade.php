@@ -83,7 +83,7 @@
                     <button type="submit" :class="{ 'justify-center': !sidebarOpen }"
                         class="flex items-center w-full p-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors">
                         <i class="bi bi-box-arrow-right w-5" :class="{ 'mr-3': sidebarOpen }"></i>
-                        <span :class="{ 'hidden': !sidebarOpen }">Logout</span>
+                        <span :class="{ 'hidden': !sidebarOpen }">Keluar</span>
                     </button>
                 </form>
             </div>
@@ -143,9 +143,9 @@
                                     class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg border border-gray-200"
                                     style="display: none;">
                                     <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
                                     <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pengaturan</a>
                                     <hr class="my-2 border-gray-200">
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf

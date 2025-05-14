@@ -24,7 +24,7 @@
             </div>
             <div class="ml-3">
                 <p class="text-sm font-medium text-red-800">
-                    {{ session('error') ?? 'here is something wrong in your input !' }}
+                    {{ session('error') ?? 'Ada yang salah dalam input Anda!' }}
                 </p>
             </div>
             <button @click="show = false" class="ml-auto text-red-500 hover:text-red-600">

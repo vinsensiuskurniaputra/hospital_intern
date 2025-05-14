@@ -10,11 +10,11 @@
         <div class="p-6 space-y-6">
             <!-- Summary Cards -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h1 class="text-2xl text-gray-800 pb-6">User Authorization</h1>
+                <h1 class="text-2xl text-gray-800 pb-6">Otorisasi Penggun</h1>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">User Count</p>
+                            <p class="text-sm font-medium text-gray-500">Jumlah Pengguna</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $userCount }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -23,7 +23,7 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Roles</p>
+                            <p class="text-sm font-medium text-gray-500">Peran</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $roleCount }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">
@@ -32,7 +32,7 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Menus</p>
+                            <p class="text-sm font-medium text-gray-500">Menu</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $menuCount }}</h3>
                         </div>
                         <div class="p-3 bg-[#F5F7F0] rounded-lg">

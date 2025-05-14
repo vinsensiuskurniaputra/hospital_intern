@@ -12,7 +12,7 @@
                 <h2
                     class="mt-8 text-3xl font-bold bg-gradient-to-r from-[#637F26] to-[#85A832] bg-clip-text text-transparent">
                     Hospital Intern</h2>
-                <p class="mt-3 text-gray-600 text-lg">Managing medical internships made simple</p>
+                <p class="mt-3 text-gray-600 text-lg">Mengelola magang Medis Menjadi Lebih Mudah</p>
             </div>
         </div>
 
@@ -21,15 +21,15 @@
             <div
                 class="w-full max-w-md space-y-8 bg-white/80 backdrop-blur-sm p-10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
                 <div>
-                    <h1 class="text-3xl font-bold text-center text-gray-800">Welcome Back</h1>
-                    <p class="mt-3 text-center text-gray-600">Sign in to continue your journey</p>
+                    <h1 class="text-3xl font-bold text-center text-gray-800">Selamat Datang Kembali</h1>
+                    <p class="mt-3 text-center text-gray-600">Masuk untuk melanjutkan perjalanan Anda</p>
                 </div>
 
                 <form action="{{ route('login') }}" method="POST" class="mt-10 space-y-6">
                     @csrf
                     <div class="space-y-6">
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700" for="username">Username</label>
+                            <label class="block text-sm font-medium text-gray-700" for="username">Nama Pengguna</label>
                             <input type="text" id="username" name="username" value="{{ old('username') }}" required
                                 class="mt-1 block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm 
                                 focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26] transition-all duration-200
@@ -41,7 +41,7 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700" for="password">Password</label>
+                            <label class="block text-sm font-medium text-gray-700" for="password">Kata Sandi</label>
                             <input type="password" id="password" name="password" required
                                 class="mt-1 block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm 
                                 focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26] transition-all duration-200
@@ -56,17 +56,16 @@
                             <div class="flex items-center">
                                 <input type="checkbox" id="remember" name="remember"
                                     class="h-4 w-4 rounded border-gray-300 text-[#637F26] focus:ring-[#637F26]">
-                                <label for="remember" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                                <label for="remember" class="ml-2 block text-sm text-gray-700">Ingatkan saya</label>
                             </div>
-                            <a href="#" class="text-sm text-[#637F26] hover:text-[#85A832] font-medium">Forgot
-                                password?</a>
+                            <a href="#" class="text-sm text-[#637F26] hover:text-[#85A832] font-medium">Lupa Kata Sandi?</a>
                         </div>
 
                         <button type="submit"
                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl text-sm font-semibold
                             text-white bg-[#637F26] hover:bg-[#85A832] focus:outline-none focus:ring-2 focus:ring-offset-2 
                             focus:ring-[#637F26] transition-all duration-200 shadow-sm hover:shadow-md mt-4">
-                            Sign in
+                            Masuk
                         </button>
                     </div>
                 </form>

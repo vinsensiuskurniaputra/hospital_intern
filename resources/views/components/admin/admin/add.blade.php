@@ -2,7 +2,7 @@
     @click="{{ $show }} = false" x-cloak>
     <div class="bg-white p-6 shadow-lg lg:w-1/3 w-full h-screen overflow-y-scroll" @click.stop>
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-800">Add New Admin</h2>
+            <h2 class="text-xl font-semibold text-gray-800">Tambah Admin Baru</h2>
             <button @click="{{ $show }} = false" class="text-gray-500 hover:text-gray-700">
                 <i class="bi bi-x-lg"></i>
             </button>
@@ -37,8 +37,8 @@
                     <label x-show="!imageUrl"
                         class="flex flex-col items-center w-full p-6 cursor-pointer hover:bg-gray-100 transition rounded-lg">
                         <i class="bi bi-cloud-arrow-up text-3xl text-gray-400"></i>
-                        <span class="mt-2 text-sm text-gray-500">Drag and drop your photo here, or</span>
-                        <span class="mt-1 text-sm font-medium text-green-700">Browse Files</span>
+                        <span class="mt-2 text-sm text-gray-500">Seret dan jatuhkan foto Anda di sini, atau</span>
+                        <span class="mt-1 text-sm font-medium text-green-700">Telusuri Berkas</span>
                         <input type="file" name="photo_profile" class="hidden" x-ref="fileInput"
                             @change="handleFileSelect" accept="image/*">
                     </label>
@@ -53,7 +53,7 @@
             <!-- Other Form Fields -->
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengguna</label>
                     <input type="text" name="username" value="{{ old('username') }}" required
                         class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26]">
                     @error('username')
@@ -62,7 +62,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
                     <input type="text" name="name" value="{{ old('name') }}" required
                         class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26]">
                     @error('name')
@@ -80,7 +80,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
                     <input type="password" name="password" value="{{ old('password') }}"
                         class="w-full px-4 py-2 border rounded-lg @error('password') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
                     @error('password')
@@ -89,7 +89,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password Confirmation</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Kata Sandi</label>
                     <input type="password" name="password_confirmation" value="{{ old('password_confirmation') }}"
                         class="w-full px-4 py-2 border rounded-lg @error('password_confirmation') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
                     @error('password_confirmation')
@@ -102,12 +102,12 @@
                     <button type="button" @click="{{ $show }} = false"
                         class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-600 rounded-lg 
                         hover:bg-red-50 transition-colors duration-200">
-                        Cancel
+                        Batal
                     </button>
                     <button type="submit"
                         class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg 
                         hover:bg-[#85A832] transition-colors duration-200 shadow-sm hover:shadow-md">
-                        Add Admin
+                        Tambah Admin
                     </button>
                 </div>
             </div>
