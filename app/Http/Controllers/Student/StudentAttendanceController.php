@@ -15,29 +15,96 @@ class StudentAttendanceController extends Controller
 {
     public function index()
     {
-        $attendanceStats = [
-            'total' => 1000,
-            'hadir' => 52.1,
-            'izin' => 22.8,
-            'alpha' => 15.9
-        ];
+        $student = Auth::user()->student;
+        
+        // Get attendance data for current month
+        $presences = Presence::where('student_id', $student->id)
+            ->whereMonth('date_entry', Carbon::now()->month)
+            ->get();
 
-        $stases = [
-            [
-                'name' => 'Stase Dokter Umum',
-                'department' => 'Departemen Umum',
-                'date' => '1 Jan - 31 Maret 2025',
-                'percentage' => 80
+        // Calculate main attendance stats
+        $total = $presences->count();
+        $present = $presences->where('status', 'present')->count();
+        $sick = $presences->where('status', 'sick')->count();
+        $absent = $presences->where('status', 'absent')->count();
+
+        $attendanceStats = [
+            'total' => $total,
+            'present' => [
+                'count' => $present,
+                'percent' => $total > 0 ? round(($present / $total) * 100, 1) : 0
             ],
-            [
-                'name' => 'Stase Dokter Umum',
-                'department' => 'Departemen Umum',
-                'date' => '1 Apr - 30 Juni 2025',
-                'percentage' => 0
+            'sick' => [
+                'count' => $sick,
+                'percent' => $total > 0 ? round(($sick / $total) * 100, 1) : 0
+            ],
+            'absent' => [
+                'count' => $absent,
+                'percent' => $total > 0 ? round(($absent / $total) * 100, 1) : 0
             ]
         ];
 
-        return view('pages.student.attendance.index', compact('attendanceStats', 'stases'));
+        // Get stases data through proper relationships
+        $stases = PresenceSession::with(['schedule.stase', 'presences' => function($query) use ($student) {
+            $query->where('student_id', $student->id);
+        }])
+        ->whereHas('schedule', function($query) use ($student) {
+            $query->whereHas('internshipClass.students', function($q) use ($student) {
+                $q->where('students.id', $student->id);
+            });
+        })
+        ->get()
+        ->groupBy('schedule_id')
+        ->map(function($sessions) use ($student) {
+            $schedule = $sessions->first()->schedule;
+            $total = $sessions->count();
+            
+            // Get attendance counts per stase
+            $present = $sessions->flatMap->presences
+                ->where('student_id', $student->id)
+                ->where('status', 'present')
+                ->count();
+                
+            $sick = $sessions->flatMap->presences
+                ->where('student_id', $student->id)
+                ->where('status', 'sick')
+                ->count();
+                
+            $absent = $sessions->flatMap->presences
+                ->where('student_id', $student->id)
+                ->where('status', 'absent')
+                ->count();
+
+            // Calculate percentages
+            $presentPercent = $total > 0 ? ($present / $total) * 100 : 0;
+            $sickPercent = $total > 0 ? ($sick / $total) * 100 : 0;
+            $absentPercent = $total > 0 ? ($absent / $total) * 100 : 0;
+
+            return [
+                'name' => $schedule->stase->name ?? 'Unknown Stase',
+                'department' => $schedule->stase->department->name ?? 'Unknown Department',
+                'date' => Carbon::parse($schedule->start_date)->format('j M') . ' - ' . 
+                         Carbon::parse($schedule->end_date)->format('j M Y'),
+                'percentage' => $presentPercent + $sickPercent,
+                'attendance' => [
+                    'present' => number_format($presentPercent, 1),
+                    'sick' => number_format($sickPercent, 1),
+                    'absent' => number_format($absentPercent, 1)
+                ]
+            ];
+        })
+        ->values();
+
+        // Check if all stages are completed
+        $allStagesCompleted = $stases->count() > 0 && 
+            $stases->every(fn($stase) => $stase['percentage'] >= 80);
+
+        return view('pages.student.attendance.index', compact(
+            'presences',
+            'attendanceStats',
+            'stases',
+            'allStagesCompleted'
+        ));
     }
     
     public function submitToken(Request $request)
@@ -273,5 +340,35 @@ class StudentAttendanceController extends Controller
         
         // Distance in meters
         return $radius * $c;
+    }
+
+    public function getPresences(Request $request)
+    {
+        $student = Auth::user()->student;
+        $month = $request->month;
+        $year = $request->year;
+        
+        $presences = Presence::where('student_id', $student->id)
+            ->whereYear('date_entry', $year)
+            ->whereMonth('date_entry', $month)
+            ->get()
+            ->pluck('status', 'date_entry')
+            ->toArray();
+        
+        return response()->json($presences);
+    }
+
+    public function getPresenceDetail($date)
+    {
+        $student = Auth::user()->student;
+        
+        $presence = Presence::where('student_id', $student->id)
+            ->whereDate('date_entry', $date)
+            ->first();
+        
+        return response()->json([
+            'success' => true,
+            'presence' => $presence
+        ]);
     }
 }
