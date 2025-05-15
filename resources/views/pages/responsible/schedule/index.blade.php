@@ -58,21 +58,17 @@
 
 @push('scripts')
 <script>
-// Tambahkan fungsi formatDate sebelum fungsi printSchedule
 function formatDate(dateString) {
-    if (!dateString) return '';
+    if (!dateString) return 'N/A';
     
+    const date = new Date(dateString);
     const options = { 
-        day: 'numeric', 
-        month: 'long', 
+        day: 'numeric',
+        month: 'long',
         year: 'numeric'
     };
     
-    const date = new Date(dateString);
-    // Format date to Indonesian locale
-    const formattedDate = date.toLocaleDateString('id-ID', options);
-    
-    return formattedDate;
+    return date.toLocaleDateString('id-ID', options);
 }
 
 let selectedDate = new Date().toISOString().split('T')[0]; // Set default selected date to today
@@ -274,6 +270,11 @@ generateCalendar(
 function printSchedule() {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
+    
+    if (!startDate || !endDate) {
+        alert('Pilih rentang tanggal terlebih dahulu');
+        return;
+    }
 
     // Create print content
     let printContent = `
@@ -370,16 +371,24 @@ function printSchedule() {
                         <th>Tanggal</th>
                         <th>Stase</th>
                         <th>Kelas</th>
-                        <th>Departemen</th>
                     </tr>
                 </thead>
                 <tbody>
     `;
 
-    // Get table rows
+    // Get current table content
     const rows = document.querySelectorAll('table tbody tr');
     rows.forEach(row => {
-        printContent += row.outerHTML;
+        const cells = Array.from(row.querySelectorAll('td'));
+        if (cells.length === 3) { // Pastikan ada 3 kolom
+            printContent += `
+                <tr>
+                    <td>${cells[0].textContent}</td>
+                    <td>${cells[1].textContent}</td>
+                    <td>${cells[2].textContent}</td>
+                </tr>
+            `;
+        }
     });
 
     printContent += `
@@ -392,15 +401,13 @@ function printSchedule() {
     `;
 
     // Create print window
-    const printWindow = window.open('about:blank', '_blank');
-    
-    // Set content and trigger print
+    const printWindow = window.open('', '_blank');
     printWindow.document.write(printContent);
     printWindow.document.close();
-    
-    // Add event listener for after content loads
+
+    // Print after content loads
     printWindow.onload = function() {
-        printWindow.focus(); // Focus the new window
+        printWindow.focus();
         setTimeout(() => {
             printWindow.print();
             printWindow.close();
@@ -438,7 +445,6 @@ function applyFilter() {
         </tr>
     `;
 
-    // Update URL to use the correct route
     fetch(`/responsible/schedule/filter?start_date=${startDate}&end_date=${endDate}`)
         .then(response => {
             if (!response.ok) {
@@ -463,10 +469,11 @@ function applyFilter() {
 
             tableBody.innerHTML = data.schedules.map(schedule => `
                 <tr>
-                    <td class="px-6 py-4 text-sm text-center">${formatDate(schedule.start_date)}</td>
-                    <td class="px-6 py-4 text-sm text-center">${schedule.stase?.name || 'N/A'}</td>
-                    <td class="px-6 py-4 text-sm text-center">${schedule.internship_class?.name || 'N/A'}</td>
-                    <td class="px-6 py-4 text-sm text-center">${schedule.stase?.departement?.name || 'N/A'}</td>
+                    <td class="px-8 py-4 text-sm text-center border border-gray-200">
+                        ${formatDate(schedule.start_date)} - ${formatDate(schedule.end_date)}
+                    </td>
+                    <td class="px-8 py-4 text-sm text-center border border-gray-200">${schedule.stase?.name || 'N/A'}</td>
+                    <td class="px-8 py-4 text-sm text-center border border-gray-200">${schedule.internship_class?.name || 'N/A'}</td>
                 </tr>
             `).join('');
         })
@@ -572,21 +579,23 @@ function toggleStudentList() {
 
 <!-- Right Side - Schedule Cards -->
 <div class="w-[calc(100%-400px-24px)] flex items-start"> 
-    <div id="today-schedules" class="w-full space-y-2 mt-14"> <!-- Added mt-8 to align with days -->
+    <div id="today-schedules" class="w-full mt-14 h-[calc(100%-7.5rem)]"> <!-- Tambahkan fixed height -->
         @forelse($todaySchedules as $schedule)
-        <div class="bg-[#F5F7F0] rounded-lg p-3">
+        <div class="bg-[#F5F7F0] rounded-lg p-3 mb-2">
             <h6 class="text-base font-medium mb-1">{{ $schedule->internshipClass->name ?? 'N/A' }}</h6>
             <div class="text-sm text-gray-600 mb-1">{{ $schedule->stase->name ?? 'N/A' }}</div>
             <div class="text-sm text-gray-600">{{ $schedule->stase->departement->name ?? 'N/A' }}</div>
         </div>
         @empty
-        <div class="bg-gray-50 rounded-lg p-4 text-center">
-            <div class="text-gray-400 mb-2">
-                <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
+        <div class="bg-gray-50 rounded-lg h-[280px] flex items-center justify-center"> <!-- Sesuaikan height dengan tinggi kalender -->
+            <div class="text-center">
+                <div class="text-gray-400 mb-2">
+                    <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div class="text-sm text-gray-500">Tidak ada jadwal untuk tanggal ini</div>
             </div>
-            <div class="text-sm text-gray-500">Tidak ada jadwal untuk hari ini</div>
         </div>
         @endforelse
     </div>
@@ -640,31 +649,30 @@ function toggleStudentList() {
         <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Tanggal</th>
         <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Stase</th>
         <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Kelas</th>
-        <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Departemen</th>
     </tr>
 </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @forelse($schedules as $schedule)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-8 py-4 text-sm text-center border border-gray-200">
-                                {{ 
-                                    Carbon\Carbon::parse($schedule->start_date)
-                                        ->locale('id')
-                                        ->isoFormat('D MMMM Y')
-                                }}
-                            </td>
-                            <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->stase->name ?? 'N/A' }}</td>
-                            <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
-                            <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->stase->departement->name ?? 'N/A' }}</td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="px-8 py-4 text-sm text-center text-gray-500 border border-gray-200">
-                                Tidak ada jadwal yang ditemukan
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
+
+<tbody class="divide-y divide-gray-200">
+    @forelse($schedules as $schedule)
+    <tr class="hover:bg-gray-50">
+        <td class="px-8 py-4 text-sm text-center border border-gray-200">
+            {{ 
+                Carbon\Carbon::parse($schedule->start_date)->locale('id')->isoFormat('D MMMM Y') 
+            }} - {{
+                Carbon\Carbon::parse($schedule->end_date)->locale('id')->isoFormat('D MMMM Y')
+            }}
+        </td>
+        <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->stase->name ?? 'N/A' }}</td>
+        <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="3" class="px-8 py-4 text-sm text-center text-gray-500 border border-gray-200">
+            Tidak ada jadwal yang ditemukan
+        </td>
+    </tr>
+    @endforelse
+</tbody>
                 </table>
             </div>
 

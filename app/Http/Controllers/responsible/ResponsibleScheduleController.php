@@ -48,7 +48,7 @@ class ResponsibleScheduleController extends Controller
         // Get all schedules for table, ordered by start_date
         $schedules = Schedule::with(['internshipClass', 'stase.departement'])
             ->whereIn('stase_id', $staseIds)
-            ->orderBy('start_date', 'asc') // Menambahkan pengurutan berdasarkan start_date
+            ->orderBy('start_date', 'asc')
             ->get();
 
         // Get all departments for filter
