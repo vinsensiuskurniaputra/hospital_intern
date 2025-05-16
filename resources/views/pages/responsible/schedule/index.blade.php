@@ -88,7 +88,7 @@ function generateCalendar(year, month) {
     // Previous month days
     for (let i = startingDay - 1; i >= 0; i--) {
         calendarHTML += `
-            <div class="text-center p-2 text-gray-400">
+            <div class="text-center text-gray-400 calendar-day">
                 ${prevMonthDays - i}
             </div>`;
     }
@@ -102,7 +102,7 @@ function generateCalendar(year, month) {
         calendarHTML += `
             <div 
                 data-date="${date}"
-                class="text-center p-2 cursor-pointer transition-all duration-200 hover:bg-gray-50 rounded-lg calendar-day
+                class="calendar-day text-center rounded-lg
                     ${isToday ? 'today' : ''}
                     ${isSelected ? 'selected-date' : ''}"
                 onclick="selectDate('${date}', this)">
@@ -117,7 +117,7 @@ function generateCalendar(year, month) {
     // Next month days
     for (let i = 1; i <= remainingDays; i++) {
         calendarHTML += `
-            <div class="text-center p-2 text-gray-400">
+            <div class="text-center text-gray-400 calendar-day">
                 ${i}
             </div>`;
     }
@@ -437,7 +437,7 @@ function applyFilter() {
                 <div class="flex items-center justify-center">
                     <svg class="animate-spin h-5 w-5 mr-3 text-gray-500" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Memuat data...
                 </div>
@@ -567,7 +567,175 @@ function toggleStudentList() {
         toggleBtn.textContent = 'Lihat Mahasiswa';
     }
 }
+
+function loadClassDetails(staseId, classId) {
+    if (!staseId || !classId) return;
+
+    const container = document.getElementById('class-container');
+    container.innerHTML = `
+        <div class="flex items-center justify-center p-6">
+            <svg class="animate-spin h-5 w-5 mr-3 text-gray-500" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Memuat data...</span>
+        </div>
+    `;
+
+    fetch(`/responsible/schedule/class-details?stase_id=${staseId}&class_id=${classId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Terjadi kesalahan');
+            }
+
+            const studentList = data.students.map(student => `
+                <div class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div class="flex-shrink-0">
+                        <img 
+                            src="${student.user?.photo_profile_url || '/images/default-avatar.png'}" 
+                            alt="Profile" 
+                            class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                        >
+                    </div>
+                    <div class="flex-grow">
+                        <h6 class="text-sm font-medium text-gray-900">${student.user?.name || 'N/A'}</h6>
+                        <p class="text-xs text-gray-500">NIM: ${student.nim || 'N/A'}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs text-gray-500">${student.study_program?.name || 'N/A'}</span>
+                            <span class="text-xs text-gray-400">•</span>
+                            <span class="text-xs text-gray-500">${student.study_program?.campus?.name || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h6 class="text-base font-medium">Daftar Mahasiswa</h6>
+                        <span class="text-sm text-gray-500">${data.students.length} mahasiswa</span>
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                        ${studentList}
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            container.innerHTML = `
+                <div class="p-6 text-center text-red-500">
+                    ${error.message || 'Terjadi kesalahan saat memuat data'}
+                </div>
+            `;
+        });
+}
+
+function updateFilters() {
+    const staseId = document.getElementById('stase-filter').value;
+    const classId = document.getElementById('class-filter').value;
+
+    if (staseId && classId) {
+        loadClassDetails(staseId, classId);
+    } else {
+        document.getElementById('class-container').innerHTML = `
+            <div class="p-6 text-center text-gray-500">
+                Pilih Stase dan Kelas untuk melihat daftar mahasiswa
+            </div>
+        `;
+    }
+}
 </script>
+@endpush
+
+@push('styles')
+<style>
+    /* ... existing styles ... */
+
+    /* Dropdown styles */
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+    }
+
+    .form-select:focus {
+        border-color: #637F26;
+        outline: none;
+        box-shadow: 0 0 0 1px rgba(99, 127, 38, 0.2);
+    }
+
+    /* Profile image styles */
+    .student-profile-img {
+        object-fit: cover;
+        transition: transform 0.2s;
+    }
+    
+    .student-profile-img:hover {
+        transform: scale(1.05);
+    }
+
+    /* List item hover effect */
+    .student-list-item {
+        transition: all 0.2s ease;
+    }
+    
+    .student-list-item:hover {
+        background-color: #F8FAF5;
+    }
+
+    /* Calendar day styles */
+    .calendar-day {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        height: 38px; /* Ubah dari 40px ke 48px */
+        width: 48px; /* Ubah dari 40px ke 48px */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 2px;
+        font-size: 14px; /* Tambahkan ukuran font yang sesuai */
+    }
+
+    /* Styling untuk hari-hari dari bulan sebelum/sesudah */
+    .calendar-day.text-gray-400 {
+        pointer-events: none;
+        height: 38px; /* Sesuaikan dengan ukuran yang sama */
+        width: 48px; /* Sesuaikan dengan ukuran yang sama */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 2px;
+    }
+
+    .calendar-day.today {
+        border: 2px solid #637F26;
+        font-weight: 500;
+    }
+
+    .calendar-day.selected-date {
+        background-color: #637F26;
+        color: white;
+    }
+
+    .calendar-day.selected-date.today {
+        border-color: #637F26;
+    }
+
+    .calendar-day:hover:not(.selected-date) {
+        background-color:rgb(219, 224, 209);
+    }
+
+    /* Update calendar grid styling */
+    #calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        background-color: #fff;
+        padding: 4px;
+    }
+</style>
 @endpush
 
                     <!-- Cancel/Done Buttons -->
@@ -579,7 +747,7 @@ function toggleStudentList() {
 
 <!-- Right Side - Schedule Cards -->
 <div class="w-[calc(100%-400px-24px)] flex items-start"> 
-    <div id="today-schedules" class="w-full mt-14 h-[calc(100%-7.5rem)]"> <!-- Tambahkan fixed height -->
+    <div id="today-schedules" class="w-full mt-14 h-[calc(100%-8rem)]"> <!-- Tambahkan fixed height -->
         @forelse($todaySchedules as $schedule)
         <div class="bg-[#F5F7F0] rounded-lg p-3 mb-2">
             <h6 class="text-base font-medium mb-1">{{ $schedule->internshipClass->name ?? 'N/A' }}</h6>
@@ -690,156 +858,36 @@ function toggleStudentList() {
     <!-- Detail Kelas Section -->
     <div class="bg-white rounded-lg shadow-sm mb-6">
         <div class="p-6">
-            <h5 class="text-lg font-medium mb-4">Detail Kelas</h5>
-        
-        @if($currentClass)
-            <div class="bg-[#F5F7F0] rounded-lg" id="class-container">
-                <!-- Class Header -->
-                <div class="p-6 border-b border-gray-200" id="class-detail">
-                    <div class="flex items-center justify-between mb-2">
-                        <h5 class="text-xl font-medium">{{ $currentClass->name }} - {{ $currentSchedule->stase->name ?? 'N/A' }}</h5>
-                    </div>
-                    <p class="text-gray-600 mb-4">{{ $students->count() }} mahasiswa terdaftar</p>
-                    
-                    <button 
-                        onclick="toggleStudentList()" 
-                        class="px-4 py-2 rounded-lg bg-[#637F26] text-white hover:bg-[#4B601C] transition-colors"
-                        id="toggle-students-btn">
-                        Lihat Mahasiswa
-                    </button>
-                </div>
+            <!-- Header with filters -->
+            <div class="flex justify-between items-center mb-4">
+                <h5 class="text-lg font-medium">Detail Kelas</h5>
+                
+                <!-- Filters -->
+                <div class="flex gap-4">
+                    <!-- Stase Filter -->
+                    <select id="stase-filter" class="form-select w-48 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer" onchange="updateFilters()">
+                        <option value="">Pilih Stase</option>
+                        @foreach($stases as $stase)
+                            <option value="{{ $stase->id }}">{{ $stase->name }}</option>
+                        @endforeach
+                    </select>
 
-                <!-- Student List (Hidden by default) -->
-                <div id="student-list" class="hidden border-t border-gray-200">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h6 class="text-lg font-semibold">Daftar Mahasiswa</h6>
-                            <button 
-                                onclick="toggleStudentList()" 
-                                class="text-gray-500 hover:text-gray-700">
-                            </button>
-                        </div>
-                        
-                        <!-- Student List item -->
-                        <div class="space-y-4">
-                            @foreach($students as $student)
-                            <div class="flex items-center justify-between p-4 rounded-lg bg-white transition-colors student-card">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h6 class="font-medium">{{ $student->user->name ?? 'Unnamed Student' }}</h6>
-                                        <p class="text-gray-600">{{ $student->studyProgram->name ?? 'Unknown Program' }}, Kelas {{ $student->class ?? '3' }}</p>
-                                        <p class="text-gray-600">{{ $student->studyProgram->campus->name ?? 'Unknown Campus' }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
+                    <!-- Kelas Filter -->
+                    <select id="class-filter" class="form-select w-36 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer" onchange="updateFilters()">
+                        <option value="">Pilih Kelas</option>
+                        @foreach($internshipClasses as $class)
+                            <option value="{{ $class->id }}">{{ $class->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
-        @else
-            <div class="text-gray-500 text-center py-4">
-                Tidak ada kelas yang dipilih
+
+            <!-- Default Container -->
+            <div class="bg-[#F5F7F0] rounded-lg" id="class-container">
+                <div class="p-6 text-center text-gray-500">
+                    Pilih Stase dan Kelas untuk melihat daftar mahasiswa
+                </div>
             </div>
-        @endif
         </div>
     </div>
-</div>
 @endsection
-
-@push('styles')
-<style>
-    .form-select:focus, .form-input:focus {
-        outline: none;
-        border-color: #637F26;
-        ring-color: #F5F7F0;
-    }
-
-    .calendar-day {
-        transition: all 0.2s ease-in-out;
-    }
-
-    .calendar-day:hover {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .calendar-day.selected-date {
-        background-color: #637F26;
-        color: white;
-    }
-
-    .calendar-day.selected-date:hover {
-        background-color: #637F26;
-    }
-
-    .calendar-day.today {
-        border: 2px solid #637F26;
-    }
-
-    .calendar-day.selected-date.today {
-        border: 2px solid #637F26;
-    }
-
-    /* Hover effect untuk daftar mahasiswa */
-    .student-card {
-        transition: all 0.2s ease-in-out;
-    }
-
-    .student-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        background-color: #fafafa;
-    }
-
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        
-        #print-content, #print-content * {
-            visibility: visible;
-        }
-        
-        #print-content {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-        
-        .no-print {
-            display: none;
-        }
-    }
-
-    /* Table styles */
-    table {
-        border-spacing: 0;
-        width: 100%;
-    }
-    
-    table td, table th {
-        border: 1px solid #e5e7eb;
-    }
-
-    thead tr th {
-        background-color: #f9fafb; /* Light gray for header */
-    }
-
-    tbody tr td {
-        background-color: #ffffff; /* White for content */
-    }
-
-    tbody tr:hover {
-        background-color: #f3f4f6;
-    }
-
-    tr:hover td {
-        background-color: #f3f4f6;
-    }
-</style>
-@endpush
