@@ -7,6 +7,7 @@ use App\Models\Schedule;
 use App\Models\Stase;
 use App\Models\Departement;
 use App\Models\Student;
+use App\Models\ResponsibleUser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,10 +16,10 @@ class ResponsibleScheduleController extends Controller
 {
     public function index()
     {
-        // Get current user's stase
-        $userStase = Stase::where('responsible_user_id', Auth::id())->first();
+        // Get responsible user data
+        $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
         
-        if (!$userStase) {
+        if (!$responsibleUser) {
             return view('pages.responsible.schedule.index', [
                 'todaySchedules' => [],
                 'schedules' => [],
@@ -28,110 +29,128 @@ class ResponsibleScheduleController extends Controller
             ]);
         }
 
-        // Get today's schedules
+        // Get stase IDs
+        $staseIds = $responsibleUser->stases->pluck('id');
+
+        // Get today's schedules for all assigned stases
         $todaySchedules = Schedule::with(['internshipClass', 'stase.departement'])
-            ->where('stase_id', $userStase->id)
-            ->whereDate('date_schedule', Carbon::today())
+            ->whereIn('stase_id', $staseIds)
+            ->whereDate('start_date', Carbon::today())
             ->get()
             ->map(function($schedule) {
                 return [
-                    'class_name' => $schedule->internshipClass->name ?? 'Unknown Class',
-                    'time_range' => '10:00 - 14:00', // Default time if not available
-                    'department' => $schedule->stase->departement->name ?? 'Unknown Department'
+                    'class_name' => $schedule->internshipClass->name ?? 'N/A',
+                    'stase_name' => $schedule->stase->name ?? 'N/A',
+                    'department' => $schedule->stase->departement->name ?? 'N/A'
                 ];
             });
 
-        // Get all schedules for table
-        $schedules = Schedule::with(['internshipClass', 'stase.departement', 'stase.responsibleUser'])
-            ->where('stase_id', $userStase->id)
-            ->orderBy('date_schedule', 'desc')
+        // Get all schedules for table, ordered by start_date
+        $schedules = Schedule::with(['internshipClass', 'stase.departement'])
+            ->whereIn('stase_id', $staseIds)
+            ->orderBy('start_date', 'asc') // Menambahkan pengurutan berdasarkan start_date
             ->get();
 
         // Get all departments for filter
         $departments = Departement::all();
 
-        // Get students for current class (using first schedule's class as example)
+        // Get students for current class
         $currentSchedule = $schedules->first();
         $students = [];
         $currentClass = null;
 
         if ($currentSchedule) {
             $currentClass = $currentSchedule->internshipClass;
-            $students = Student::where('internship_class_id', $currentSchedule->internship_class_id)
-                ->take(8) // Limit to 8 students as example
+            // Load stase relationship
+            $currentSchedule->load('stase');
+            
+            $students = Student::with(['user', 'studyProgram'])
+                ->where('internship_class_id', $currentSchedule->internship_class_id)
                 ->get();
         }
 
-        return view('pages.responsible.schedule.index', [
-            'todaySchedules' => $todaySchedules,
-            'schedules' => $schedules,
-            'departments' => $departments,
-            'students' => $students,
-            'currentClass' => $currentClass
-        ]);
+        return view('pages.responsible.schedule.index', 
+            compact('todaySchedules', 'schedules', 'departments', 'students', 'currentClass', 'currentSchedule')
+        );
     }
 
-    public function getSchedules(Request $request)
+    public function getSchedules(Request $request) 
     {
         try {
-            $date = $request->get('date');
-            $userStase = Stase::where('responsible_user_id', Auth::id())->first();
-
-            if (!$userStase) {
+            $date = $request->date;
+            $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
+            
+            if (!$responsibleUser) {
                 return response()->json([
                     'success' => true,
                     'schedules' => []
                 ]);
             }
 
-            // Debug log
-            \Log::info('Fetching schedules with params:', [
-                'date' => $date,
-                'stase_id' => $userStase->id
-            ]);
+            $staseIds = $responsibleUser->stases->pluck('id');
 
             $schedules = Schedule::with(['internshipClass', 'stase.departement'])
-                ->whereDate('date_schedule', $date)
-                ->get();
-
-            // Debug log
-            \Log::info('Found schedules:', [
-                'count' => $schedules->count(),
-                'schedules' => $schedules->toArray()
-            ]);
-
-            $formattedSchedules = $schedules->map(function($schedule) {
-                return [
-                    'class_name' => $schedule->internshipClass->name ?? 'Unknown Class',
-                    'time_range' => Carbon::parse($schedule->start_date)->format('H:i') . ' - ' . 
-                                  Carbon::parse($schedule->end_date)->format('H:i'),
-                    'department' => $schedule->stase->departement->name ?? 'Unknown Department',
-                    'debug_info' => [
-                        'schedule_id' => $schedule->id,
-                        'date_schedule' => $schedule->date_schedule,
-                        'stase_id' => $schedule->stase_id
-                    ]
-                ];
-            });
+                ->whereIn('stase_id', $staseIds)
+                ->whereDate('start_date', $date)
+                ->get()
+                ->map(function($schedule) {
+                    return [
+                        'class_name' => $schedule->internshipClass->name ?? 'N/A',
+                        'stase_name' => $schedule->stase->name ?? 'N/A',
+                        'department' => $schedule->stase->departement->name ?? 'N/A'
+                    ];
+                });
 
             return response()->json([
                 'success' => true,
-                'schedules' => $formattedSchedules,
-                'debug' => [
-                    'requested_date' => $date,
-                    'raw_count' => $schedules->count(),
-                    'formatted_count' => $formattedSchedules->count(),
-                    'user_stase_id' => $userStase->id
-                ]
+                'schedules' => $schedules
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Schedule loading error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat memuat jadwal',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function filter(Request $request)
+    {
+        try {
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date'
+            ]);
+
+            // Get responsible user data
+            $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
+            
+            if (!$responsibleUser) {
+                return response()->json([
+                    'success' => true,
+                    'schedules' => []
+                ]);
+            }
+
+            // Get stase IDs
+            $staseIds = $responsibleUser->stases->pluck('id');
+
+            $schedules = Schedule::with(['internshipClass', 'stase.departement'])
+                ->whereIn('stase_id', $staseIds)
+                ->whereBetween('start_date', [$request->start_date, $request->end_date])
+                ->orderBy('start_date', 'asc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'schedules' => $schedules
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Schedule filter error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }

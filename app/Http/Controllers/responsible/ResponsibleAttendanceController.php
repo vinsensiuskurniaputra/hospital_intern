@@ -85,15 +85,43 @@ class ResponsibleAttendanceController extends Controller
         $classId = $request->class_id;
         $date = $request->date;
         
-        // Get students from the selected class
+        // Find schedules for this stase and class
+        $schedules = Schedule::where('stase_id', $staseId)
+            ->where('internship_class_id', $classId)
+            ->get();
+        
+        $scheduleIds = $schedules->pluck('id')->toArray();
+        
+        // Check if a presence session exists for this date and these schedules
+        $presenceSession = PresenceSession::whereIn('schedule_id', $scheduleIds)
+            ->whereDate('date', $date)
+            ->first();
+        
+        // If no presence session exists, return early with a flag
+        if (!$presenceSession) {
+            return response()->json([
+                'success' => true,
+                'hasPresenceSession' => false,
+                'students' => []
+            ]);
+        }
+        
+        // Get students from the selected class with their presence data
         $students = Student::where('internship_class_id', $classId)
             ->with(['user', 'studyProgram', 'presences' => function($query) use ($date) {
-                $query->whereDate('date_entry', $date);
+                $query->whereHas('presenceSession', function($q) use ($date) {
+                    $q->whereDate('date', $date);
+                });
+            }, 'attendanceExcuses' => function($query) use ($date) {
+                $query->whereHas('presenceSession', function($q) use ($date) {
+                    $q->whereDate('date', $date);
+                });
             }])
             ->get();
-            
+        
         return response()->json([
             'success' => true,
+            'hasPresenceSession' => true,
             'students' => $students,
         ]);
     }
@@ -150,20 +178,52 @@ class ResponsibleAttendanceController extends Controller
         
         if ($presence) {
             $previousStatus = $presence->status;
-            $presence->update([
-                'status' => $status,
-            ]);
+            
+            // Update with appropriate check_in and check_out based on status
+            if (in_array($status, ['sick', 'excused', 'absent'])) {
+                $presence->update([
+                    'status' => $status,
+                    'check_in' => '00:00:00',
+                    'check_out' => '00:00:00',
+                ]);
+            } else {
+                $presence->update([
+                    'status' => $status,
+                    // Don't change check_in and check_out for 'present' status
+                ]);
+            }
         } else {
             // Create new attendance record
-            $presence = Presence::create([
-                'student_id' => $studentId,
-                'status' => $status,
-                'date_entry' => $date,
-                'check_in' => now()->format('H:i:s'),
-                'check_out' => now()->format('H:i:s'),
-                // Need to set presence_sessions_id
-                'presence_sessions_id' => $this->getOrCreatePresenceSessionId($studentId, $date),
-            ]);
+            $presenceSessionId = $this->getOrCreatePresenceSessionId($studentId, $date);
+            
+            if (!$presenceSessionId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create presence session'
+                ]);
+            }
+            
+            if (in_array($status, ['sick', 'excused', 'absent'])) {
+                // For non-present statuses, use 00:00:00
+                $presence = Presence::create([
+                    'student_id' => $studentId,
+                    'status' => $status,
+                    'date_entry' => $date,
+                    'check_in' => '00:00:00',
+                    'check_out' => '00:00:00',
+                    'presence_sessions_id' => $presenceSessionId,
+                ]);
+            } else {
+                // For present status, use current time for check_in
+                $presence = Presence::create([
+                    'student_id' => $studentId,
+                    'status' => $status,
+                    'date_entry' => $date,
+                    'check_in' => now()->format('H:i:s'),
+                    'check_out' => null, // Leave check_out as null for present students
+                    'presence_sessions_id' => $presenceSessionId,
+                ]);
+            }
         }
         
         // Get presence session ID from the presence record

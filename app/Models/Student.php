@@ -100,5 +100,11 @@ class Student extends Model
             'id' // Primary key pada internship_class
         );
     }
-
+    /**
+     * Get all component grades for this student
+     */
+    public function componentGrades()
+    {
+        return $this->hasMany(StudentComponentGrade::class);
+    }
 }

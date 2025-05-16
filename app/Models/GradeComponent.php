@@ -19,4 +19,11 @@ class GradeComponent extends Model
     {
         return $this->belongsTo(Stase::class);
     }
+    /**
+     * Get the student grades for this component
+     */
+    public function studentGrades()
+    {
+        return $this->hasMany(StudentComponentGrade::class);
+    }
 }

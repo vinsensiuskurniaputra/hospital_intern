@@ -40,4 +40,12 @@ class Stase extends Model
     {
         return $this->belongsToMany(responsibleUser::class, 'responsible_stase');
     }
+
+    /**
+     * Get all student component grades for this stase
+     */
+    public function studentComponentGrades()
+    {
+        return $this->hasMany(StudentComponentGrade::class);
+    }
 }
