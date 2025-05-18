@@ -62,6 +62,12 @@
                             STATUS
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            CHECK IN
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            CHECK OUT
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             BUKTI
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -105,6 +111,26 @@
                             @endphp
                             <span class="text-sm text-gray-900">{{ $statusText }}</span>
                         </td>
+
+                        <!-- CHECK IN column -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($presence && $presence->check_in)
+                                <span class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($presence->check_in)->format('H:i') }}</span>
+                            @else
+                                <span class="text-sm text-gray-900">-</span>
+                            @endif
+                        </td>
+
+                        <!-- CHECK OUT column -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($presence && $presence->check_out)
+                                <span class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($presence->check_out)->format('H:i') }}</span>
+                            @else
+                                <span class="text-sm text-gray-900">-</span>
+                            @endif
+                        </td>
+
+                        <!-- BUKTI column starts here -->
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($presence && ($status === 'sick' || $status === 'excused') && $presence->attendanceExcuse && $presence->attendanceExcuse->proof_url)
                                 <a href="{{ asset('storage/' . $presence->attendanceExcuse->proof_url) }}" target="_blank" class="text-green-600 hover:text-green-900">Lihat</a>
@@ -228,8 +254,15 @@
             const date = dateFilter.value;
             const search = searchFilter.value;
             
+            // Format date for display in a more readable format (e.g., "12 Mei 2023")
+            const formattedDate = new Date(date).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            
             // Show loading indicator
-            document.getElementById('student-list').innerHTML = '<tr><td colspan="7" class="text-center py-4">Loading...</td></tr>';
+            document.getElementById('student-list').innerHTML = '<tr><td colspan="9" class="text-center py-4">Loading...</td></tr>';
             
             fetch(`/responsible/attendance/students?stase_id=${staseId}&class_id=${classId}&date=${date}`, {
                 headers: {
@@ -240,12 +273,27 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    renderStudents(data.students, search);
+                    // Check if presence session exists
+                    if (data.hasPresenceSession === false) {
+                        // Show message that no presence session exists for this date
+                        document.getElementById('student-list').innerHTML = 
+                            `<tr><td colspan="9" class="text-center py-8 text-gray-500">
+                                <p class="text-base">Sesi Presensi belum dibuat untuk tanggal yang dipilih</p>
+                                <p class="font-semibold text-lg mt-1">${formattedDate}</p>
+                                <p class="text-sm mt-3">Silahkan pilih tanggal lain atau Generate token presensi untuk tanggal ini terlebih dahulu.</p>
+                            </td></tr>`;
+                    } else {
+                        renderStudents(data.students, search);
+                    }
+                } else {
+                    document.getElementById('student-list').innerHTML = 
+                        `<tr><td colspan="9" class="text-center py-4 text-red-500">${data.message || 'Failed to load data'}</td></tr>`;
                 }
             })
             .catch(error => {
                 console.error('Error loading students:', error);
-                document.getElementById('student-list').innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500">Failed to load student data</td></tr>';
+                document.getElementById('student-list').innerHTML = 
+                    '<tr><td colspan="9" class="text-center py-4 text-red-500">Failed to load student data</td></tr>';
             });
         }
         
@@ -268,7 +316,7 @@
             
             // If no students found
             if (students.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No students found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">No students found</td></tr>';
                 return;
             }
             
@@ -283,9 +331,30 @@
                 else if (status === 'excused') statusText = 'Izin';
                 else if (status === 'absent') statusText = 'Absen';
                 
+                // Format check-in time
+                let checkInTime = '-';
+                if (presence && presence.check_in) {
+                    checkInTime = formatTime(presence.check_in);
+                }
+                
+                // Format check-out time
+                let checkOutTime = '-';
+                if (presence && presence.check_out) {
+                    checkOutTime = formatTime(presence.check_out);
+                }
+                
                 let proofLink = '';
-                if (presence && (status === 'sick' || status === 'excused') && presence.attendance_excuse && presence.attendance_excuse.proof_url) {
-                    proofLink = `<a href="/storage/${presence.attendance_excuse.proof_url}" target="_blank" class="text-green-600 hover:text-green-900">Lihat</a>`;
+                if (presence && (status === 'sick' || status === 'excused')) {
+                    // Look for excuse directly in the data
+                    const attendanceExcuse = student.attendance_excuses && student.attendance_excuses.find(excuse => 
+                        excuse.presence_sessions_id === presence.presence_session_id
+                    );
+                    
+                    if (attendanceExcuse && attendanceExcuse.letter_url) {
+                        proofLink = `<a href="/storage/${attendanceExcuse.letter_url}" target="_blank" class="text-green-600 hover:text-green-900">Lihat</a>`;
+                    } else {
+                        proofLink = '<span class="text-sm text-gray-900">-</span>';
+                    }
                 } else {
                     proofLink = '<span class="text-sm text-gray-900">-</span>';
                 }
@@ -313,6 +382,12 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="text-sm text-gray-900">${statusText}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">${checkInTime}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">${checkOutTime}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             ${proofLink}
@@ -435,5 +510,24 @@
         // Initialize event handlers for existing edit buttons
         document.querySelectorAll('.edit-btn').forEach(attachEditButtonHandler);
     });
+    
+    // Helper function to format time from timestamp
+    function formatTime(timeString) {
+        // Handle both datetime strings and time-only strings
+        if (!timeString) return '-';
+        
+        try {
+            const date = new Date(timeString);
+            if (isNaN(date)) {
+                // If it's not a valid date, try parsing as HH:MM:SS
+                const parts = timeString.split(':');
+                return `${parts[0]}:${parts[1]}`;
+            }
+            return date.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'});
+        } catch (e) {
+            console.error('Error formatting time:', e);
+            return timeString;
+        }
+    }
 </script>
 @endpush

@@ -139,10 +139,14 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     Route::get('/schedule/filter', [ResponsibleScheduleController::class, 'filter'])->name('schedule.filter');
     
     // Presensi
-    Route::get('/attendance', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'index'])->name('attendance');
-    Route::get('/attendance/classes', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getInternshipClasses'])->name('attendance.classes');
-    Route::get('/attendance/students', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getStudentAttendance'])->name('attendance.students');
-    Route::post('/attendance/update', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'updateAttendance'])->name('attendance.update');
+    Route::get('/attendance', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'index'])
+        ->name('attendance');
+    Route::get('/attendance/students', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getStudentAttendance'])
+        ->name('attendance.students');
+    Route::get('/attendance/classes', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getInternshipClasses'])
+        ->name('attendance.classes');
+    Route::post('/attendance/update', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'updateAttendance'])
+        ->name('attendance.update');
     
     // API endpoints untuk presensi
     Route::get('/attendance/students', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getStudentAttendance'])->name('attendance.students');
