@@ -13,7 +13,6 @@
                         <h6 class="text-sm font-medium text-gray-600">Kelas</h6>
                         <h5 class="text-xl font-semibold mb-2">FK-01</h5>
                         <div class="space-y-0.5">
-                            <p class="text-sm text-gray-600">10.00 - 14.00</p>
                             <p class="text-sm text-gray-600">Departemen Bedah</p>
                         </div>
                     </div>
