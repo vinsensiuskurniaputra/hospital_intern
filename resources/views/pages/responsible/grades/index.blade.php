@@ -3,233 +3,131 @@
 @section('title', 'Penilaian Mahasiswa')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="card">
-        <div class="card-body">
-            <div class="p-6">
-                <!-- Main Title -->
-                <h5 class="text-2xl font-semibold mb-8">Penilaian Mahasiswa</h5>
-
-                <!-- Penilaian Tertunda Section -->
-                <div class="mb-8">
-                    <div class="border-b-2 border-gray-200 mb-6">
-                        <h6 class="text-xl font-medium pb-2">Penilaian Tertunda</h6>
-                    </div>
-                    <h6 class="text-lg font-medium text-gray-900 mb-4">Mahasiswa Yang Menunggu Penilaian</h6>
-                    
-                    <div class="space-y-4">
-                        @foreach([
-                            ['Jeki Kebab', 'Departemen Jantung', 'Mei 15 - Juni 12'],
-                            ['Jeki Rendang', 'Departemen Saraf', 'Mei 10 - Juni 7'],
-                            ['Jeki DokDok', 'Departemen Anak', 'Mei 22 - Juni 19'],
-                            ['Jeki Demangki', 'Departemen Bedah', 'Mei 5 - Juni 2']
-                        ] as [$name, $dept, $period])
-                        <div class="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm transition-all duration-200">
-                            <div class="flex items-center space-x-3">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($name) }}&background=F5F7F0&color=637F26" 
-                                     class="h-10 w-10 rounded-full"
-                                     alt="{{ $name }}">
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $name }}</p>
-                                    <p class="text-sm text-gray-500">{{ $dept }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-sm text-gray-500">{{ $period }}</span>
-                                <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium">Belum Dinilai</span>
-                                <a href="#form-penilaian" 
-                                   onclick="editAssessment('{{ $name }}', '{{ $dept }}', '{{ $period }}')"
-                                   class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">
-                                    edit
-                                </a>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <!-- Single Form Section -->
-                <div id="form-penilaian" class="mb-8">
-                    <div class="border-b-2 border-gray-200 mb-6">
-                        <h6 class="text-xl font-medium pb-2 text-gray-900">Formulir Penilaian</h6>
-                    </div>
-                    
-                    <!-- Info Cards -->
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="bg-[#F5F7F0] p-5 rounded-[20px] border-2 border-[#637F26]/30">
-                            <h6 class="font-medium mb-2 text-gray-900">Informasi Mahasiswa</h6>
-                            <p class="text-sm text-gray-600">Jeki Kebab • Tahun ke-3 Kedokteran • NIM: 2141720001</p>
-                        </div>
-                        <div class="bg-[#F5F7F0] p-5 rounded-[20px] border-2 border-[#637F26]/30">
-                            <h6 class="font-medium mb-2 text-gray-900">Detail Rotasi</h6>
-                            <p class="text-sm text-gray-600">Departemen Jantung • dr. Budi Santoso • 15 Mei - 12 Jun, 2023</p>
+<div class="container-fluid py-4 px-4">
+    <div class="max-w-7xl mx-auto">
+        <div class="card bg-white rounded-xl shadow-sm">
+            <div class="card-body">
+                <div class="p-4">
+                    <!-- Kelas Info -->
+                    <div class="mb-4 space-y-1">
+                        <h6 class="text-sm font-medium text-gray-600">Kelas</h6>
+                        <h5 class="text-xl font-semibold mb-2">FK-01</h5>
+                        <div class="space-y-0.5">
+                            <p class="text-sm text-gray-600">10.00 - 14.00</p>
+                            <p class="text-sm text-gray-600">Departemen Bedah</p>
                         </div>
                     </div>
 
-                    <form action="{{ route('responsible.reports') }}" method="POST">
-                        @csrf
+                    <!-- Detail Kelompok -->
+                    <div class="mt-2">
+                        <div class="flex justify-between items-center mb-2">
+                            <h6 class="text-base font-medium">Detail Kelas</h6>
+                            <button onclick="toggleDetail()" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                                <svg id="toggleIcon" class="w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                        </div>
                         
-                        <!-- Departemen -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium mb-2 text-gray-900">Departemen/Disiplin Ilmu</label>
-                            <div class="relative">
-                                <select class="w-full h-12 px-4 rounded-[20px] border-2 border-[#637F26]/30 bg-[#F5F7F0] text-gray-900 appearance-none cursor-pointer hover:border-[#637F26]/50 transition-colors focus:ring-0 focus:border-[#637F26]/70">
-                                    <option>Departemen Kulit</option>
-                                    <option>Departemen THT</option>
-                                    <option>Departemen Mata</option>
-                                    <option>Departemen Jantung</option>
-                                    <option>Departemen Saraf</option>
-                                    <option>Departemen Gigi</option>
-                                    <option>Departemen Anak</option>
-                                    <option>Departemen Paru</option>
-                                    <option>Departemen Bedah</option>
-                                    <option>Departemen Ortopedi</option>
-                                    <option>Departemen Urologi</option>
-                                    <option>Departemen Obstetri & Ginekologi</option>
-                                </select>
-                                <!-- Dropdown indicator -->
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Evaluasi Kinerja -->
-                        <div class="mb-6">
-                            <h6 class="font-medium mb-4">Evaluasi Kinerja</h6>
-                            @foreach([
-                                'Keahlian' => 'Kemampuan dalam melakukan tugas dan prosedur klinis',
-                                'Komunikasi' => 'Efektivitas dalam berkomunikasi dengan tim medis',
-                                'Profesionalisme' => 'Ketepatan waktu, tanggung jawab, dan perilaku profesional',
-                                'Kemampuan dalam merawat pasien' => 'Kemampuan menangani pasien dengan perhatian dan empati'
-                            ] as $title => $desc)
-                            <div class="border-2 rounded-lg p-5 mb-4 bg-white hover:shadow-md transition-all duration-300">
-                                <div class="flex justify-between items-center gap-8">
-                                    <div class="flex-1">
-                                        <h6 class="font-medium text-base mb-2 text-gray-800">{{ $title }}</h6>
-                                        <p class="text-sm text-gray-500 leading-relaxed">{{ $desc }}</p>
+                        <div id="detailContent" class="space-y-4 transition-all duration-200 ease-in-out">
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- Kampus Card -->
+                                <div class="flex items-center bg-[#ECF5EC] rounded-xl p-4 hover:shadow-lg transition duration-300">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 bg-black rounded-full grid place-items-center">
+                                            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium">Kelas</p>
+                                            <p class="text-base">FK-01</p>
+                                            <!-- <p class="text-xs text-gray-500">Departemen Bedah</p> -->
+                                        </div>
                                     </div>
-                                    <div class="flex flex-col items-center">
-                                        <div class="relative group">
-                                            <input type="text" 
-                                                name="scores[{{ Str::slug($title) }}]"
-                                                class="w-28 h-12 text-xl text-center rounded-lg
-                                                       bg-white/98 
-                                                       border-2 border-gray-200/80
-                                                       shadow-sm
-                                                       hover:border-[#637F26]/70 hover:bg-[#637F26]/10
-                                                       focus:border-[#637F26]/80 focus:ring-2 focus:ring-[#637F26]/30 
-                                                       transition-all duration-200 ease-out"
-                                                maxlength="3"
-                                                pattern="[0-9]*"
-                                                inputmode="numeric"
-                                                oninput="handleScoreInput(this)">
-                                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <span class="text-sm font-medium text-gray-400 score-placeholder">Masukkan nilai</span>
-                                            </div>
+                                </div>
+
+                                <!-- Stase Card -->
+                                <div class="bg-[#ECF5EC] rounded-xl p-4 hover:shadow-lg transition duration-300">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 bg-black rounded-full grid place-items-center">
+                                            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium">Stase</p>
+                                            <p class="text-base">Bedah Umum</p>
+                                            <p class="text-xs text-gray-500">Departemen Bedah</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            @endforeach
-                        </div>
 
-                        <!-- Single Komentar Section - Keep only this one -->
-                        <div class="mb-6">
-                            <h6 class="font-medium mb-2 text-gray-900">Komentar Tambahan</h6>
-                            <div class="border-2 border-gray-200 rounded-[20px] bg-white">
-                                <textarea 
-                                    rows="4" 
-                                    name="comment"
-                                    class="w-full rounded-[20px] border-0 focus:ring-0 bg-white px-4 py-3 text-gray-900 placeholder-gray-400"
-                                    placeholder="Masukkan komentar atau umpan balik tambahan untuk mahasiswa"
-                                    ></textarea>
+                            <!-- Student List moved inside detailContent -->
+                            <div class="bg-[#FAFBF8] rounded-xl p-6">
+                                <h6 class="font-medium text-lg mb-6">Daftar Penilaian</h6>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead>
+                                            <tr class="border-b-2 border-[#E8EBE0]">
+                                                <th class="text-left py-4 px-4 text-sm font-semibold text-gray-700 w-1/5">Nama</th>
+                                                <th class="text-left py-4 px-4 text-sm font-semibold text-gray-700 w-1/5">Kampus</th>
+                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[15%]">Keahlian</th>
+                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[15%]">Komunikasi</th>
+                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[15%]">Profesionalisme</th>
+                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[20%]">Kemampuan Menangani Pasien</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-[#E8EBE0]">
+                                            @foreach([
+                                                ['Zaki Ki-Demang', 'Politeknik Negeri Semarang'],
+                                                ['Zaki Indome', 'Universitas Diponegoro'],
+                                                ['Zaki Dok-dok', 'Universitas Gajah Mada']
+                                            ] as [$name, $campus])
+                                            <tr class="hover:bg-[#F5F7F2] transition-colors duration-150">
+                                                <td class="py-4 px-4">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-10 h-10 bg-[#F0F3E7] rounded-full flex items-center justify-center text-sm font-medium">
+                                                            {{ strtoupper(substr($name, 0, 2)) }}
+                                                        </div>
+                                                        <span class="font-medium">{{ $name }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="py-4 px-4 text-gray-600">{{ $campus }}</td>
+                                                @for($i = 0; $i < 4; $i++)
+                                                <td class="py-4 px-4 text-center">
+                                                    <input type="number" 
+                                                           class="w-full max-w-[140px] mx-auto px-4 py-2.5 text-black bg-white border border-[#E8EBE0] rounded-lg text-base text-center font-medium focus:ring-2 focus:ring-[#DCE0D3] focus:border-transparent transition-all duration-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                           min="0" 
+                                                           max="100" 
+                                                           placeholder="Masukkan Nilai"
+                                                           pattern="[0-9]*"
+                                                           onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"
+                                                    >
+                                                </td>
+                                                @endfor
+                                                
+                                                <!-- Add Submit Button Column -->
+                                                <td class="py-4 px-4 text-center">
+                                                    <button class="px-4 py-2 bg-[#4CAF50] text-white rounded-lg text-sm font-medium hover:bg-[#43A047] transition-all duration-200 focus:ring-2 focus:ring-[#388E3C] focus:ring-offset-2">
+                                                        Submit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="text-center mt-8">
+                                    <button class="px-6 py-2.5 bg-white border border-[#E8EBE0] text-gray-700 rounded-lg text-sm font-medium hover:bg-[#F5F7F2] transition-all duration-200 focus:ring-2 focus:ring-[#DCE0D3]">
+                                        Lihat Semua Mahasiswa
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex space-x-3 mb-8">
-                            <button type="submit" name="action" value="draft"
-                                    class="px-6 py-2 bg-[#F5F7F0] text-[#637F26] rounded-full border-2 border-[#637F26]/30 hover:bg-[#637F26]/10 transition-colors">
-                                Simpan Konsep
-                            </button>
-                            <button type="submit" name="action" value="submit"
-                                    class="px-6 py-2 bg-[#F5F7F0] text-[#637F26] rounded-full border-2 border-[#637F26]/30 hover:bg-[#637F26]/10 transition-colors">
-                                Simpan & Kirim Penilaian
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Riwayat Penilaian Section -->
-                <div>
-                    <div class="border-b-2 border-gray-200 mb-6">
-                        <h6 class="text-xl font-medium pb-2">Riwayat Penilaian</h6>
                     </div>
-
-                    <!-- Search and Export Section -->
-                    <div class="flex items-center justify-between mb-6">
-                        <!-- Search Bar -->
-                        <div class="relative flex-1 max-w-[480px]">
-                            <input type="search" 
-                                   class="w-full h-12 rounded-[20px] border-2 border-gray-200 pl-4 pr-4 bg-gray-50/50
-                                          placeholder-gray-400 text-gray-600
-                                          focus:border-[#637F26]/30 focus:ring-0 focus:bg-white
-                                          transition-colors duration-200"
-                                   placeholder="Cari berdasarkan nama siswa">
-                        </div>
-                        
-                        <!-- Export Buttons -->
-                        <div class="flex gap-3">
-                            <button type="button" 
-                                    class="px-4 py-2.5 rounded-[20px] bg-[#F5F7F0] border-2 border-[#637F26]/30 
-                                           text-[#637F26] text-sm font-medium hover:bg-[#637F26]/10 
-                                           transition-colors duration-200">
-                                Ekspor ke Excel
-                            </button>
-                            <button type="button"
-                                    class="px-4 py-2.5 rounded-[20px] bg-[#F5F7F0] border-2 border-[#637F26]/30 
-                                           text-[#637F26] text-sm font-medium hover:bg-[#637F26]/10 
-                                           transition-colors duration-200">
-                                Ekspor ke PDF
-                            </button>
-                        </div>
-                    </div>
-
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="text-left py-3 font-medium text-black">Mahasiswa</th>
-                                <th class="text-left py-3 font-medium text-black">Departemen</th>
-                                <th class="text-left py-3 font-medium text-black">Periode</th>
-                                <th class="text-left py-3 font-medium text-black">Nilai</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            @foreach([
-                                ['Jeki Rendang', 'Departemen Jantung', '1 April - 28 April', 'Sangat Baik (4.8/5)'],
-                                ['Jeki Kebab', 'Departemen Saraf', '15 Maret - 12 April', 'Baik (4.2/5)'],
-                                ['Jeki Ganteng', 'Departemen Anak', '5 Maret - 2 April', 'Sangat Baik (4.5/5)'],
-                                ['Jeki Demangki', 'Departemen Bedah', '10 Februari - 9 Maret', 'Memuaskan (3.7/5)']
-                            ] as [$name, $dept, $period, $score])
-                            <tr class="hover:bg-gray-50">
-                                <td class="py-3">
-                                    <div class="flex items-center">
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($name) }}&background=F5F7F0&color=637F26" 
-                                             class="h-8 w-8 rounded-full mr-3"
-                                             alt="{{ $name }}">
-                                        <span class="font-medium">{{ $name }}</span>
-                                    </div>
-                                </td>
-                                <td class="py-3 text-gray-600">{{ $dept }}</td>
-                                <td class="py-3 text-gray-600">{{ $period }}</td>
-                                <td class="py-3 text-gray-600">{{ $score }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
@@ -239,78 +137,51 @@
 
 @push('scripts')
 <script>
-function editAssessment(name, dept, period) {
-    // Update info cards
-    const infoCards = document.querySelectorAll('.bg-[#F5F7F0] p.text-sm');
-    infoCards[0].textContent = `${name} • ${dept}`;
-    infoCards[1].textContent = `${dept} • ${period}`;
-    
-    // Set department in select
-    const deptSelect = document.querySelector('select');
-    if (deptSelect) {
-        deptSelect.value = dept;
-    }
-    
-    // Clear previous scores
-    document.querySelectorAll('input[pattern="[0-9]*"]').forEach(input => {
-        input.value = '';
-        handleScoreInput(input);
-    });
-    
-    // Clear comment
-    document.querySelector('textarea').value = '';
-    
-    // Scroll to form
-    document.getElementById('form-penilaian').scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-    });
-}
-
 function handleScoreInput(input) {
-    // Remove non-numeric characters
     input.value = input.value.replace(/[^0-9]/g, '');
-    
     let value = parseInt(input.value);
-    let placeholder = input.nextElementSibling.querySelector('.score-placeholder');
-    
-    // Handle placeholder visibility
-    if (input.value.length > 0) {
-        placeholder.style.display = 'none';
-    } else {
-        placeholder.style.display = 'block';
-    }
-    
-    // Validate range
     if (value > 100) {
         input.value = '100';
     }
-    
-    // Add styling based on value
-    if (value > 0 && value <= 100) {
-        input.classList.add('border-[#637F26]', 'bg-[#637F26]/5', 'text-[#637F26]');
-    } else {
-        input.classList.remove('border-[#637F26]', 'bg-[#637F26]/5', 'text-[#637F26]');
+    if (value < 0) {
+        input.value = '0';
     }
 }
 
-// Initialize all score inputs
-document.addEventListener('DOMContentLoaded', function() {
-    const scoreInputs = document.querySelectorAll('input[pattern="[0-9]*"]');
+function toggleDetail() {
+    const content = document.getElementById('detailContent');
+    const icon = document.getElementById('toggleIcon');
     
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        content.style.maxHeight = content.scrollHeight + 'px';
+        icon.classList.add('rotate-180');
+        setTimeout(() => {
+            content.classList.add('opacity-100');
+            content.classList.remove('opacity-0');
+        }, 10);
+    } else {
+        icon.classList.remove('rotate-180');
+        content.classList.add('opacity-0');
+        content.classList.remove('opacity-100');
+        content.style.maxHeight = '0px';
+        setTimeout(() => {
+            content.style.display = 'none';
+        }, 200);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const content = document.getElementById('detailContent');
+    if (content) {
+        content.style.display = 'none';
+        content.style.maxHeight = '0px';
+        content.classList.add('opacity-0', 'transition-all', 'duration-200', 'ease-in-out');
+    }
+    
+    // Initialize score inputs
+    const scoreInputs = document.querySelectorAll('input[type="number"]');
     scoreInputs.forEach(input => {
-        // Prevent form submission on enter
-        input.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                // Optionally move focus to next input
-                const allInputs = Array.from(scoreInputs);
-                const currentIndex = allInputs.indexOf(this);
-                const nextInput = allInputs[currentIndex + 1];
-                if (nextInput) nextInput.focus();
-            }
-        });
-        
         input.addEventListener('input', () => handleScoreInput(input));
     });
 });
