@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Campus;
+use App\Models\Student;
 use App\Models\ClassYear;
 use Illuminate\Http\Request;
 use App\Models\InternshipClass;
@@ -16,7 +18,8 @@ class AdminInternshipClassController extends Controller
     {
         $internshipClasses = InternshipClass::paginate(10);
         $classYears = ClassYear::all();
-        return view('pages.admin.internship_class.index', compact('internshipClasses', 'classYears'));
+        $campuses = Campus::all();
+        return view('pages.admin.internship_class.index', compact('internshipClasses', 'classYears', 'campuses'));
     }
 
     /**
@@ -35,6 +38,7 @@ class AdminInternshipClassController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'class_year_id' => 'required|exists:class_years,id',
+            'campus_id' => 'required|exists:campuses,id',
             'description' => 'required|string|max:255',
         ]);
 
@@ -42,6 +46,7 @@ class AdminInternshipClassController extends Controller
         InternshipClass::create([
             'name' => $validatedData['name'],
             'class_year_id' => $validatedData['class_year_id'],
+            'campus_id' => $validatedData['campus_id'],
             'description' => $validatedData['description'],
         ]);
 
@@ -62,7 +67,8 @@ class AdminInternshipClassController extends Controller
     public function edit(InternshipClass $internshipClass)
     {
         $classYears = ClassYear::all();
-        return view('pages.admin.internship_class.edit', compact('classYears', 'internshipClass'));
+        $campuses = Campus::all();
+        return view('pages.admin.internship_class.edit', compact('classYears', 'internshipClass', 'campuses'));
     }
 
     /**
@@ -73,12 +79,14 @@ class AdminInternshipClassController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'class_year_id' => 'required|exists:class_years,id',
+            'campus_id' => 'required|exists:campuses,id',
             'description' => 'required|string|max:255',
         ]);
 
         $internshipClass->update([
             'name' => $validatedData['name'],
             'class_year_id' => $validatedData['class_year_id'],
+            'campus_id' => $validatedData['campus_id'],
             'description' => $validatedData['description'],
         ]);
 
@@ -111,5 +119,42 @@ class AdminInternshipClassController extends Controller
         $internshipClasses = $query->paginate(10);
 
         return view('components.admin.internship_class.table', compact('internshipClasses'))->render();
+    }
+
+    public function insertStudent()
+    {
+        $internshipClasses = InternshipClass::with('classYear')->get();
+        $students = Student::with(['user'])->whereDoesntHave('internshipClass')->get();
+        $studentsGroupedByCampus = $students->groupBy('study_program.campus_id');
+        $campuses = Campus::with('studyPrograms.Students')->get();
+        return view('pages.admin.internship_class.insert_student', compact('internshipClasses', 'studentsGroupedByCampus', 'campuses', 'students'));
+    }
+
+    public function insertStudentStore(Request $request)
+    {
+        // Validate the request
+        $validatedData = $request->validate([
+            'internship_class_id' => 'required|exists:internship_classes,id',
+            'students' => 'required|array',
+            'students.*' => 'exists:students,id'
+        ]);
+
+        try {
+            // Get the internship class
+            $internshipClass = InternshipClass::findOrFail($validatedData['internship_class_id']);
+
+            // Update the students' internship_class_id
+            Student::whereIn('id', $validatedData['students'])
+                ->update(['internship_class_id' => $internshipClass->id]);
+
+            return redirect()
+                ->route('admin.internshipClasses.index')
+                ->with('success', 'Students added to internship class successfully');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to add students to internship class. ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }

@@ -28,10 +28,16 @@
                                     <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
                                 </div>
                             </div>
-                            <button @click="addModal = true"
-                                class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                                <i class="bi bi-plus-lg mr-2"></i>Add Internship Class
-                            </button>
+                            <div>
+                                <a href="{{ route('admin.internshipClasses.insertStudent') }}"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
+                                    <i class="bi bi-plus-lg mr-2"></i>Insert Student
+                                </a>
+                                <button @click="addModal = true"
+                                    class="px-4 py-2 ml-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
+                                    <i class="bi bi-plus-lg mr-2"></i>Add Internship Class
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -46,6 +52,12 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">description</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Class Year
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Campus
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Banyak Mahasiswa
                                 </th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>

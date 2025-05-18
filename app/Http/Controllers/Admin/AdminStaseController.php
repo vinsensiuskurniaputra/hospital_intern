@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Models\Stase;
+use App\Models\Departement;
 use Illuminate\Http\Request;
 use App\Models\ResponsibleUser;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class AdminStaseController extends Controller
 {
@@ -17,9 +19,10 @@ class AdminStaseController extends Controller
     {
         $stases = Stase::paginate(10);
         $responsibles = User::whereHas('roles', function ($query) {
-            $query->where('name', 'responsible');
+            $query->where('name', 'pic');
         })->get();
-        return view('pages.admin.stase.index', compact('stases', 'responsibles'));
+        $departements = Departement::all();
+        return view('pages.admin.stase.index', compact('stases', 'responsibles', 'departements'));
     }
 
     /**
@@ -37,16 +40,22 @@ class AdminStaseController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'responsible_user_id' => 'required|exists:responsible_users,id',
+            'responsibleUsers' => ['required', 'array'],
+            'responsibleUsers.*' => ['exists:responsible_users,id'],
+            'departement_id' => 'required|exists:departements,id',
             'detail' => 'required|string|max:255',
         ]);
 
+        $responsibles = ResponsibleUser::whereIn('id', $validatedData['responsibleUsers'])->get();
 
-        $user = Stase::create([
+
+        $stase = Stase::create([
             'name' => $validatedData['name'],
-            'responsible_user_id' => $validatedData['responsible_user_id'],
+            'departement_id' => $validatedData['departement_id'],
             'detail' => $validatedData['detail'],
         ]);
+
+        $stase->responsibleUsers()->sync($responsibles);
 
         return redirect()->route('admin.stases.index')->with('success', 'Stase created successfully');
     }
@@ -65,9 +74,10 @@ class AdminStaseController extends Controller
     public function edit(Stase $stase)
     {
         $responsibles = User::whereHas('roles', function ($query) {
-            $query->where('name', 'responsible');
+            $query->where('name', 'pic');
         })->get();
-        return view('pages.admin.stase.edit', compact('stase', 'responsibles'));
+        $departements = Departement::all();
+        return view('pages.admin.stase.edit', compact('stase', 'responsibles', 'departements'));
     }
 
     /**
@@ -75,20 +85,41 @@ class AdminStaseController extends Controller
      */
     public function update(Request $request, Stase $stase)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'responsible_user_id' => 'required|exists:responsible_users,id',
-            'detail' => 'required|string|max:255',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'responsibleUsers' => ['required', 'array'],
+                'responsibleUsers.*' => ['exists:responsible_users,id'],
+                'departement_id' => 'required|exists:departements,id',
+                'detail' => 'required|string|max:255',
+            ]);
 
+            DB::beginTransaction();
 
-        $stase->update([
-            'name' => $validatedData['name'],
-            'responsible_user_id' => $validatedData['responsible_user_id'],
-            'detail' => $validatedData['detail'],
-        ]);
+            // Update stase basic info
+            $stase->update([
+                'name' => $validatedData['name'],
+                'departement_id' => $validatedData['departement_id'],
+                'detail' => $validatedData['detail'],
+            ]);
 
-        return redirect()->route('admin.stases.index')->with('success', 'Stase updated successfully');
+            // Update responsible users
+            $responsibles = ResponsibleUser::whereIn('id', $validatedData['responsibleUsers'])->get();
+            $stase->responsibleUsers()->sync($responsibles);
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.stases.index')
+                ->with('success', 'Stase updated successfully');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to update stase: ' . $e->getMessage())
+                ->withInput();
+        }
     }
  
     /**
