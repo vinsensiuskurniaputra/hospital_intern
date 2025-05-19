@@ -149,18 +149,40 @@
                                             </thead>
                                             <tbody class="divide-y divide-[#E8EBE0]">
                                                 @foreach($students as $student)
-                                                <tr class="hover:bg-[#F5F7F2] transition-colors duration-150">
+                                                <tr class="{{ isset($existingGrades[$student->id]) ? 'bg-[#F0F7F0]' : '' }} hover:bg-[#F5F7F2] transition-colors duration-150">
                                                     <td class="py-4 px-4">
                                                         <div class="flex items-center gap-3">
                                                             <div class="w-10 h-10 bg-[#F0F3E7] rounded-full flex items-center justify-center text-sm font-medium">
                                                                 {{ strtoupper(substr($student->user->name, 0, 2)) }}
                                                             </div>
-                                                            <span class="font-medium">{{ $student->user->name }}</span>
+                                                            <div>
+                                                                <span class="font-medium">{{ $student->user->name }}</span>
+                                                                
+                                                                <!-- Status indikator untuk mahasiswa yang sudah dinilai -->
+                                                                @if(isset($existingGrades[$student->id]))
+                                                                <div class="flex items-center mt-1">
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                        <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        Sudah dinilai
+                                                                    </span>
+                                                                    <span class="ml-2 text-xs text-gray-500">
+                                                                        {{ isset($existingGrades[$student->id][0]->updated_at) ? 
+                                                                           'Diperbaharui: ' . \Carbon\Carbon::parse($existingGrades[$student->id][0]->updated_at)->format('d M Y, H:i') : '' }}
+                                                                    </span>
+                                                                </div>
+                                                                @endif
+                                                            </div>
                                                         </div>
                                                     </td>
+                                                    
+                                                    <!-- Kolom lain dari tabel -->
                                                     <td class="py-4 px-4 text-gray-600">
                                                         {{ $student->studyProgram->campus->name ?? '-' }}
                                                     </td>
+                                                    
+                                                    <!-- Form untuk nilai -->
                                                     <form action="{{ route('responsible.grades.store') }}" method="POST">
                                                         @csrf
                                                         <input type="hidden" name="student_id" value="{{ $student->id }}">
@@ -169,7 +191,10 @@
                                                         <td class="py-4 px-4 text-center">
                                                             <input type="number"
                                                                 name="grades[{{ $component->id }}]"
-                                                                class="w-full max-w-[140px] mx-auto px-4 py-2.5 text-black bg-white border border-[#E8EBE0] rounded-lg text-base text-center font-medium focus:ring-2 focus:ring-[#DCE0D3] focus:border-transparent transition-all duration-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                                class="w-full max-w-[140px] mx-auto px-4 py-2.5 text-black 
+                                                                      {{ isset($existingGrades[$student->id]) ? 'bg-[#F6FFF6] border-green-200' : 'bg-white border-[#E8EBE0]' }} 
+                                                                      border rounded-lg text-base text-center font-medium focus:ring-2 focus:ring-[#DCE0D3] focus:border-transparent transition-all duration-200 
+                                                                      [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                                 min="0"
                                                                 max="100"
                                                                 placeholder="Masukkan Nilai"
@@ -180,8 +205,11 @@
                                                         </td>
                                                         @endforeach
                                                         <td class="py-4 px-4 text-center">
-                                                            <button type="submit" class="px-4 py-2 bg-[#4CAF50] text-white rounded-lg text-sm font-medium hover:bg-[#43A047] transition-all duration-200 focus:ring-2 focus:ring-[#388E3C] focus:ring-offset-2">
-                                                                Submit
+                                                            <button type="submit" class="{{ isset($existingGrades[$student->id]) ? 
+                                                                'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 
+                                                                'bg-[#4CAF50] hover:bg-[#43A047] focus:ring-[#388E3C]' }} 
+                                                                px-4 py-2 text-white rounded-lg text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2">
+                                                                {{ isset($existingGrades[$student->id]) ? 'Perbarui' : 'Submit' }}
                                                             </button>
                                                         </td>
                                                     </form>
