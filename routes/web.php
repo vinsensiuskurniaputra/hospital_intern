@@ -43,13 +43,16 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/students/filter', [AdminStudentController::class, 'filter'])->name('students.filter');
     Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
     Route::put('/students/{student}/change-status', [AdminStudentController::class, 'changeStatus'])->name('students.change_status');
+    Route::get('/download-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.downloadTemplate');
 
     Route::resource('/users/admins', AdminUserAdminController::class)->names('admin.admins');
     Route::get('/admins/filter', [AdminUserAdminController::class, 'filter'])->name('admins.filter');
 
     Route::resource('/users/responsibles', AdminResponsibleUserController::class)->names('admin.responsibles');
     Route::get('/responsibles/filter', [AdminResponsibleUserController::class, 'filter'])->name('responsibles.filter');
-    
+    Route::get('/responsibles/download-template', [AdminResponsibleUserController::class, 'downloadTemplate'])->name('responsibles.downloadTemplate');
+    Route::post('/responsibles/import', [AdminResponsibleUserController::class, 'import'])->name('responsibles.import');
+
     Route::resource('/permissions/users', AdminUserAuthorizationController::class)->names('admin.user_authorizations');
     Route::get('/users/filter', [AdminUserAuthorizationController::class, 'filter'])->name('users.filter');
     
@@ -64,7 +67,6 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
-    
     Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
     Route::get('/departements/filter', [AdminDepartementController::class, 'filter'])->name('departements.filter');
 
@@ -81,6 +83,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
         Route::get('/presences/schedules/filter-by-date', [AdminScheduleController::class, 'filterByDate'])
             ->name('presences.schedules.filter-by-date');
         
+        Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
+            ->name('presences.schedules.filter');
+
         Route::resource('/presences/schedules', AdminScheduleController::class)
             ->names('presences.schedules');
     });
@@ -88,6 +93,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
     Route::post('/presences/schedules', [AdminScheduleController::class, 'store'])
         ->name('presences.schedules.store');
+    Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
+        ->name('presences.schedules.filter');
   
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
 

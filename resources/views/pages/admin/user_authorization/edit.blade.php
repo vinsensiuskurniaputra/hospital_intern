@@ -12,7 +12,7 @@
 
     <!-- Daftar Role -->
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Assign Roles:</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Tetapkan Peran:</label>
         <div class="grid grid-cols-2 gap-2">
             @foreach ($roles as $role)
                 <label class="flex items-center space-x-2">
