@@ -157,6 +157,7 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades');
+    Route::post('/grades/store', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'store'])->name('grades.store');
     
     // Laporan & Rekapitulasi
     Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
@@ -165,6 +166,7 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
 
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
+    Route::get('/students', [App\Http\Controllers\Responsible\ResponsibleStudentController::class, 'index'])->name('students.index');
 });
 
 // API Routes for presence (PIC/Responsible)

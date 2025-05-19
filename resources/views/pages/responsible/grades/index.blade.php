@@ -5,15 +5,27 @@
 @section('content')
 <div class="container-fluid py-4 px-4">
     <div class="max-w-7xl mx-auto">
+        @if(session('success'))
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-md">
+            {{ session('success') }}
+        </div>
+        @endif
+        
+        @if(session('error'))
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md">
+            {{ session('error') }}
+        </div>
+        @endif
+        
         <div class="card bg-white rounded-xl shadow-sm">
             <div class="card-body">
                 <div class="p-4">
                     <!-- Kelas Info -->
                     <div class="mb-4 space-y-1">
                         <h6 class="text-sm font-medium text-gray-600">Kelas</h6>
-                        <h5 class="text-xl font-semibold mb-2">FK-01</h5>
+                        <h5 class="text-xl font-semibold mb-2">{{ $kelas }}</h5>
                         <div class="space-y-0.5">
-                            <p class="text-sm text-gray-600">Departemen Bedah</p>
+                            <p class="text-sm text-gray-600">{{ $departement->name }}</p>
                         </div>
                     </div>
 
@@ -41,7 +53,6 @@
                                         <div>
                                             <p class="text-sm font-medium">Kelas</p>
                                             <p class="text-base">FK-01</p>
-                                            <!-- <p class="text-xs text-gray-500">Departemen Bedah</p> -->
                                         </div>
                                     </div>
                                 </div>
@@ -56,14 +67,14 @@
                                         </div>
                                         <div>
                                             <p class="text-sm font-medium">Stase</p>
-                                            <p class="text-base">Bedah Umum</p>
-                                            <p class="text-xs text-gray-500">Departemen Bedah</p>
+                                            <p class="text-base">{{ $stase->name }}</p>
+                                            <p class="text-xs text-gray-500">{{ $departement->name }}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Student List moved inside detailContent -->
+                            <!-- Student List -->
                             <div class="bg-[#FAFBF8] rounded-xl p-6">
                                 <h6 class="font-medium text-lg mb-6">Daftar Penilaian</h6>
                                 <div class="overflow-x-auto">
@@ -72,58 +83,72 @@
                                             <tr class="border-b-2 border-[#E8EBE0]">
                                                 <th class="text-left py-4 px-4 text-sm font-semibold text-gray-700 w-1/5">Nama</th>
                                                 <th class="text-left py-4 px-4 text-sm font-semibold text-gray-700 w-1/5">Kampus</th>
-                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[15%]">Keahlian</th>
-                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[15%]">Komunikasi</th>
-                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[15%]">Profesionalisme</th>
-                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[20%]">Kemampuan Menangani Pasien</th>
+                                                @foreach($gradeComponents as $component)
+                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[15%]">{{ $component->name }}</th>
+                                                @endforeach
+                                                <th class="text-center py-4 px-4 text-sm font-semibold text-gray-700 w-[10%]">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-[#E8EBE0]">
-                                            @foreach([
-                                                ['Zaki Ki-Demang', 'Politeknik Negeri Semarang'],
-                                                ['Zaki Indome', 'Universitas Diponegoro'],
-                                                ['Zaki Dok-dok', 'Universitas Gajah Mada']
-                                            ] as [$name, $campus])
+                                            @foreach($students as $student)
                                             <tr class="hover:bg-[#F5F7F2] transition-colors duration-150">
                                                 <td class="py-4 px-4">
                                                     <div class="flex items-center gap-3">
                                                         <div class="w-10 h-10 bg-[#F0F3E7] rounded-full flex items-center justify-center text-sm font-medium">
-                                                            {{ strtoupper(substr($name, 0, 2)) }}
+                                                            {{ strtoupper(substr($student->user->name, 0, 2)) }}
                                                         </div>
-                                                        <span class="font-medium">{{ $name }}</span>
+                                                        <span class="font-medium">{{ $student->user->name }}</span>
                                                     </div>
                                                 </td>
-                                                <td class="py-4 px-4 text-gray-600">{{ $campus }}</td>
-                                                @for($i = 0; $i < 4; $i++)
-                                                <td class="py-4 px-4 text-center">
-                                                    <input type="number" 
-                                                           class="w-full max-w-[140px] mx-auto px-4 py-2.5 text-black bg-white border border-[#E8EBE0] rounded-lg text-base text-center font-medium focus:ring-2 focus:ring-[#DCE0D3] focus:border-transparent transition-all duration-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                           min="0" 
-                                                           max="100" 
-                                                           placeholder="Masukkan Nilai"
-                                                           pattern="[0-9]*"
-                                                           onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"
-                                                    >
+                                                <td class="py-4 px-4 text-gray-600">
+                                                    {{ $student->studyProgram->campus->name ?? '-' }}
                                                 </td>
-                                                @endfor
-                                                
-                                                <!-- Add Submit Button Column -->
-                                                <td class="py-4 px-4 text-center">
-                                                    <button class="px-4 py-2 bg-[#4CAF50] text-white rounded-lg text-sm font-medium hover:bg-[#43A047] transition-all duration-200 focus:ring-2 focus:ring-[#388E3C] focus:ring-offset-2">
-                                                        Submit
-                                                    </button>
-                                                </td>
+                                                <form action="{{ route('responsible.grades.store') }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="student_id" value="{{ $student->id }}">
+                                                    <input type="hidden" name="stase_id" value="{{ $stase->id }}">
+                                                    @foreach($gradeComponents as $component)
+                                                    <td class="py-4 px-4 text-center">
+                                                        <input type="number"
+                                                            name="grades[{{ $component->id }}]"
+                                                            class="w-full max-w-[140px] mx-auto px-4 py-2.5 text-black bg-white border border-[#E8EBE0] rounded-lg text-base text-center font-medium focus:ring-2 focus:ring-[#DCE0D3] focus:border-transparent transition-all duration-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                            min="0"
+                                                            max="100"
+                                                            placeholder="Masukkan Nilai"
+                                                            pattern="[0-9]*"
+                                                            onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"
+                                                            value="{{ isset($existingGrades[$student->id]) ? json_decode($existingGrades[$student->id][0]->grade_details, true)[$component->id] ?? '' : '' }}"
+                                                        >
+                                                    </td>
+                                                    @endforeach
+                                                    <td class="py-4 px-4 text-center">
+                                                        <button type="submit" class="px-4 py-2 bg-[#4CAF50] text-white rounded-lg text-sm font-medium hover:bg-[#43A047] transition-all duration-200 focus:ring-2 focus:ring-[#388E3C] focus:ring-offset-2">
+                                                            Submit
+                                                        </button>
+                                                    </td>
+                                                </form>
                                             </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
                                 </div>
-
+                                
+                                <!-- Tombol "Lihat Semua Mahasiswa" dipindahkan ke sini -->
+                                @if($students->count() > 0 && isset($remainingCount) && $remainingCount > 0)
                                 <div class="text-center mt-8">
-                                    <button class="px-6 py-2.5 bg-white border border-[#E8EBE0] text-gray-700 rounded-lg text-sm font-medium hover:bg-[#F5F7F2] transition-all duration-200 focus:ring-2 focus:ring-[#DCE0D3]">
-                                        Lihat Semua Mahasiswa
-                                    </button>
+                                    <a href="{{ url('/responsible/grades?show_all=1') }}" class="px-6 py-3 bg-white border border-[#E8EBE0] text-gray-700 rounded-lg text-sm font-medium hover:bg-[#F5F7F2] transition-all duration-200 focus:ring-2 focus:ring-[#DCE0D3]">
+                                        Lihat Semua Mahasiswa ({{ $remainingCount }} lainnya)
+                                    </a>
                                 </div>
+                                @endif
+                                
+                                @if(isset($showAll) && $showAll)
+                                <div class="text-center mt-4">
+                                    <a href="{{ url('/responsible/grades') }}" class="px-6 py-3 bg-white border border-[#E8EBE0] text-gray-700 rounded-lg text-sm font-medium hover:bg-[#F5F7F2] transition-all duration-200 focus:ring-2 focus:ring-[#DCE0D3]">
+                                        Kembali ke Tampilan Awal
+                                    </a>
+                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>
