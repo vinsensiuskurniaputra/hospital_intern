@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Student\StudentProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
@@ -101,6 +102,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::get('/responsible/schedule/get-schedules', [ResponsibleScheduleController::class, 'getSchedules'])
         ->name('responsible.schedule.get-schedules');
+
+    Route::get('/home/profile', [StudentProfileController::class, 'index'])->name('student-profile');
 });
 
 // Student Routes 
@@ -121,6 +124,10 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/password', [StudentProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/password', [StudentProfileController::class, 'updatePassword'])->name('profile.update-password');
+    Route::get('/profile/edit', [StudentProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [StudentProfileController::class, 'update'])->name('profile.update');
     
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationController::class, 'index'])->name('notifications');
