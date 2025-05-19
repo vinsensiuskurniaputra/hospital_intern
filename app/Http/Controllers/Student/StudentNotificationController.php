@@ -51,4 +51,19 @@ class StudentNotificationController extends Controller
         
         return back();
     }
+    
+    public function show($id)
+    {
+        $notification = Notification::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Mark notification as read when viewed
+        if (!$notification->is_read) {
+            $notification->is_read = true;
+            $notification->save();
+        }
+
+        return view('pages.student.notifications.detail', compact('notification'));
+    }
 }
