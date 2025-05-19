@@ -162,6 +162,7 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
 
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
+    Route::get('/schedule/get-classes', [ResponsibleScheduleController::class, 'getClassesForStase'])->name('schedule.get-classes');
 });
 
 // API Routes for presence (PIC/Responsible)

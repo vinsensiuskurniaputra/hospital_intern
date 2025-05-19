@@ -640,10 +640,57 @@ function updateFilters() {
     } else {
         document.getElementById('class-container').innerHTML = `
             <div class="p-6 text-center text-gray-500">
-                Pilih Stase dan Kelas untuk melihat daftar mahasiswa
+                ${!staseId ? 'Pilih Stase terlebih dahulu' : 'Pilih Kelas untuk melihat daftar mahasiswa'}
             </div>
         `;
     }
+}
+
+function onStaseChange() {
+    const staseId = document.getElementById('stase-filter').value;
+    const classFilter = document.getElementById('class-filter');
+    
+    // Reset class filter and hide it if no stase is selected
+    classFilter.innerHTML = '<option value="">Pilih Kelas</option>';
+    
+    if (!staseId) {
+        classFilter.classList.add('hidden');
+        document.getElementById('class-container').innerHTML = `
+            <div class="p-6 text-center text-gray-500">
+                Pilih Stase dan Kelas untuk melihat daftar mahasiswa
+            </div>
+        `;
+        return;
+    }
+    
+    // Show loading state in class dropdown
+    classFilter.innerHTML = '<option value="">Loading...</option>';
+    classFilter.classList.remove('hidden');
+    
+    // Fetch classes for selected stase
+    fetch(`/responsible/schedule/get-classes?stase_id=${staseId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Terjadi kesalahan');
+            }
+            
+            // Populate class dropdown with fetched classes
+            classFilter.innerHTML = '<option value="">Pilih Kelas</option>';
+            
+            if (data.classes.length === 0) {
+                classFilter.innerHTML += '<option value="" disabled>Tidak ada kelas di stase ini</option>';
+                return;
+            }
+            
+            data.classes.forEach(cls => {
+                classFilter.innerHTML += `<option value="${cls.id}">${cls.name}</option>`;
+            });
+        })
+        .catch(error => {
+            classFilter.innerHTML = '<option value="">Error loading classes</option>';
+            console.error('Error:', error);
+        });
 }
 </script>
 @endpush
@@ -847,19 +894,16 @@ function updateFilters() {
                 <!-- Filters -->
                 <div class="flex gap-4">
                     <!-- Stase Filter -->
-                    <select id="stase-filter" class="form-select w-48 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer" onchange="updateFilters()">
+                    <select id="stase-filter" class="form-select w-48 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer" onchange="onStaseChange()">
                         <option value="">Pilih Stase</option>
                         @foreach($stases as $stase)
                             <option value="{{ $stase->id }}">{{ $stase->name }}</option>
                         @endforeach
                     </select>
 
-                    <!-- Kelas Filter -->
-                    <select id="class-filter" class="form-select w-36 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer" onchange="updateFilters()">
+                    <!-- Kelas Filter - Initially hidden -->
+                    <select id="class-filter" class="form-select w-36 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer hidden" onchange="updateFilters()">
                         <option value="">Pilih Kelas</option>
-                        @foreach($internshipClasses as $class)
-                            <option value="{{ $class->id }}">{{ $class->name }}</option>
-                        @endforeach
                     </select>
                 </div>
             </div>

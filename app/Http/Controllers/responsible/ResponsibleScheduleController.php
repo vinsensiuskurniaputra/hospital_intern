@@ -195,4 +195,32 @@ class ResponsibleScheduleController extends Controller
             ], 500);
         }
     }
+
+    public function getClassesForStase(Request $request)
+    {
+        try {
+            $request->validate([
+                'stase_id' => 'required|exists:stases,id',
+            ]);
+
+            // Get classes that have schedules in this stase
+            $classes = Schedule::where('stase_id', $request->stase_id)
+                ->with('internshipClass:id,name')
+                ->get()
+                ->pluck('internshipClass')
+                ->unique('id')
+                ->values();
+
+            return response()->json([
+                'success' => true,
+                'classes' => $classes
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
