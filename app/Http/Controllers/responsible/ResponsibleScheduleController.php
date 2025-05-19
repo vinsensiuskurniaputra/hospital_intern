@@ -48,7 +48,7 @@ class ResponsibleScheduleController extends Controller
         // Get all schedules for table, ordered by start_date
         $schedules = Schedule::with(['internshipClass', 'stase.departement'])
             ->whereIn('stase_id', $staseIds)
-            ->orderBy('start_date', 'asc') // Menambahkan pengurutan berdasarkan start_date
+            ->orderBy('start_date', 'asc')
             ->get();
 
         // Get all departments for filter
@@ -69,8 +69,19 @@ class ResponsibleScheduleController extends Controller
                 ->get();
         }
 
+        // Get stases for filter
+        $stases = Stase::whereIn('id', $staseIds)->get();
+        
+        // Get internship classes for filter
+        $internshipClasses = Schedule::whereIn('stase_id', $staseIds)
+            ->with('internshipClass')
+            ->get()
+            ->pluck('internshipClass')
+            ->unique('id');
+
         return view('pages.responsible.schedule.index', 
-            compact('todaySchedules', 'schedules', 'departments', 'students', 'currentClass', 'currentSchedule')
+            compact('todaySchedules', 'schedules', 'departments', 'students', 
+                    'currentClass', 'currentSchedule', 'stases', 'internshipClasses')
         );
     }
 
@@ -148,6 +159,64 @@ class ResponsibleScheduleController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Schedule filter error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getClassDetails(Request $request)
+    {
+        try {
+            $request->validate([
+                'stase_id' => 'required|exists:stases,id',
+                'class_id' => 'required|exists:internship_classes,id',
+            ]);
+
+            // Update query untuk include campus dan photo
+            $students = Student::with([
+                'user:id,name,photo_profile_url', 
+                'studyProgram.campus:id,name',
+                'studyProgram:id,name,campus_id'
+            ])
+            ->where('internship_class_id', $request->class_id)
+            ->get();
+
+            return response()->json([
+                'success' => true,
+                'students' => $students
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getClassesForStase(Request $request)
+    {
+        try {
+            $request->validate([
+                'stase_id' => 'required|exists:stases,id',
+            ]);
+
+            // Get classes that have schedules in this stase
+            $classes = Schedule::where('stase_id', $request->stase_id)
+                ->with('internshipClass:id,name')
+                ->get()
+                ->pluck('internshipClass')
+                ->unique('id')
+                ->values();
+
+            return response()->json([
+                'success' => true,
+                'classes' => $classes
+            ]);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
