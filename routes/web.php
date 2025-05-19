@@ -105,6 +105,10 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/password', [StudentProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/password', [StudentProfileController::class, 'updatePassword'])->name('profile.update-password');
+    Route::get('/profile/edit', [StudentProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [StudentProfileController::class, 'update'])->name('profile.update');
     
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationController::class, 'index'])->name('notifications');
