@@ -7,7 +7,7 @@
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <a href="{{ route('admin.schedules.index') }}" class="text-gray-400 hover:text-gray-600">
+                <a href="{{ route('presences.schedules.index') }}" class="text-gray-400 hover:text-gray-600">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -33,9 +33,9 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.schedules.update', $schedule->id) }}" method="POST" class="max-w-4xl mx-auto">
-            @csrf
+        <form action="{{ route('presences.schedules.update', $schedule->id) }}" method="POST">
             @method('PUT')
+            @csrf
 
             <div class="grid grid-cols-2 gap-6">
                 <div>
@@ -62,44 +62,14 @@
                             @endforeach
                         </select>
                     </div>
-
-                    <!-- Departemen -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Departemen</label>
-                        <select name="departement_id" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}" {{ $schedule->departement_id == $department->id ? 'selected' : '' }}>
-                                    {{ $department->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
 
                 <div>
-                    <!-- Tahun Angkatan -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Angkatan</label>
-                        <select name="class_year" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
-                            <option value="2025/2026" {{ $schedule->internshipClass->classYear->class_year == '2025/2026' ? 'selected' : '' }}>2025/2026</option>
-                            <option value="2024/2025" {{ $schedule->internshipClass->classYear->class_year == '2024/2025' ? 'selected' : '' }}>2024/2025</option>
-                        </select>
-                    </div>
-
-                    <!-- Pembimbing -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Pembimbing Magang</label>
-                        <input type="text" value="{{ $schedule->stase->responsibleUser->user->name ?? '' }}" 
-                            class="w-full border border-gray-300 rounded-md px-3 py-2.5 bg-gray-50" readonly>
-                        <p class="mt-1 text-sm text-gray-500">Pembimbing ditentukan berdasarkan Stase yang dipilih</p>
-                    </div>
-
                     <!-- Additional Info -->
                     <div class="mb-6 p-4 bg-blue-50 rounded-md">
                         <h4 class="text-sm font-medium text-blue-800 mb-2">Informasi Penting</h4>
                         <ul class="text-sm text-blue-700 list-disc list-inside space-y-1">
                             <li>Pastikan periode rotasi tidak bertabrakan dengan jadwal lain</li>
-                            <li>Jam praktik disesuaikan dengan ketentuan departemen</li>
                         </ul>
                     </div>
                 </div>
@@ -122,7 +92,7 @@
                 </div>
             </div>
 
-            <!-- Jam -->
+            <!-- Jam
             <div class="mb-8">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Jam Praktik</label>
                 <div class="grid grid-cols-2 gap-4">
@@ -137,12 +107,11 @@
                             class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-end gap-3 border-t pt-6">
-                <a href="{{ route('admin.schedules.index') }}" 
-                    class="px-6 py-2.5 text-sm font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors duration-200">
+                <a href="{{ route('presences.schedules.index') }}" class="px-6 py-2.5 text-sm font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-50">
                     Cancel
                 </a>
                 <button type="submit" 

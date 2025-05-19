@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Stase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany; // Tambahkan import ini
 
 class ResponsibleUser extends Model
 {
@@ -18,6 +20,11 @@ class ResponsibleUser extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function stases(): BelongsToMany
+    {
+        return $this->belongsToMany(Stase::class, 'responsible_stase');
     }
 
 

@@ -2,50 +2,10 @@
 
 @section('content')
 <div class="p-6" x-data="{ 
-    open: false, 
+    open: false,
     selectedFilter: 'Semua',
-    notifications: [
-        {
-            id: 1,
-            title: 'Pengambilan Sertifikat Magang',
-            description: 'Bagi mahasiswa yang telah menyelesaikan seluruh rangkaian magang dan evaluasi, sertifikat magang sudah bisa diunduh melalui sistem mulai 09 Agustus 2024.',
-            date: '05 Agustus 2024 - 23:59',
-            type: 'Umum',
-            isRead: false
-        },
-        {
-            id: 2,
-            title: 'Pergantian Jadwal',
-            description: 'Pengumuman untuk mahasiswa Kelas FK-01 di Departemen Kesehatan: jadwal rotasi magang diubah menjadi 11 Juli. Mohon untuk mengecek jadwal terbaru di sistem dan menyesuaikan dengan perubahan ini.',
-            date: '09 Juli 2024 - 00:03',
-            type: 'Jadwal',
-            isRead: false
-        },
-        {
-            id: 3,
-            title: 'Jadwal Ujian Evaluasi Sebelum Rotasi Baru',
-            description: 'Mahasiswa magang diharapkan untuk mengikuti ujian evaluasi sebelum rotasi ke departemen berikutnya. Ujian akan dilaksanakan secara online melalui sistem pada 30 Jun 2024 pukul 10:00 WIB.',
-            date: '28 Juni 2024 - 10:00',
-            type: 'Evaluasi',
-            isRead: true
-        },
-        {
-            id: 4,
-            title: 'Kebijakan Baru Kedisiplinan Magang',
-            description: 'Mulai tanggal 1 April 2024, mahasiswa magang diwajibkan untuk hadir minimal 90% dari total hari magang.',
-            date: '29 Maret 2024 - 15:00',
-            type: 'Kebijakan',
-            isRead: true
-        },
-        {
-            id: 5,
-            title: 'Pengumpulan Berkas Administrasi Magang',
-            description: 'Mahasiswa wajib mengumpulkan berkas magang sebelum 27 Maret 2025 melalui sistem atau ke bagian administrasi.',
-            date: '28 Februari 2024 - 12:00',
-            type: 'Administrasi',
-            isRead: true
-        }
-    ],
+    notifications: {{ Js::from($notifications) }},
+    
     sortedNotifications() {
         return this.notifications.sort((a, b) => {
             return new Date(this.parseDate(b.date)) - new Date(this.parseDate(a.date));
@@ -53,7 +13,6 @@
     },
     
     parseDate(dateStr) {
-        // Convert Indonesian date format to JS Date format
         const [date, time] = dateStr.split(' - ');
         const [day, month, year] = date.split(' ');
         const months = {
@@ -93,30 +52,20 @@
                         :class="{ 'bg-green-100': selectedFilter === 'Semua' }">
                     Semua
                 </button>
-                <button @click="selectedFilter = 'Umum'; open = false" 
+                <button @click="selectedFilter = 'info'; open = false" 
                         class="w-full px-4 py-2 text-left text-sm hover:bg-green-100"
-                        :class="{ 'bg-green-100': selectedFilter === 'Umum' }">
-                    Umum
+                        :class="{ 'bg-green-100': selectedFilter === 'info' }">
+                    info
                 </button>
-                <button @click="selectedFilter = 'Jadwal'; open = false" 
+                <button @click="selectedFilter = 'warning'; open = false" 
                         class="w-full px-4 py-2 text-left text-sm hover:bg-green-100"
-                        :class="{ 'bg-green-100': selectedFilter === 'Jadwal' }">
-                    Jadwal
+                        :class="{ 'bg-green-100': selectedFilter === 'warning' }">
+                    warning
                 </button>
-                <button @click="selectedFilter = 'Evaluasi'; open = false" 
+                <button @click="selectedFilter = 'error'; open = false" 
                         class="w-full px-4 py-2 text-left text-sm hover:bg-green-100"
-                        :class="{ 'bg-green-100': selectedFilter === 'Evaluasi' }">
-                    Evaluasi
-                </button>
-                <button @click="selectedFilter = 'Kebijakan'; open = false" 
-                        class="w-full px-4 py-2 text-left text-sm hover:bg-green-100"
-                        :class="{ 'bg-green-100': selectedFilter === 'Kebijakan' }">
-                    Kebijakan
-                </button>
-                <button @click="selectedFilter = 'Administrasi'; open = false" 
-                        class="w-full px-4 py-2 text-left text-sm hover:bg-green-100"
-                        :class="{ 'bg-green-100': selectedFilter === 'Administrasi' }">
-                    Administrasi
+                        :class="{ 'bg-green-100': selectedFilter === 'error' }">
+                    error
                 </button>
             </div>
         </div>
@@ -136,14 +85,12 @@
                         </div>
                         <div class="ml-4 flex flex-col items-end">
                             <p class="text-sm text-gray-500" x-text="notification.date"></p>
-                            <span class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full mt-2"
+                            <span class="inline-flex items-center px-3 py-1 text-m font-semibold rounded-full mt-2 capitalize tracking-wide shadow-sm"
                                   :class="{
-                                      'bg-green-100 text-green-800': notification.type === 'Umum',
-                                      'bg-yellow-100 text-yellow-800': notification.type === 'Jadwal',
-                                      'bg-blue-100 text-blue-800': notification.type === 'Evaluasi',
-                                      'bg-red-100 text-red-800': notification.type === 'Kebijakan',
-                                      'bg-purple-100 text-purple-800': notification.type === 'Administrasi'
-                                  }" x-text="notification.type"></span>
+                                        'bg-green-100 text-green-800': notification.type === 'info',
+                                        'bg-yellow-100 text-yellow-800': notification.type === 'warning',
+                                        'bg-blue-100 text-blue-800': notification.type === 'error',
+                                   }" x-text="notification.type"></span>
                         </div>
                     </div>
                 </div>
