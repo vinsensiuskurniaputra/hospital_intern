@@ -774,44 +774,26 @@ function updateFilters() {
 
     <!-- Tabel Jadwal Section -->
 <div class="bg-white rounded-lg shadow-sm mb-6">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h5 class="text-lg font-medium">Tabel Jadwal</h5>
-                <div class="flex gap-4">
-                    <div class="flex items-center gap-2">
-                        <input 
-                            type="date" 
-                            id="start-date"
-                            class="form-input px-4 py-2 rounded-lg border border-gray-300" 
-                            placeholder="Tanggal Mulai">
-                        <span class="text-gray-500">s/d</span>
-                        <input 
-                            type="date" 
-                            id="end-date"
-                            class="form-input px-4 py-2 rounded-lg border border-gray-300" 
-                            placeholder="Tanggal Selesai">
-                    </div>
-                    <div class="relative">
-                    </div>
-                    <button 
-                        onclick="applyFilter()"
-                        class="px-4 py-2 rounded-lg bg-[#637F26] text-white hover:bg-[#4B601C] transition-colors">
-                        Terapkan
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Filter Pills -->
-            <div class="flex gap-2 mb-4">
-                <button class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600">Bulan Ini</button>
-                <button class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600">Minggu Ini</button>
-                <button class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600">Minggu Depan</button>
-                <button class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600">Bulan Depan</button>
-            </div>
+    <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h5 class="text-lg font-medium">Tabel Jadwal</h5>
+        </div>
+        
+        <!-- Hidden inputs for date range (not visible but used by JS) -->
+        <input type="hidden" id="start-date" name="start_date">
+        <input type="hidden" id="end-date" name="end_date">
+        
+        <!-- Filter Pills -->
+        <div class="flex gap-2 mb-4">
+            <button class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600" id="pill-current-month">Bulan Ini</button>
+            <button class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600" id="pill-current-week">Minggu Ini</button>
+            <button class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600" id="pill-next-week">Minggu Depan</button>
+            <button class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600" id="pill-next-month">Bulan Depan</button>
+        </div>
 
-            <!-- Table -->
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse">
+        <!-- Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
 <thead class="bg-gray-50">
     <tr>
         <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Tanggal</th>
