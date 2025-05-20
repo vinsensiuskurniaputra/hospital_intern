@@ -74,41 +74,48 @@ class AdminCertificateController extends Controller
     public function generateCertificate($id, PDF $pdfGenerator)
     {
         $student = Student::findOrFail($id);
-
         $nama = $student->user->name;
 
-        // Format kode sertifikat
+        // Generate certificate code
         $tanggal = Carbon::now()->format('Ymd');
         $countToday = Certificate::whereDate('created_at', Carbon::today())->count() + 1;
         $urut = str_pad($countToday, 4, '0', STR_PAD_LEFT);
         $kode = "CERT-{$tanggal}-{$urut}";
 
-        // Generate PDF dari view
-        $data = [
-            'nama' => $nama,
-            'kode' => $kode,
-        ];
-        $pdf = $pdfGenerator->loadView('components.template', $data);
+        // Prepare data for the PDF
+        $data = ['nama' => $nama, 'kode' => $kode];
+        $pdf = $pdfGenerator->loadView('components.admin.certificate.template', $data);
 
-        // Simpan PDF ke storage/app/public/sertifikat/
+        // Define file path and name
         $filename = "{$kode}.pdf";
         $path = "public/sertifikat/{$filename}";
-        Storage::put($path, $pdf->output());
 
-        // Buat URL (agar bisa diakses via browser/public)
-        $certificateUrl = Storage::url("sertifikat/{$filename}"); // hasilnya /storage/sertifikat/CERT-xxx.pdf
+        // Ensure the directory exists
+        if (!Storage::exists('public/sertifikat')) {
+            Storage::makeDirectory('public/sertifikat', 0755, true);
+        }
 
-        // Simpan ke database
+        // Save the PDF file to storage
+        $result = Storage::put($path, $pdf->output());
+        if (!$result) {
+            \Log::error("Failed to save PDF to: {$path}");
+            abort(500, 'Failed to save certificate');
+        }
+
+        // Generate a public URL for the certificate
+        $certificateUrl = Storage::url("sertifikat/{$filename}");
+
+        // Save certificate details to the database
         Certificate::create([
             'student_id' => $student->id,
             'kode' => $kode,
             'certificate_url' => $certificateUrl,
         ]);
 
-        // Nama file untuk diunduh
-        $safeNama = Str::slug($nama, '_');
-        return $pdf->download("sertifikat-{$safeNama}-{$kode}.pdf");
+        // Return the PDF file for download
+        return $pdf->download($filename);
     }
+
     
     public function view($id)
     {
