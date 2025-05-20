@@ -93,13 +93,21 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
                                         @if ($student->certificate != null)
-                                            <button class="text-blue-600 hover:text-blue-700">
-                                                <i class="bi bi-download text-lg"></i>
-                                            </button>
+                                            <a href="{{ route('certificate.view', $student->certificate->id) }}"
+                                                class="text-blue-600 hover:text-blue-700">
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium bg-green-100 hover:bg-green-800 hover:text-green-100 text-green-800">
+                                                    <i class="bi bi-download text-lg pr-1"></i> Download
+                                                </span>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('admin.certificate.generate', $student->id) }}">
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium bg-blue-100 hover:bg-blue-800 hover:text-blue-100 text-blue-800">
+                                                    <i class="bi bi-file-earmark-pdf text-lg pr-1"></i> Generate
+                                                </span>
+                                            </a>
                                         @endif
-                                        <button class="text-[#637F26] hover:text-[#85A832]">
-                                            <i class="bi bi-file-earmark-pdf text-lg"></i>
-                                        </button>
                                     </div>
                                 </td>
                             </tr>

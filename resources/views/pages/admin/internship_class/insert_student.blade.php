@@ -14,6 +14,7 @@
         students: [],
         internshipClasses: [],
         searchTerm: '',
+        selectedClassId: '',
         allStudents: {{ json_encode(
             $campuses->mapWithKeys(function ($campus) {
                 return [
@@ -23,7 +24,8 @@
                                 'id' => $student->id,
                                 'name' => $student->user->name,
                                 'nim' => $student->nim,
-                                'selected' => false,
+                                'selected' => !is_null($student->internship_class_id),
+                                'current_class_id' => $student->internship_class_id,
                             ],
                         );
                     }),
@@ -79,8 +81,16 @@
         <!-- Step 2: Class Selection -->
         <div x-show="step === 2" x-transition class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <label class="block text-sm font-medium text-gray-700 mb-2">Select Internship Class</label>
-            <select name="internship_class_id"
-                @change="if($event.target.value) { step = 3; students = allStudents[selectedCampus] || []; }"
+            <!-- Update the class selection part -->
+            <select name="internship_class_id" x-model="selectedClassId"
+                @change="if($event.target.value) { 
+                step = 3; 
+                students = allStudents[selectedCampus] || [];
+                // Update selected status based on current class
+                students.forEach(s => {
+                    s.selected = (s.current_class_id == selectedClassId);
+                });
+            }"
                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
                 <option value="">Choose a class...</option>
                 <template x-for="cls in internshipClasses" :key="cls.id">

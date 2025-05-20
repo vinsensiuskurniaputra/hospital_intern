@@ -21,6 +21,16 @@ class Student extends Model
         'telp',
         'is_finished',
     ];
+    
+    protected $casts = [
+        'internship_class_id' => 'integer',
+        'is_finished' => 'boolean'
+    ];
+    
+    protected $attributes = [
+        'internship_class_id' => null,
+        'is_finished' => false
+    ];
 
     public function user()
     {
