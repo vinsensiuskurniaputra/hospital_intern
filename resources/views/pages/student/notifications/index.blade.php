@@ -5,6 +5,11 @@
     open: false,
     selectedFilter: 'Semua',
     notifications: {{ Js::from($notifications) }},
+    clickedNotifications: {},
+    
+    toggleClicked(id) {
+        this.clickedNotifications[id] = !this.clickedNotifications[id];
+    },
     
     sortedNotifications() {
         return this.notifications.sort((a, b) => {
@@ -55,17 +60,17 @@
                 <button @click="selectedFilter = 'info'; open = false" 
                         class="w-full px-4 py-2 text-left text-sm hover:bg-green-100"
                         :class="{ 'bg-green-100': selectedFilter === 'info' }">
-                    info
+                    Info
                 </button>
                 <button @click="selectedFilter = 'warning'; open = false" 
                         class="w-full px-4 py-2 text-left text-sm hover:bg-green-100"
                         :class="{ 'bg-green-100': selectedFilter === 'warning' }">
-                    warning
+                    Warning
                 </button>
                 <button @click="selectedFilter = 'error'; open = false" 
                         class="w-full px-4 py-2 text-left text-sm hover:bg-green-100"
                         :class="{ 'bg-green-100': selectedFilter === 'error' }">
-                    error
+                    Error
                 </button>
             </div>
         </div>
@@ -74,27 +79,30 @@
     <!-- Notifications List -->
     <div class="space-y-4">
         <template x-for="notification in sortedNotifications()" :key="notification.id">
-            <div x-show="filteredNotifications(notification)"
-                 class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-                 :class="{ 'bg-white': !notification.isRead }">
-                <div class="p-6">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <h2 class="text-xl font-semibold" :class="{ 'text-gray-900': !notification.isRead, 'text-gray-500': notification.isRead }" x-text="notification.title"></h2>
-                            <p class="mt-4 font-semibold" :class="{ 'text-gray-900': !notification.isRead, 'text-gray-500': notification.isRead }" x-text="notification.description"></p>
-                        </div>
-                        <div class="ml-4 flex flex-col items-end">
-                            <p class="text-sm text-gray-500" x-text="notification.date"></p>
-                            <span class="inline-flex items-center px-3 py-1 text-m font-semibold rounded-full mt-2 capitalize tracking-wide shadow-sm"
-                                  :class="{
-                                        'bg-green-100 text-green-800': notification.type === 'info',
-                                        'bg-yellow-100 text-yellow-800': notification.type === 'warning',
-                                        'bg-blue-100 text-blue-800': notification.type === 'error',
-                                   }" x-text="notification.type"></span>
+            <a :href="`/student/notifications/${notification.id}`"
+               class="block hover:no-underline">
+                <div x-show="filteredNotifications(notification)"
+                     class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                     :class="{ 'bg-white': !notification.isRead }">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h2 class="text-xl font-semibold" :class="{ 'text-gray-900': !notification.isRead, 'text-gray-500': notification.isRead }" x-text="notification.title"></h2>
+                                <p class="mt-4 font-semibold" :class="{ 'text-gray-900': !notification.isRead, 'text-gray-500': notification.isRead }" x-text="notification.description"></p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <p class="text-sm text-gray-500" x-text="notification.date"></p>
+                                <span class="inline-flex items-center px-3 py-1 text-m font-semibold rounded-full mt-2 capitalize tracking-wide shadow-sm"
+                                      :class="{
+                                            'bg-green-100 text-green-800': notification.type === 'info',
+                                            'bg-yellow-100 text-yellow-800': notification.type === 'warning',
+                                            'bg-blue-100 text-blue-800': notification.type === 'error',
+                                       }" x-text="notification.type"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </template>
     </div>
 

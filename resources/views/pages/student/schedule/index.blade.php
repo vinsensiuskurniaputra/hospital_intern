@@ -42,7 +42,7 @@
                             </div>
                         </div>
                     </div>
-
+                    
                     <!-- Calendar Grid -->
                     <div class="mb-6">
                         <div class="grid grid-cols-7 mb-2">

@@ -109,6 +109,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::get('/responsible/schedule/get-schedules', [ResponsibleScheduleController::class, 'getSchedules'])
         ->name('responsible.schedule.get-schedules');
+
+    Route::get('/home/profile', [StudentProfileController::class, 'index'])->name('student-profile');
 });
 
 // Student Routes
@@ -131,9 +133,14 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
 
     // Profile
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
-
+    Route::get('/profile/password', [StudentProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/password', [StudentProfileController::class, 'updatePassword'])->name('profile.update-password');
+    Route::get('/profile/edit', [StudentProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [StudentProfileController::class, 'update'])->name('profile.update');
+    
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Student\StudentNotificationController::class, 'index'])->name('notifications');
+    Route::get('/notifications/{id}', [App\Http\Controllers\Student\StudentNotificationController::class, 'show'])->name('notifications.show');
     Route::post('/notifications/{id}/read', [App\Http\Controllers\Student\StudentNotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [App\Http\Controllers\Student\StudentNotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });
@@ -153,6 +160,9 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     Route::get('/attendance/students', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getStudentAttendance'])->name('attendance.students');
     Route::post('/attendance/update', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'updateAttendance'])->name('attendance.update');
 
+    Route::get('/schedule/filter', [ResponsibleScheduleController::class, 'filter'])->name('schedule.filter');
+    Route::get('/schedule/class-details', [ResponsibleScheduleController::class, 'getClassDetails'])->name('schedule.class-details');
+    
     // API endpoints untuk presensi
     Route::get('/attendance/students', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getStudentAttendance'])->name('attendance.students');
     Route::post('/attendance/manual-add', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'addManualAttendance'])->name('attendance.manual-add');
@@ -162,7 +172,8 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
 
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades');
-
+    Route::post('/grades/store', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'store'])->name('grades.store');
+ 
     // Laporan & Rekapitulasi
     Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
     Route::resource('schedules', AdminScheduleController::class);
@@ -170,6 +181,8 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
 
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
+    Route::get('/schedule/get-classes', [ResponsibleScheduleController::class, 'getClassesForStase'])->name('schedule.get-classes');
+    Route::get('/students', [App\Http\Controllers\Responsible\ResponsibleStudentController::class, 'index'])->name('students.index');
 });
 
 // API Routes for presence (PIC/Responsible)
