@@ -93,7 +93,7 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
                                         @if ($student->certificate != null)
-                                            <a href="{{ route('certificate.view', $student->certificate->id) }}"
+                                            <a href="{{ route('certificate.download', $student->certificate->id) }}"
                                                 class="text-blue-600 hover:text-blue-700">
                                                 <span
                                                     class="inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium bg-green-100 hover:bg-green-800 hover:text-green-100 text-green-800">

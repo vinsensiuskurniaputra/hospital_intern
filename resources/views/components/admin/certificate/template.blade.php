@@ -1,30 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
     <title>Sertifikat Magang Rumah Sakit</title>
     <style>
         @page {
+            size: A4 portrait;
             margin: 0;
-            size: A4 landscape;
         }
 
+        html,
         body {
-            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
+            height: 1122px;
+            /* Tinggi A4 pada 96 DPI */
+            width: 794px;
+            /* Lebar A4 pada 96 DPI */
+            font-family: 'Arial', sans-serif;
             background: #fff;
-            position: relative;
+            box-sizing: border-box;
         }
 
         .certificate-container {
+            position: relative;
             width: 100%;
             height: 100%;
-            min-height: 100%;
-            padding: 40px;
+            padding: 30px;
             box-sizing: border-box;
-            position: relative;
+            overflow: hidden;
         }
 
         .border-pattern {
@@ -42,172 +47,156 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            opacity: 0.05;
-            font-size: 150px;
+            font-size: 120px;
             color: #2D5A27;
+            opacity: 0.05;
             z-index: 0;
             pointer-events: none;
+            white-space: nowrap;
         }
 
         .content {
             position: relative;
             z-index: 1;
-            padding: 60px;
-            height: 100%;
+            padding: 20px;
+            text-align: center;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            justify-content: space-between;
+            height: 100%;
+            box-sizing: border-box;
         }
 
         .logo {
-            width: 150px;
-            margin-bottom: 30px;
+            width: 80px;
+            margin: 0 auto 20px;
         }
 
         .certificate-title {
-            font-size: 54px;
+            font-size: 48px;
             color: #2D5A27;
-            margin-bottom: 20px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 6px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
         }
 
         .certificate-subtitle {
-            font-size: 28px;
+            font-size: 22px;
             color: #4F9546;
-            margin-bottom: 50px;
-            letter-spacing: 2px;
-        }
-
-        .recipient-name {
-            font-size: 42px;
-            color: #333;
-            margin: 30px 0;
-            border-bottom: 3px solid #4F9546;
-            padding-bottom: 10px;
-            font-weight: bold;
+            margin-bottom: 20px;
         }
 
         .certificate-text {
-            font-size: 20px;
+            font-size: 14px;
             color: #444;
-            line-height: 1.8;
-            margin: 25px 0;
-            max-width: 800px;
+            line-height: 1.6;
+            margin: 10px 0;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
             text-align: justify;
-            text-justify: inter-word;
+        }
+
+        .recipient-name {
+            font-size: 36px;
+            color: #333;
+            font-weight: bold;
+            margin: 20px 0 10px;
+            border-bottom: 3px solid #4F9546;
+            padding-bottom: 5px;
+            display: inline-block;
         }
 
         .date-location {
-            margin-top: 50px;
-            font-size: 18px;
+            font-size: 16px;
             color: #555;
+            margin-top: 30px;
             font-style: italic;
         }
 
         .signature-section {
-            margin-top: 80px;
+            margin-top: 30px;
             display: flex;
             justify-content: space-around;
-            width: 100%;
-            max-width: 800px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         .signature {
             text-align: center;
-            margin: 0 40px;
         }
 
         .signature-line {
-            width: 250px;
+            width: 180px;
             border-bottom: 2px solid #333;
             margin: 10px auto;
         }
 
         .signature-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 10px;
-        }
-
-        .signature-title {
             font-size: 16px;
-            color: #555;
+            font-weight: bold;
             margin-top: 5px;
         }
 
+        .signature-title {
+            font-size: 14px;
+            color: #555;
+        }
+
         .certificate-footer {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
+            font-size: 12px;
+            margin-top: 10px;
+            color: #666;
         }
 
         .certificate-number {
-            font-size: 16px;
-            color: #666;
-            padding: 8px 15px;
-            border: 1px solid #ddd;
             display: inline-block;
-            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
     <div class="certificate-container">
-        <div class="border-pattern"></div>
-        <div class="watermark">CERTIFIED</div>
         <div class="content">
-            <img src="{{ public_path('images/logo.png') }}" alt="Hospital Logo" class="logo">
+            <div>
+                <img src="{{ public_path('images/logo.png') }}" alt="Hospital Logo" class="logo">
+                <div class="certificate-title">Sertifikat</div>
+                <div class="certificate-subtitle">Program Magang Rumah Sakit</div>
 
-            <div class="certificate-title">Sertifikat</div>
-            <div class="certificate-subtitle">Program Magang Rumah Sakit</div>
-
-            <div class="certificate-text">
-                Dengan ini menyatakan bahwa
-            </div>
-
-            <div class="recipient-name">
-                {{ $nama }}
-            </div>
-
-            <div class="certificate-text">
-                telah berhasil menyelesaikan Program Magang Rumah Sakit
-                dengan penuh dedikasi dan profesionalisme sesuai dengan
-                standar kompetensi yang ditetapkan.<br>
-                Periode Magang: {{ $periode ?? 'Januari - Juni 2024' }}
-            </div>
-
-            <div class="date-location">
-                Diberikan pada tanggal {{ Carbon\Carbon::now()->isoFormat('D MMMM Y') }}
-                <br>
-                di Malang, Indonesia
-            </div>
-
-            <div class="signature-section">
-                <div class="signature">
-                    <div class="signature-line"></div>
-                    <div class="signature-name">Dr. Jane Doe</div>
-                    <div class="signature-title">Direktur Rumah Sakit</div>
+                <div class="certificate-text">Dengan ini menyatakan bahwa</div>
+                <div class="recipient-name">{{ $nama }}</div>
+                <div class="certificate-text">
+                    telah berhasil menyelesaikan Program Magang Rumah Sakit dengan penuh dedikasi dan profesionalisme
+                    sesuai dengan standar kompetensi yang ditetapkan.<br>
+                    Periode Magang: {{ $periode ?? 'Januari - Juni 2024' }}
                 </div>
 
-                <div class="signature">
-                    <div class="signature-line"></div>
-                    <div class="signature-name">Dr. John Smith</div>
-                    <div class="signature-title">Kepala Program Magang</div>
+                <div class="date-location">
+                    Diberikan pada tanggal {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}<br>
+                    di Malang, Indonesia
                 </div>
             </div>
 
-            <div class="certificate-footer">
-                <div class="certificate-number">
-                    Nomor Sertifikat: {{ $kode }}
+            <div>
+                <div class="signature-section">
+                    <div class="signature">
+                        <div class="signature-line"></div>
+                        <div class="signature-name">Dr. Jane Doe</div>
+                        <div class="signature-title">Direktur Rumah Sakit</div>
+                    </div>
+                    <div class="signature">
+                        <div class="signature-line"></div>
+                        <div class="signature-name">Dr. John Smith</div>
+                        <div class="signature-title">Kepala Program Magang</div>
+                    </div>
+                </div>
+
+                <div class="certificate-footer">
+                    <div class="certificate-number">Nomor Sertifikat: {{ $kode }}</div>
                 </div>
             </div>
         </div>

@@ -71,10 +71,9 @@ class AdminCertificateController extends Controller
         //
     }
 
-    public function generateCertificate($id, PDF $pdfGenerator)
+    public function generateCertificate($id)
     {
         $student = Student::findOrFail($id);
-        $nama = $student->user->name;
 
         // Generate certificate code
         $tanggal = Carbon::now()->format('Ymd');
@@ -82,58 +81,34 @@ class AdminCertificateController extends Controller
         $urut = str_pad($countToday, 4, '0', STR_PAD_LEFT);
         $kode = "CERT-{$tanggal}-{$urut}";
 
-        // Prepare data for the PDF
-        $data = ['nama' => $nama, 'kode' => $kode];
-        $pdf = $pdfGenerator->loadView('components.admin.certificate.template', $data);
-
-        // Define file path and name
-        $filename = "{$kode}.pdf";
-        $path = "public/sertifikat/{$filename}";
-
-        // Ensure the directory exists
-        if (!Storage::exists('public/sertifikat')) {
-            Storage::makeDirectory('public/sertifikat', 0755, true);
-        }
-
-        // Save the PDF file to storage
-        $result = Storage::put($path, $pdf->output());
-        if (!$result) {
-            \Log::error("Failed to save PDF to: {$path}");
-            abort(500, 'Failed to save certificate');
-        }
-
-        // Generate a public URL for the certificate
-        $certificateUrl = Storage::url("sertifikat/{$filename}");
 
         // Save certificate details to the database
         Certificate::create([
             'student_id' => $student->id,
             'kode' => $kode,
-            'certificate_url' => $certificateUrl,
+            'certificate_url' => '-',
         ]);
 
         // Return the PDF file for download
+        return redirect()->route('admin.certificates.index')->with('success', 'Departement created successfully');
+    }
+
+    public function downloadCertificate($id, PDF $pdfGenerator)
+    {
+        $student = Student::findOrFail($id);
+
+        $nama = $student->user->name;
+        $kode = $student->certificate->kode;
+
+        // Prepare data for the PDF
+        $data = ['nama' => $nama, 'kode' => $kode];
+        $pdf = $pdfGenerator->loadView('components.admin.certificate.template', $data);
+        $pdf->set_paper('A4', 'portrait');
+        $filename = "{$kode}.pdf";
+
+        // Just return the PDF file for download
         return $pdf->download($filename);
     }
 
-    
-    public function view($id)
-    {
-        $certificate = Certificate::findOrFail($id);
-        @dd($certificate);
 
-        // Ambil path dari field `certificate_url` (misal: /storage/sertifikat/CERT-xxxx.pdf)
-        $relativePath = str_replace('/storage/', '', $certificate->certificate_url); // hasil: sertifikat/xxx.pdf
-
-        // Buat full path storage
-        $path = storage_path("app/public/{$relativePath}");
-
-        if (!file_exists($path)) {
-            abort(404, 'Sertifikat tidak ditemukan');
-        }
-
-        return response()->file($path, [
-            'Content-Type' => 'application/pdf',
-        ]);
-    }
 }
