@@ -27,11 +27,15 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100">
             <div class="p-6 border-b border-gray-100">
                 <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-                    <!-- Date Range -->
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-                        <input type="date"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Class Year</label>
+                        <select
                             class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
+                            <option value="">All Class Year</option>
+                            <option value="present">Present</option>
+                            <option value="sick">Sick</option>
+                            <option value="permission">Permission</option>
+                        </select>
                     </div>
 
                     <!-- Status Filter -->
@@ -65,38 +69,51 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student Info</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Evidence</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Evidence</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th> --}}
                         </tr>
                     </thead>
-                    {{-- <tbody class="divide-y divide-gray-100">
-                        @foreach ($data as $index => $row)
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach ($students as $index => $student)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $index + 1 }}.</td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($row['nama']) }}"
-                                            class="h-8 w-8 rounded-full" alt="{{ $row['nama'] }}">
+                                        <img src="{{ $student->user->photo_profile_url ? asset('storage/' . $student->user->photo_profile_url) : 'https://ui-avatars.com/api/?name=' . urlencode($student->user->name) }}"
+                                            class="h-8 w-8 rounded-full" alt="{{ $student->user->name }}">
                                         <div class="ml-3">
-                                            <p class="text-sm font-medium text-gray-800">{{ $row['nama'] }}</p>
-                                            <p class="text-xs text-gray-500">{{ $row['nim'] }}</p>
+                                            <p class="text-sm font-medium text-gray-800">{{ $student->user->name }}</p>
+                                            <p class="text-xs text-gray-500">{{ $student->nim }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ $row['tanggal'] }}</td>
                                 <td class="px-6 py-4">
-                                    <span @class([
-                                        'px-2 py-1 text-xs font-medium rounded-full',
-                                        'bg-green-100 text-green-700' => $row['status'] === 'Hadir',
-                                        'bg-yellow-100 text-yellow-700' => $row['status'] === 'Izin',
-                                        'bg-red-100 text-red-700' => $row['status'] === 'Sakit',
-                                    ])>
-                                        {{ $row['status'] }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
+                                    {{-- Progress Bar Gabungan --}}
+                                    <div class="w-full bg-gray-200 rounded-full h-4 flex overflow-hidden">
+                                        <div class="bg-green-500 h-4" style="width: {{ $student->present_percentage }}%">
+                                        </div>
+                                        <div class="bg-yellow-400 h-4" style="width: {{ $student->sick_percentage }}%">
+                                        </div>
+                                        <div class="bg-red-500 h-4" style="width: {{ $student->absent_percentage }}%"></div>
+                                    </div>
+
+                                    {{-- Keterangan --}}
+                                    <div class="text-xs text-gray-700 mt-2 space-x-2">
+                                        <span class="inline-block">
+                                            <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1"></span>Hadir:
+                                            {{ $student->present_percentage }}%
+                                        </span>
+                                        <span class="inline-block">
+                                            <span class="inline-block w-3 h-3 bg-yellow-400 rounded-full mr-1"></span>Sakit:
+                                            {{ $student->sick_percentage }}%
+                                        </span>
+                                        <span class="inline-block">
+                                            <span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>Alpa:
+                                            {{ $student->absent_percentage }}%
+                                        </span>
+                                    </div>
+                                    {{-- <td class="px-6 py-4">
                                     @if ($row['bukti'] !== '-')
                                         <button
                                             class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100">
@@ -105,8 +122,8 @@
                                     @else
                                         <span class="text-gray-400">-</span>
                                     @endif
-                                </td>
-                                <td class="px-6 py-4">
+                                </td> --}}
+                                    {{-- <td class="px-6 py-4">
                                     <div class="flex gap-2">
                                         <button class="p-1 text-blue-600 hover:text-blue-700">
                                             <i class="bi bi-pencil"></i>
@@ -115,26 +132,17 @@
                                             <i class="bi bi-check2"></i>
                                         </button>
                                     </div>
-                                </td>
+                                </td> --}}
                             </tr>
                         @endforeach
-                    </tbody> --}}
+                    </tbody>
                 </table>
             </div>
 
             <!-- Pagination -->
-            <div class="px-6 py-4 border-t border-gray-100">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm text-gray-500">Showing 1 to 5 of 25 entries</p>
-                    <div class="flex gap-2">
-                        <button class="px-3 py-1 text-sm text-gray-500">Previous</button>
-                        <button class="px-3 py-1 text-sm text-white bg-[#637F26] rounded-lg">1</button>
-                        <button class="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">2</button>
-                        <button class="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">3</button>
-                        <button class="px-3 py-1 text-sm text-gray-500">Next</button>
-                    </div>
-                </div>
-            </div>
+            @include('components.general.pagination', [
+                'datas' => $students,
+            ])
         </div>
     </div>
 @endsection
