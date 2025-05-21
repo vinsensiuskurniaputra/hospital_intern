@@ -104,8 +104,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
     Route::get('/presences/generate-certificates/{id}', [AdminCertificateController::class, 'generateCertificate'])->name('admin.certificate.generate');
-    Route::get('/presences/certificate/view/{id}', [AdminCertificateController::class, 'view'])
-    ->name('certificate.view');
+    Route::get('/presences/certificate/download/{id}', [AdminCertificateController::class, 'downloadCertificate'])
+    ->name('certificate.download');
 
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
 
