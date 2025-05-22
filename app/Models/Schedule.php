@@ -4,35 +4,39 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schedule extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
-        'internship_class_id',
         'stase_id',
+        'internship_class_id',
         'start_date',
-        'end_date'
+        'end_date',
+        'start_time',
+        'end_time'
     ];
 
-    protected $dates = [
-        'start_date',
-        'end_date'
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date'
     ];
 
-    public function internshipClass()
-    {
-        return $this->belongsTo(InternshipClass::class);
-    }
-
-    public function stase()
+    public function stase(): BelongsTo
     {
         return $this->belongsTo(Stase::class);
     }
 
-    public function departement()
+    public function internshipClass(): BelongsTo
     {
-        return $this->belongsTo(Departement::class, 'departement_id');
+        return $this->belongsTo(InternshipClass::class);
+    }
+
+    public function responsibleUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(ResponsibleUser::class, 'responsible_schedule');
     }
 }
