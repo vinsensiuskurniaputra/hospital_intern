@@ -1,60 +1,60 @@
 @extends('layouts.auth')
 
-@section('title', 'Student Presence')
+@section('title', 'Presensi Mahasiswa')
 
 @section('content')
     <div class="p-6 space-y-6">
-        <!-- Header Section -->
+        <!-- Bagian Header -->
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-semibold text-gray-800">Student Presence</h1>
-                    <p class="mt-1 text-sm text-gray-500">Monitor and manage student attendance</p>
+                    <h1 class="text-2xl font-semibold text-gray-800">Presensi Mahasiswa</h1>
+                    <p class="mt-1 text-sm text-gray-500">Pantau dan kelola kehadiran mahasiswa</p>
                 </div>
                 <div class="flex gap-3">
                     <button class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                        <i class="bi bi-plus-lg mr-2"></i>Add Presence
+                        <i class="bi bi-plus-lg mr-2"></i>Tambah Presensi
                     </button>
                     <button
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <i class="bi bi-download mr-2"></i>Export Data
+                        <i class="bi bi-download mr-2"></i>Ekspor Data
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Filters & Search -->
+        <!-- Filter & Pencarian -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100">
             <div class="p-6 border-b border-gray-100">
                 <div class="flex flex-col lg:flex-row lg:items-center gap-4">
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Class Year</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Kelas</label>
                         <select
                             class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
-                            <option value="">All Class Year</option>
-                            <option value="present">Present</option>
-                            <option value="sick">Sick</option>
-                            <option value="permission">Permission</option>
+                            <option value="">Semua Tahun Kelas</option>
+                            <option value="present">Hadir</option>
+                            <option value="sick">Sakit</option>
+                            <option value="permission">Izin</option>
                         </select>
                     </div>
 
-                    <!-- Status Filter -->
+                    <!-- Filter Status -->
                     <div class="flex-1">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                         <select
                             class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
-                            <option value="">All Status</option>
-                            <option value="present">Present</option>
-                            <option value="sick">Sick</option>
-                            <option value="permission">Permission</option>
+                            <option value="">Semua Status</option>
+                            <option value="present">Hadir</option>
+                            <option value="sick">Sakit</option>
+                            <option value="permission">Izin</option>
                         </select>
                     </div>
 
-                    <!-- Search -->
+                    <!-- Pencarian -->
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pencarian</label>
                         <div class="relative">
-                            <input type="text" placeholder="Search by name or NIM..."
+                            <input type="text" placeholder="Cari berdasarkan nama atau NIM..."
                                 class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
                             <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
                         </div>
@@ -62,13 +62,14 @@
                 </div>
             </div>
 
-            <!-- Table -->
+            <!-- Tabel -->
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-50 border-y border-gray-100">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student Info</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Info Mahasiswa
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Evidence</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th> --}}
@@ -89,7 +90,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{-- Progress Bar Gabungan --}}
+                                    {{-- Bilah Progres Gabungan --}}
                                     <div class="w-full bg-gray-200 rounded-full h-4 flex overflow-hidden">
                                         <div class="bg-green-500 h-4" style="width: {{ $student->present_percentage }}%">
                                         </div>
@@ -139,7 +140,7 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+            <!-- Paginasi -->
             @include('components.general.pagination', [
                 'datas' => $students,
             ])
