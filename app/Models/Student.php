@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Presence;
 use App\Models\Certificate;
 use App\Models\StudyProgram;
 use App\Models\InternshipClass;
