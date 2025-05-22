@@ -36,9 +36,9 @@ class Stase extends Model
         return $this->hasMany(StudentGrade::class);
     }
 
-    public function responsibleUsers(): BelongsToMany
+    public function responsibleStases()
     {
-        return $this->belongsToMany(responsibleUser::class, 'responsible_stase');
+        return $this->hasMany(ResponsibleStase::class);
     }
 
     /**

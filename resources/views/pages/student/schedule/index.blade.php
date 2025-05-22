@@ -3,157 +3,70 @@
 @section('title', 'Jadwal Mahasiswa')
 
 @section('content')
-<div class="p-4" x-data="{
-    months: [
-        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ],
-    currentMonth: 'Mei',
-    currentYear: '2025',
-    selectedDate: 12,
-    todayDate: new Date().getDate(),
-    getYears() {
-        const currentYear = new Date().getFullYear();
-        return Array.from({length: 10}, (_, i) => currentYear + i);
-    },
-    printPage() {
-        window.print();
-    }
-}">
+<div class="p-4">
     <h5 class="text-xl font-semibold mb-4">Jadwal Magang</h5>
 
     <!-- Jadwal Hari Ini Section -->
-    <div class="bg-white rounded-lg p-4 mb-6">
-        <h6 class="font-semibold mb-3">Jadwal Hari Ini</h6>
+    <div class="bg-white rounded-lg shadow-sm mb-6">
+        <div class="p-6">
+            <h5 class="text-lg font-medium mb-4">Jadwal Hari Ini</h5>
 
-        <!-- Two Column Layout -->
-        <div class="flex gap-4">
-            <!-- Left Column - Calendar -->
-            <div class="w-[320px]">
-                <!-- Calendar Controls -->
-                <div class="flex gap-2 mb-3">
-                    <select x-model="currentMonth" class="form-select rounded-md text-sm border-gray-300 w-[160px] h-9 transition-all duration-200 ease-in-out hover:border-[#637F26] focus:border-[#637F26] focus:ring focus:ring-[#637F26] focus:ring-opacity-50">
-                        <template x-for="month in months" :key="month">
-                            <option :value="month" x-text="month"></option>
-                        </template>
-                    </select>
-                    <select x-model="currentYear" class="form-select rounded-md text-sm border-gray-300 w-[112px] h-9 transition-all duration-200 ease-in-out hover:border-[#637F26] focus:border-[#637F26] focus:ring focus:ring-[#637F26] focus:ring-opacity-50">
-                        <template x-for="year in getYears()" :key="year">
-                            <option :value="year" x-text="year"></option>
-                        </template>
-                    </select>
-                </div>
-
-                <!-- Calendar -->
-                <div class="w-[280px] bg-white rounded-lg border border-gray-200 overflow-hidden mb-3">
-                    <!-- Calendar Header -->
-                    <div class="grid grid-cols-7 border-b border-gray-200">
-                        <div class="py-1.5 text-center text-xs font-medium text-gray-600">Ming</div>
-                        <div class="py-1.5 text-center text-xs font-medium text-gray-600">Sen</div>
-                        <div class="py-1.5 text-center text-xs font-medium text-gray-600">Sel</div>
-                        <div class="py-1.5 text-center text-xs font-medium text-gray-600">Rab</div>
-                        <div class="py-1.5 text-center text-xs font-medium text-gray-600">Kam</div>
-                        <div class="py-1.5 text-center text-xs font-medium text-gray-600">Jum</div>
-                        <div class="py-1.5 text-center text-xs font-medium text-gray-600">Sab</div>
-                    </div>
-
-                    <!-- Calendar Body -->
-                    <div class="grid grid-cols-7 gap-1.5 p-1.5">
-                        <template x-for="date in 31">
-                            <div
-                                @click="selectedDate = date"
-                                class="aspect-square w-[32px] flex items-center justify-center cursor-pointer rounded-lg transition-all duration-300 ease-in-out transform text-sm"
-                                :class="{
-                                    'bg-[#637F26] text-white scale-105 shadow-md': selectedDate === date,
-                                    'hover:bg-[#F5F7F0] hover:text-[#637F26] hover:scale-105': selectedDate !== date,
-                                    'ring-2 ring-[#637F26] ring-offset-2': date === todayDate && selectedDate !== date
-                                }"
-                            >
-                                <span x-text="date"></span>
+            <div class="flex gap-6">
+                <!-- Left Side - Calendar -->
+                <div class="w-[400px]">
+                    <!-- Calendar Controls -->
+                    <div class="flex gap-4 mb-6">
+                        <div class="relative">
+                            <select id="monthSelect" class="form-select w-36 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer">
+                                @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $index => $month)
+                                    <option value="{{ $index }}" {{ $index == date('n') - 1 ? 'selected' : '' }}>{{ $month }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
                             </div>
-                        </template>
+                        </div>
+
+                        <div class="relative">
+                            <select id="yearSelect" class="form-select w-28 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer">
+                                @for ($year = date('Y') - 2; $year <= date('Y') + 2; $year++)
+                                    <option value="{{ $year }}" {{ $year == date('Y') ? 'selected' : '' }}>{{ $year }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="mb-6">
+                        <div class="grid grid-cols-7 mb-2">
+                            @foreach(['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] as $day)
+                                <div class="text-center text-sm text-gray-500">{{ $day }}</div>
+                            @endforeach
+                        </div>
+
+                        <div id="calendarDays" class="grid grid-cols-7 gap-1">
+                            <!-- Calendar days will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Cancel/Done Buttons -->
+                    <div class="flex justify-end gap-2">
+                        <button class="calendar-cancel px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">Batal</button>
+                        <button class="calendar-done px-4 py-2 rounded-lg bg-[#637F26] text-white hover:bg-[#4B601C] transition-colors opacity-50" disabled>Pilih Tanggal</button>
                     </div>
                 </div>
 
-                <!-- Calendar Footer -->
-                <div class="flex justify-end gap-2 w-[280px]">
-                    <button
-                        @click="selectedDate = todayDate"
-                        class="h-8 px-3 text-sm rounded-md text-gray-700 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
-                    >
-                        Batal
-                    </button>
-                    <button
-                        class="h-8 px-3 text-sm rounded-md bg-[#637F26] text-white hover:bg-[#4f6420] transition-all duration-200 ease-in-out hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
-                        @click="$dispatch('date-selected', { date: selectedDate })"
-                    >
-                        Selesai
-                    </button>
-                </div>
-            </div>
-
-            <!-- Right Column - Schedule -->
-            <div class="flex-1 space-y-2">
-                <div class="bg-[#F5F7F0] p-4 rounded-lg">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-[#637F26]"></span>
-                            <h6 class="font-semibold text-sm">Kelas FK-01</h6>
-                        </div>
-                        <span class="text-xs text-gray-500">Keperawatan</span>
-                    </div>
-                    <div class="mt-2 text-sm text-gray-600">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="bi bi-clock text-[#637F26]"></i>
-                            <span>08:00 - 11:00</span>
-                        </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="bi bi-calendar text-[#637F26]"></i>
-                            <span class="text-xs">12/05/2025 - 18/05/2025</span>
-                        </div>
-                        <p class="ml-6">Departemen THT</p>
-                    </div>
-                </div>
-
-                <div class="bg-[#F5F7F0] p-4 rounded-lg">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-[#637F26]"></span>
-                            <h6 class="font-semibold text-sm">Kelas FK-01</h6>
-                        </div>
-                        <span class="text-xs text-gray-500">Keperawatan</span>
-                    </div>
-                    <div class="mt-2 text-sm text-gray-600">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="bi bi-clock text-[#637F26]"></i>
-                            <span>11:00 - 14:00</span>
-                        </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="bi bi-calendar text-[#637F26]"></i>
-                            <span class="text-xs">12/05/2025 - 12/05/2025</span>
-                        </div>
-                        <p class="ml-6">Departemen Mata</p>
-                    </div>
-                </div>
-
-                <div class="bg-[#F5F7F0] p-4 rounded-lg">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-[#637F26]"></span>
-                            <h6 class="font-semibold text-sm">Kelas FK-01</h6>
-                        </div>
-                        <span class="text-xs text-gray-500">Keperawatan</span>
-                    </div>
-                    <div class="mt-2 text-sm text-gray-600">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="bi bi-clock text-[#637F26]"></i>
-                            <span>14:00 - 17:00</span>
-                        </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="bi bi-calendar text-[#637F26]"></i>
-                            <span class="text-xs">12/05/2025 - 12/05/2025</span>
-                        </div>
-                        <p class="ml-6">Departemen Kulit</p>
+                <!-- Right Side - Schedule Cards -->
+                <div class="flex-1">
+                    <div id="scheduleContainer" class="space-y-2">
+                        <!-- Schedule items will be rendered here -->
                     </div>
                 </div>
             </div>
@@ -164,117 +77,324 @@
     <div class="bg-white rounded-lg p-4">
         <h6 class="text-lg font-semibold mb-4">Tabel Jadwal</h6>
 
-        <!-- Filters -->
-        <div class="flex items-end gap-3 mb-4">
-            <div class="w-[240px]">
-                <p class="text-sm text-gray-600 mb-1">Rentang Tanggal</p>
-                <input type="date" x-model="start_date" class="form-input rounded-md text-sm border-gray-300 w-full h-9 transition-all duration-200 ease-in-out hover:border-[#637F26] focus:border-[#637F26] focus:ring focus:ring-[#637F26] focus:ring-opacity-50" placeholder="Pilih rentang tanggal">
-            </div>
-            <div class="w-[240px]">
-                <p class="text-sm text-gray-600 mb-1">Departemen</p>
-                <select x-model="departement" class="form-select rounded-md text-sm border-gray-300 w-full h-9 transition-all duration-200 ease-in-out hover:border-[#637F26] focus:border-[#637F26] focus:ring focus:ring-[#637F26] focus:ring-opacity-50 [&>*]:transition-transform [&>*]:duration-200 [&>*]:ease-in-out hover:[&>*]:translate-x-1">
-                    <option value="">Pilih departemen</option>
-                    <option value="kardiologi">Kardiologi</option>
-                    <option value="neurologi">Neurologi</option>
-                    <option value="radiologi">Radiologi</option>
-                </select>
-            </div>
-            <button class="h-9 px-4 text-sm rounded-md bg-[#637F26] text-white hover:bg-[#4f6420] transition-all duration-200 ease-in-out hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm">
-                Terapkan
-            </button>
+        <!-- Update the filter buttons HTML -->
+        <div class="flex gap-2 mb-4">
+            <button class="schedule-filter px-4 py-2 rounded-lg border border-gray-300 hover:bg-[#637F26] hover:text-white transition-colors" data-filter="this-month">Bulan Ini</button>
+            <button class="schedule-filter px-4 py-2 rounded-lg border border-gray-300 hover:bg-[#637F26] hover:text-white transition-colors" data-filter="this-week">Minggu Ini</button>
+            <button class="schedule-filter px-4 py-2 rounded-lg border border-gray-300 hover:bg-[#637F26] hover:text-white transition-colors" data-filter="next-week">Minggu Depan</button>
+            <button class="schedule-filter px-4 py-2 rounded-lg border border-gray-300 hover:bg-[#637F26] hover:text-white transition-colors" data-filter="next-month">Bulan Depan</button>
         </div>
 
-        <!-- Time Filter Tabs -->
-        <div class="border-b border-gray-200 mb-4">
-            <div class="flex gap-6">
-                <button class="text-sm pb-2 text-[#637F26] border-b-2 border-[#637F26] font-medium transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 active:translate-y-0">Bulan Ini</button>
-                <button class="text-sm pb-2 text-gray-500 hover:text-[#637F26] transition-all duration-200 ease-in-out hover:border-b-2 hover:border-[#637F26] transform hover:-translate-y-0.5 active:translate-y-0">Minggu Ini</button>
-                <button class="text-sm pb-2 text-gray-500 hover:text-[#637F26] transition-all duration-200 ease-in-out hover:border-b-2 hover:border-[#637F26] transform hover:-translate-y-0.5 active:translate-y-0">Minggu Depan</button>
-            </div>
-        </div>
-
-        <!-- Schedule Table -->
         <div class="overflow-x-auto mb-3">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b border-gray-200 transition-colors duration-200">
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Tanggal</th>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Rentang Tanggal</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Stase</th>
                         <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Kelas</th>
                         <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Nama Penanggung Jawab</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Departemen</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Jam</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
-                    <tr class="hover:bg-gray-50 transition-colors duration-200 ease-in-out">
-                        <td class="py-3 px-4 text-sm text-gray-600">Mei 15, 2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Kelas A-2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">dr. Jeki Indomie</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Kardiologi</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">8:00 - 16:00</td>
-                    </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-4 text-sm text-gray-600">Mei 16, 2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Kelas B-2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">dr. Angga Radiant</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Kardiologi</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">8:00 - 16:00</td>
-                    </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-4 text-sm text-gray-600">Mei 17, 2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Kelas A-2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">dr. Acim Resing</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Neurologi</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">9:00 - 17:00</td>
-                    </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-4 text-sm text-gray-600">Mei 18, 2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Kelas C-2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">dr. Stones</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Kardiologi</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">8:00 - 16:00</td>
-                    </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-4 text-sm text-gray-600">Mei 19, 2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Kelas B-2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">dr. Jeki, N.Tr</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">Radiologi</td>
-                        <td class="py-3 px-4 text-sm text-gray-600">7:00 - 15:00</td>
-                    </tr>
+                <tbody id="scheduleTableBody" class="divide-y divide-gray-200">
+                    @foreach ($schedules as $schedule)
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 text-sm text-gray-600">
+                                {{ \Carbon\Carbon::parse($schedule->start_date)->locale('id')->translatedFormat('j F Y') }} -
+                                {{ \Carbon\Carbon::parse($schedule->end_date)->locale('id')->translatedFormat('j F Y') }}
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-600">{{ $schedule->stase->name }}</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">{{ $schedule->internshipClass->name }}</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">{{ $schedule->stase->responsibleStases->first()?->responsibleUser->user->name ?? '-' }}</td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
-        </div>
-
-        <!-- Export Button -->
-        <div class="text-right print:hidden">
-            <button
-                @click="printPage()"
-                class="h-8 px-4 text-sm rounded-md border border-[#637F26] text-[#637F26] hover:bg-[#F5F7F0] transition-all duration-200 ease-in-out hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
-            >
-                Cetak Jadwal
-            </button>
         </div>
     </div>
 </div>
 
-<style>
-    @media print {
-        .print\:hidden {
-            display: none !important;
+@push('scripts')
+<script>
+$(document).ready(function() {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    let currentDate = new Date();
+
+    // Initialize calendar
+    function initCalendar() {
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+
+        // Set month and year selects
+        $('#monthSelect').val(currentMonth);
+        populateYearSelect(currentYear);
+        $('#yearSelect').val(currentYear);
+
+        renderCalendar(currentMonth, currentYear);
+        loadSchedules(formatDate(currentDate));
+    }
+
+    // Update the renderCalendar function
+    function renderCalendar(month, year) {
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const today = new Date();
+        let calendarHTML = '';
+
+        // Empty cells for days before first of month
+        for (let i = 0; i < firstDay; i++) {
+            calendarHTML += '<div class="aspect-square"></div>';
         }
-        .bg-white {
-            background-color: white !important;
-            box-shadow: none !important;
+
+        // Days of month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const currentDateStr = formatDate(new Date(year, month, day));
+            const isToday = day === today.getDate() &&
+                           month === today.getMonth() &&
+                           year === today.getFullYear();
+            const isSelected = $('.selected-date').data('date') === currentDateStr;
+
+            calendarHTML += `
+                <div class="aspect-square cursor-pointer flex items-center justify-center
+                    ${isSelected ? 'bg-[#637F26] text-white' : ''}
+                    ${isToday && !isSelected ? 'bg-[#637F26] text-white' : ''}
+                    ${isToday && isSelected ? 'border-2 border-[#637F26]' : ''}
+                    hover:bg-[#F5F7F0] rounded-lg"
+                    data-date="${currentDateStr}"
+                    onclick="selectDate(this)">
+                    ${day}
+                </div>
+            `;
         }
-        .rounded-lg {
-            border-radius: 0 !important;
-        }
-        body {
-            background: white !important;
-        }
-        @page {
-            margin: 2cm;
+
+        $('#calendarDays').html(calendarHTML);
+    }
+
+    function populateYearSelect(currentYear) {
+        const yearSelect = $('#yearSelect');
+        const startYear = currentYear - 2;
+        const endYear = currentYear + 2;
+
+        for (let year = startYear; year <= endYear; year++) {
+            yearSelect.append(`<option value="${year}">${year}</option>`);
         }
     }
+
+    // Event handlers
+    $('#monthSelect, #yearSelect').on('change', function() {
+        const selectedMonth = parseInt($('#monthSelect').val());
+        const selectedYear = parseInt($('#yearSelect').val());
+        currentDate = new Date(selectedYear, selectedMonth, 1);
+        renderCalendar(selectedMonth, selectedYear);
+    });
+
+    // Update the selectDate function
+    window.selectDate = function(element) {
+        $('.temp-selected').removeClass('temp-selected border-[#637F26] border-2');
+
+        const isToday = new Date($(element).data('date')).toDateString() === new Date().toDateString();
+        const todayElement = $(`[data-date="${formatDate(new Date())}"]`);
+
+        // Remove highlight from today's date and add outline
+        todayElement.removeClass('bg-[#637F26] text-white').addClass('border-2 border-[#637F26]');
+
+        if (!isToday) {
+            $(element).addClass('temp-selected border-[#637F26] border-2');
+        }
+
+        $('.calendar-done').prop('disabled', false).removeClass('opacity-50');
+    }
+
+    // Update the calendar-done click handler
+    $('.calendar-done').on('click', function() {
+        const selectedElement = $('.temp-selected').first();
+        if (selectedElement.length) {
+            // Remove all previous selections
+            $('.selected-date').removeClass('selected-date bg-[#637F26] text-white');
+
+            // Add highlight to selected date
+            selectedElement
+                .removeClass('temp-selected border-[#637F26] border-2')
+                .addClass('selected-date bg-[#637F26] text-white');
+
+            // Ensure today's date has outline only
+            const todayElement = $(`[data-date="${formatDate(new Date())}"]`);
+            todayElement
+                .removeClass('bg-[#637F26] text-white')
+                .addClass('border-2 border-[#637F26]');
+
+            loadSchedules(selectedElement.data('date'));
+        }
+    });
+
+    // Update the calendar-cancel click handler
+    $('.calendar-cancel').on('click', function() {
+        // Remove all selections
+        $('.temp-selected').removeClass('temp-selected border-[#637F26] border-2');
+        $('.selected-date').removeClass('selected-date bg-[#637F26] text-white');
+
+        // Reset to today's date and highlight it
+        const today = new Date();
+        currentDate = today;
+
+        // Update selects and re-render
+        $('#monthSelect').val(today.getMonth());
+        $('#yearSelect').val(today.getFullYear());
+        renderCalendar(today.getMonth(), today.getFullYear());
+
+        // Ensure today's date is highlighted
+        const todayElement = $(`[data-date="${formatDate(today)}"]`);
+        todayElement
+            .removeClass('border-2 border-[#637F26]')
+            .addClass('bg-[#637F26] text-white');
+
+        // Load today's schedules
+        loadSchedules(formatDate(today));
+
+        // Disable Pilih Tanggal button
+        $('.calendar-done').prop('disabled', true).addClass('opacity-50');
+    });
+
+    // Add active state style for filter buttons
+    $('.schedule-filter').click(function() {
+        $('.schedule-filter').removeClass('bg-[#637F26] text-white').addClass('border-gray-300');
+        $(this).removeClass('border-gray-300').addClass('bg-[#637F26] text-white');
+
+        const filter = $(this).data('filter');
+        loadFilteredSchedules(filter);
+    });
+
+    // Update the document.ready function to show "Bulan Ini" by default
+    $('.schedule-filter[data-filter="this-month"]').addClass('bg-[#637F26] text-white');
+    loadFilteredSchedules('this-month');
+
+    // Modify loadSchedules to only affect the schedule cards
+    function loadSchedules(date) {
+        $.ajax({
+            url: '/student/schedule/by-date',
+            data: { date: date },
+            method: 'GET',
+            success: function(schedules) {
+                // Only update the schedule cards, not the table
+                renderSchedules(schedules);
+            },
+            error: function(error) {
+                console.error('Error loading schedules:', error);
+            }
+        });
+    }
+
+    // Keep loadFilteredSchedules separate for table updates only
+    function loadFilteredSchedules(filter) {
+        $.ajax({
+            url: '/student/schedule/filtered',
+            data: { filter: filter },
+            method: 'GET',
+            success: function(schedules) {
+                // Only update the table
+                renderScheduleTable(schedules);
+            },
+            error: function(error) {
+                console.error('Error loading schedules:', error);
+            }
+        });
+    }
+
+    // Initialize calendar
+    initCalendar();
+
+    function formatDate(date) {
+        return date.getFullYear() + '-' +
+               String(date.getMonth() + 1).padStart(2, '0') + '-' +
+               String(date.getDate()).padStart(2, '0');
+    }
+
+    function renderSchedules(schedules) {
+        const container = $('#scheduleContainer');
+        container.empty();
+
+        if (!schedules || schedules.length === 0) {
+            container.html(`
+                <div class="bg-gray-50 rounded-lg p-4 text-center">
+                    <div class="text-gray-500">Tidak ada jadwal untuk tanggal ini</div>
+                </div>
+            `);
+            return;
+        }
+
+        schedules.forEach(schedule => {
+            container.append(`
+                <div class="bg-[#F5F7F0] rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h6 class="font-medium">${schedule.stase}</h6>
+                        <span class="text-sm text-gray-600">Kelas ${schedule.class}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-[#637F26]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span>Pembimbing: ${schedule.responsibleUser}</span>
+                        </div>
+                    </div>
+                </div>
+            `);
+        });
+    }
+
+    function renderScheduleTable(schedules) {
+        const tbody = $('#scheduleTableBody');
+        tbody.empty();
+
+        schedules.forEach(schedule => {
+            tbody.append(`
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4 text-sm text-gray-600">
+                        ${schedule.startDateFormatted} - ${schedule.endDateFormatted}
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-600">${schedule.stase}</td>
+                    <td class="py-3 px-4 text-sm text-gray-600">${schedule.class}</td>
+                    <td class="py-3 px-4 text-sm text-gray-600">${schedule.responsibleUser}</td>
+                </tr>
+            `);
+        });
+    }
+});
+</script>
+@endpush
+
+@push('styles')
+<style>
+    .form-select:focus, .form-input:focus {
+        outline: none;
+        border-color: #637F26;
+        ring-color: #F5F7F0;
+    }
+
+    .calendar-day {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .calendar-day:hover {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .calendar-day.selected-date {
+        background-color: #637F26;
+        color: white;
+    }
+
+    .calendar-day.selected-date:hover {
+        background-color: #4B601C;
+    }
+
+    .calendar-day.today {
+        border: 2px solid #637F26;
+    }
+
+    .calendar-day.selected-date.today {
+        border: 2px solid #4B601C;
+    }
 </style>
+@endpush
 @endsection
