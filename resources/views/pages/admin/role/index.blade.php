@@ -10,7 +10,7 @@
         <div class="p-6 space-y-6">
             <!-- Summary Cards -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h1 class="text-2xl text-gray-800 pb-6">Role</h1>
+                <h1 class="text-2xl text-gray-800 pb-6">Peran</h1>
             </div>
 
             <!-- Main Content Card -->
@@ -30,7 +30,7 @@
                             </div>
                             <button @click="addModal = true"
                                 class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                                <i class="bi bi-plus-lg mr-2"></i>Add Role
+                                <i class="bi bi-plus-lg mr-2"></i>Tambah Peran
                             </button>
                         </div>
                     </div>
@@ -42,10 +42,11 @@
                         <thead class="bg-gray-50 border-y border-gray-100">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase w-full">Menus
-                                </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Menu</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tindakan</th>
+
                             </tr>
                         </thead>
                         <tbody id="TableBody" class="divide-y divide-gray-100">
