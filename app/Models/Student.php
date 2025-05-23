@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Presence;
 use App\Models\Certificate;
 use App\Models\StudyProgram;
 use App\Models\InternshipClass;
@@ -20,6 +21,16 @@ class Student extends Model
         'nim',
         'telp',
         'is_finished',
+    ];
+    
+    protected $casts = [
+        'internship_class_id' => 'integer',
+        'is_finished' => 'boolean'
+    ];
+    
+    protected $attributes = [
+        'internship_class_id' => null,
+        'is_finished' => false
     ];
 
     public function user()
