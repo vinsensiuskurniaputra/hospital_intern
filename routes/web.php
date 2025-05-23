@@ -121,6 +121,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Student\StudentGradeController::class, 'index'])->name('grades');
+    Route::get('/grades/export', [App\Http\Controllers\Student\StudentGradeController::class, 'exportPdf'])->name('grades.export');
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'index'])->name('profile');
