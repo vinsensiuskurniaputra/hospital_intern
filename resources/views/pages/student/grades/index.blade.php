@@ -52,8 +52,8 @@
                             <th class="column-pj">Nama PJ</th>
                             <th class="column-date">Tanggal</th>
                             <th>Keahlian</th>
-                            <th>Profesionalisme</th>
                             <th>Komunikasi</th>
+                            <th>Profesionalisme</th>
                             <th>Kemampuan Menangani Pasien</th>
                             <th class="column-average">Rata-Rata</th>
                         </tr>
@@ -76,8 +76,8 @@
                                 </td>
                                 <td>{{ isset($grade->updated_at) ? \Carbon\Carbon::parse($grade->updated_at)->format('d M') : '-' }}</td>
                                 <td>{{ $grade->skill_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->professional_grade ?? $grade->avg_grades ?? '-' }}</td>
                                 <td>{{ $grade->communication_grade ?? $grade->avg_grades ?? '-' }}</td>
+                                <td>{{ $grade->professional_grade ?? $grade->avg_grades ?? '-' }}</td>
                                 <td>{{ $grade->patient_management_grade ?? $grade->avg_grades ?? '-' }}</td>
                                 <td class="score-average">{{ $grade->avg_grades ?? '-' }}</td>
                             </tr>
@@ -91,7 +91,7 @@
             </div>
             
             <div class="export-container">
-                <button onclick="printGrades()" class="export-button">Ekspor ke PDF</button>
+                <a href="{{ route('student.grades.export') }}" class="export-a">Ekspor ke PDF</button>
             </div>
 
             <!-- Hidden print template -->
@@ -132,8 +132,8 @@
                             <th>Nama PJ</th>
                             <th>Tanggal</th>
                             <th>Keahlian</th>
-                            <th>Profesionalisme</th>
                             <th>Komunikasi</th>
+                            <th>Profesionalisme</th>
                             <th>Kemampuan Menangani Pasien</th>
                             <th>Rata-Rata</th>
                         </tr>
@@ -156,8 +156,8 @@
                                 </td>
                                 <td>{{ isset($grade->updated_at) ? \Carbon\Carbon::parse($grade->updated_at)->format('d M') : '-' }}</td>
                                 <td>{{ $grade->skill_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->professional_grade ?? $grade->avg_grades ?? '-' }}</td>
                                 <td>{{ $grade->communication_grade ?? $grade->avg_grades ?? '-' }}</td>
+                                <td>{{ $grade->professional_grade ?? $grade->avg_grades ?? '-' }}</td>
                                 <td>{{ $grade->patient_management_grade ?? $grade->avg_grades ?? '-' }}</td>
                                 <td>{{ $grade->avg_grades ?? '-' }}</td>
                             </tr>
@@ -511,19 +511,26 @@
         }
         
         /* Other print styles stay the same... */
+        
     }
 </style>
 <script>
     function printGrades() {
-        // Update the date in the print template
+    // Pastikan template cetak terlihat
+    const printTemplate = document.querySelector('.print-only-template');
+        if (printTemplate) {
+            printTemplate.style.display = 'block';
+        }
+        
+        // Update tanggal di template cetak
         const now = new Date();
-        const formattedDate = `${now.getMonth()+1}/${now.getDate()}/${now.getFullYear().toString().substr(-2)}, ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
+        const formattedDate = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}, ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
         
         if (document.querySelector('.print-date')) {
             document.querySelector('.print-date').textContent = formattedDate;
         }
         
-        // Change the title displayed in the print template
+        // Ubah judul yang ditampilkan di template cetak
         if (document.querySelector('.print-title')) {
             document.querySelector('.print-title').textContent = "Nilai Mahasiswa";
         }
@@ -532,17 +539,52 @@
             document.querySelector('.report-title').textContent = "Detail Nilai Mahasiswa";
         }
         
-        // Change the document title for printing
+        // Pastikan tabel nilai terlihat dengan menambahkan styling khusus
+        const printTable = document.querySelector('.print-grades-table');
+        if (printTable) {
+            printTable.style.display = 'table';
+            printTable.style.width = '100%';
+            printTable.style.borderCollapse = 'collapse';
+            printTable.style.marginTop = '20px';
+            printTable.style.marginBottom = '30px';
+            printTable.style.border = '1px solid #ddd';
+        }
+        
+        // Tambahkan styling tambahan untuk header dan sel tabel
+        const tableHeaders = document.querySelectorAll('.print-grades-table th');
+        tableHeaders.forEach(th => {
+            th.style.backgroundColor = '#f4f7f0';
+            th.style.color = '#658E36';
+            th.style.fontWeight = '600';
+            th.style.padding = '10px';
+            th.style.textAlign = 'center';
+            th.style.border = '1px solid #ddd';
+        });
+        
+        const tableCells = document.querySelectorAll('.print-grades-table td');
+        tableCells.forEach(td => {
+            td.style.padding = '10px';
+            td.style.border = '1px solid #ddd';
+            td.style.textAlign = 'center';
+        });
+        
+        // Ubah judul dokumen untuk mencetak
         let originalTitle = document.title;
         document.title = "Detail Nilai Mahasiswa";
         
-        // Print the page
-        window.print();
-        
-        // Restore the original title after printing
+        // Beri waktu untuk browser memproses tampilan
         setTimeout(function() {
-            document.title = originalTitle;
-        }, 100);
+            // Cetak halaman
+            window.print();
+            
+            // Kembalikan judul asli dan sembunyikan template setelah mencetak
+            setTimeout(function() {
+                document.title = originalTitle;
+                if (printTemplate) {
+                    printTemplate.style.display = 'none';
+                }
+            }, 500);
+        }, 300);
     }
 </script>
 @endsection
