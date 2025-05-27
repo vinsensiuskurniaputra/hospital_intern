@@ -67,6 +67,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
+
+    Route::get('/home/profile', [StudentProfileController::class, 'index']);
+
     Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
     Route::get('/departements/filter', [AdminDepartementController::class, 'filter'])->name('departements.filter');
 
@@ -82,10 +85,10 @@ Route::middleware(['auth', 'menu'])->group(function () {
         // Pastikan route filter-by-date didefinisikan sebelum resource route
         Route::get('/presences/schedules/filter-by-date', [AdminScheduleController::class, 'filterByDate'])
             ->name('presences.schedules.filter-by-date');
-        
+            
         Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
             ->name('presences.schedules.filter');
-
+        
         Route::resource('/presences/schedules', AdminScheduleController::class)
             ->names('presences.schedules');
     });
