@@ -88,18 +88,18 @@ class MenuSeeder extends Seeder
             'order' => 3,
         ]);
 
+        $roleManagement = Menu::create([
+            'name' => 'Roles',
+            'url' => '/permissions/roles',
+            'icon' => 'bi bi-person-gear', // Lebih cocok untuk peran/role
+            'parent_id' => $permissionManagement->id,
+            'order' => 1,
+        ]);
 
         $userAuthManagement = Menu::create([
             'name' => 'User Authorization ',
             'url' => '/permissions/users',
             'icon' => 'bi bi-person-lock', // Ikon lebih sesuai untuk admin
-            'parent_id' => $permissionManagement->id,
-            'order' => 1,
-        ]);
-        $roleManagement = Menu::create([
-            'name' => 'Roles',
-            'url' => '/permissions/roles',
-            'icon' => 'bi bi-person-gear', // Lebih cocok untuk peran/role
             'parent_id' => $permissionManagement->id,
             'order' => 2,
         ]);
