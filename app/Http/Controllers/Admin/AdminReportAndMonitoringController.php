@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\ReportAndMonitoring;
+use App\Models\User;
+use App\Models\Student;
 use Illuminate\Http\Request;
+use App\Models\ResponsibleUser;
+use App\Models\ReportAndMonitoring;
+use App\Http\Controllers\Controller;
 
 class AdminReportAndMonitoringController extends Controller
 {
@@ -13,7 +16,12 @@ class AdminReportAndMonitoringController extends Controller
      */
     public function index()
     {
-        return view('pages.admin.report_and_monitoring.index');
+        $countStudent = Student::count();
+        $countPIC = ResponsibleUser::count();
+        $countAdmin = User::whereHas('roles', function ($query) {
+            $query->where('name', 'admin');
+        })->count();
+        return view('pages.admin.report_and_monitoring.index', compact('countStudent', 'countPIC', 'countAdmin'));
     }
 
     /**
