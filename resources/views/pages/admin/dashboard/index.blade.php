@@ -13,21 +13,20 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Total Mahasiswa</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">2,450</h3>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $stats['students'] }}</h3>
                     </div>
                     <div class="p-3 bg-[#F5F7F0] rounded-lg">
                         <i class="bi bi-mortarboard text-xl text-[#637F26]"></i>
                     </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-4">TAHUN 2024</p>
             </div>
 
             <!-- Doctors Stats -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500">Total Dokter</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">126</h3>
+                        <p class="text-sm font-medium text-gray-500">Total Penanggung Jawab</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $stats['pics'] }}</h3>
                     </div>
                     <div class="p-3 bg-[#F5F7F0] rounded-lg">
                         <i class="bi bi-file-earmark-person text-xl text-[#637F26]"></i>
@@ -41,7 +40,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Total Admin</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">8</h3>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $stats['admins'] }}</h3>
                     </div>
                     <div class="p-3 bg-[#F5F7F0] rounded-lg">
                         <i class="bi bi-shield-check text-xl text-[#637F26]"></i>

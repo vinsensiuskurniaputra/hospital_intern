@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\General;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Stase;
 use App\Models\Student;
-use App\Models\Notification;
 use App\Models\Presence;
 use App\Models\Schedule;
-use App\Models\StudentGrade;
-use App\Models\ResponsibleUser;
-use App\Models\Stase;
-use App\Models\PresenceSession;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Notification;
+use App\Models\StudentGrade;
+use Illuminate\Http\Request;
+use App\Models\PresenceSession;
+use App\Models\ResponsibleUser;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Validator;
 
 class HomeController extends Controller
 {
@@ -73,6 +74,10 @@ class HomeController extends Controller
         return view('pages.admin.dashboard.index', [
             'stats' => [
                 'students' => Student::count(),
+                'pics' => ResponsibleUser::count(),
+                'admins' => User::whereHas('roles', function ($query) {
+                    $query->where('name', 'admin');
+                })->count(),
                 'schedules' => Schedule::count(),
                 'presences' => Presence::count()
             ]
