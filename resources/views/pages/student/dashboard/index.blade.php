@@ -30,7 +30,7 @@
                     
                     <div id="hospital-distance" class="mb-3 hidden">
                         <div class="text-xs">
-                            <span class="font-medium">Jarak dari RS Dr. Adhyatma:</span>
+                            <span class="font-medium">Jarak dari Lokasi:</span>
                             <span id="distance-value" class="ml-1">Menghitung...</span>
                         </div>
                         <div id="distance-status" class="text-xs mt-0.5"></div>
@@ -231,7 +231,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    data: attendancePercentData, // Tetap menampilkan persentase di chart
+                    data: attendancePercentData,
                     backgroundColor: [
                         '#4ADE80', // green
                         '#FBBF24', // yellow
@@ -251,7 +251,6 @@
                     },
                     tooltip: {
                         callbacks: {
-                            // Menampilkan jumlah absolut pada tooltip
                             label: function(context) {
                                 const index = context.dataIndex;
                                 const label = labels[index];
@@ -270,6 +269,23 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Check if hospital configuration is properly set
+        @if(!config('hospital.name') || !config('hospital.coordinates.latitude') || !config('hospital.coordinates.longitude') || !config('hospital.attendance_radius'))
+            // Show error message if hospital config is not set
+            document.getElementById('attendance-result').classList.remove('hidden');
+            document.getElementById('attendance-result').innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded p-3">
+                    <p class="text-red-700 font-medium">Konfigurasi Error</p>
+                    <p class="text-sm text-red-600">Konfigurasi lokasi rumah sakit belum diatur. Silakan hubungi administrator.</p>
+                </div>
+            `;
+            
+            // Disable attendance functionality
+            document.getElementById('attendance-token').disabled = true;
+            document.getElementById('submit-token-btn').disabled = true;
+            return;
+        @endif
+        
         // Attendance functionality
         const tokenInput = document.getElementById('attendance-token');
         const submitBtn = document.getElementById('submit-token-btn');
@@ -282,6 +298,157 @@
         
         // Location variables
         let currentLocation = null;
+        
+        // Hospital configuration from backend (now without defaults)
+        const hospitalConfig = {
+            name: "{{ config('hospital.name') }}",
+            latitude: {{ config('hospital.coordinates.latitude') }},
+            longitude: {{ config('hospital.coordinates.longitude') }},
+            radius: {{ config('hospital.attendance_radius') }}
+        };
+        
+        // Validate hospital config on frontend
+        if (!hospitalConfig.name || !hospitalConfig.latitude || !hospitalConfig.longitude || !hospitalConfig.radius) {
+            showError('Konfigurasi lokasi rumah sakit tidak lengkap');
+            tokenInput.disabled = true;
+            submitBtn.disabled = true;
+            return;
+        }
+        
+        // Helper function to show error messages
+        function showError(message) {
+            attendanceResult.classList.remove('hidden');
+            attendanceResult.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded p-3">
+                    <p class="text-red-700 font-medium">Error</p>
+                    <p class="text-sm text-red-600">${message}</p>
+                </div>
+            `;
+        }
+        
+        // Function to check today's attendance
+        function checkTodayAttendance() {
+            fetch('/attendance/check-today', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status && data.data.has_attendance) {
+                    // Student has already done attendance today
+                    const attendanceData = data.data;
+                    
+                    if (attendanceData.needs_checkout) {
+                        // Needs checkout
+                        attendanceStatus.textContent = 'Sudah Presensi';
+                        attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600');
+                        attendanceStatus.classList.add('bg-green-100', 'text-green-600');
+                        
+                        attendanceResult.classList.remove('hidden');
+                        attendanceResult.innerHTML = `
+                            <div class="bg-green-50 border border-green-200 rounded p-3">
+                                <p class="text-green-700 font-medium">Presensi berhasil!</p>
+                                <p class="text-sm text-green-600">Jam masuk: ${attendanceData.check_in}</p>
+                                <p class="text-xs text-green-600 mt-1">${attendanceData.schedule || 'Jadwal'}</p>
+                                <div class="mt-1 mb-2">
+                                    <p class="text-xs text-gray-500">Kode presensi: <span class="font-mono font-medium">${attendanceData.token || ''}</span></p>
+                                </div>
+                                <button id="checkout-btn" class="w-full bg-[#637F26] hover:bg-[#4e6320] text-white font-medium py-2 px-4 rounded-md text-sm">
+                                    Presensi Pulang
+                                </button>
+                            </div>
+                        `;
+                        
+                        // Attach event listener to checkout button
+                        document.getElementById('checkout-btn').addEventListener('click', submitCheckout);
+                    } else {
+                        // Already checked out
+                        attendanceStatus.textContent = 'Sudah Presensi Pulang';
+                        attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-green-100', 'text-green-600');
+                        attendanceStatus.classList.add('bg-red-100', 'text-red-600');
+                        
+                        attendanceResult.classList.remove('hidden');
+                        attendanceResult.innerHTML = `
+                            <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                                <p class="text-blue-700 font-medium">Presensi hari ini sudah selesai</p>
+                                <p class="text-sm text-blue-600">Jam masuk: ${attendanceData.check_in}</p>
+                                <p class="text-sm text-blue-600">Jam pulang: ${attendanceData.check_out}</p>
+                                <p class="text-xs text-blue-600 mt-1">${attendanceData.schedule || 'Jadwal'}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    // Disable input and button
+                    tokenInput.disabled = true;
+                    submitBtn.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error checking today attendance:', error);
+            });
+        }
+        
+        // Function to submit checkout
+        function submitCheckout() {
+            if (!currentLocation) {
+                getLocation();
+                showError('Menunggu data lokasi...');
+                return;
+            }
+            
+            const checkoutBtn = document.getElementById('checkout-btn');
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Memproses...';
+            
+            const deviceInfo = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform
+            };
+            
+            fetch('/attendance/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    latitude: currentLocation.latitude,
+                    longitude: currentLocation.longitude,
+                    device_info: JSON.stringify(deviceInfo)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status) {
+                    // Success
+                    attendanceStatus.textContent = 'Sudah Presensi Pulang';
+                    attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-green-100', 'text-green-600');
+                    attendanceStatus.classList.add('bg-red-100', 'text-red-600');
+                    
+                    attendanceResult.innerHTML = `
+                        <div class="bg-green-50 border border-green-200 rounded p-3">
+                            <p class="text-green-700 font-medium">Presensi pulang berhasil!</p>
+                            <p class="text-sm text-green-600">Jam masuk: ${data.data.check_in}</p>
+                            <p class="text-sm text-green-600">Jam pulang: ${data.data.check_out}</p>
+                            <p class="text-xs text-green-600 mt-1">${data.data.schedule}</p>
+                        </div>
+                    `;
+                } else {
+                    showError(data.message);
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = 'Presensi Pulang';
+                }
+            })
+            .catch(err => {
+                console.error('Error submitting checkout:', err);
+                showError(err.message || 'Terjadi kesalahan saat checkout');
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Presensi Pulang';
+            });
+        }
         
         // Check if we've already done attendance today
         checkTodayAttendance();
@@ -308,15 +475,6 @@
                 </div>
             `;
             
-            const hospitalDistance = document.getElementById('hospital-distance');
-            const distanceValue = document.getElementById('distance-value');
-            const distanceStatus = document.getElementById('distance-status');
-            
-            // Hospital coordinates from config
-            const hospitalLatitude = {{ $hospitalCoordinates['latitude'] ?? -6.9831374 }};
-            const hospitalLongitude = {{ $hospitalCoordinates['longitude'] ?? 110.3426272 }};
-            const hospitalName = "{{ $hospitalCoordinates['name'] ?? 'RSUD Dr. Adhyatma' }}";
-            
             console.log("Getting location...");
             navigator.geolocation.getCurrentPosition(
                 position => {
@@ -326,19 +484,19 @@
                         longitude: position.coords.longitude
                     };
                     
-                    // Calculate distance from hospital
+                    // Calculate distance from hospital using config values
                     const distance = calculateDistance(
                         position.coords.latitude,
                         position.coords.longitude,
-                        hospitalLatitude,
-                        hospitalLongitude
+                        hospitalConfig.latitude,
+                        hospitalConfig.longitude
                     );
                     
                     // Show distance information
                     hospitalDistance.classList.remove('hidden');
                     distanceValue.textContent = `${Math.round(distance)} meter`;
                     
-                    // Update location status - IMPORTANT: This was likely missing
+                    // Update location status
                     locationStatus.innerHTML = `
                         <div class="flex items-center">
                             <span class="text-green-600">
@@ -350,8 +508,8 @@
                         </div>
                     `;
                     
-                    // Determine if user is in the hospital area (using 12 meter radius)
-                    const inHospitalArea = distance <= 500;
+                    // Determine if user is in the hospital area using config radius
+                    const inHospitalArea = distance <= hospitalConfig.radius;
                     
                     if (inHospitalArea) {
                         distanceStatus.innerHTML = `
@@ -359,7 +517,7 @@
                                 <svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                Anda berada dalam radius yang diizinkan (500m)
+                                Anda berada dalam radius yang diizinkan (${hospitalConfig.radius}m)
                             </span>
                         `;
                     } else {
@@ -368,7 +526,7 @@
                                 <svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                                 </svg>
-                                Anda berada di luar radius yang diizinkan (maks. 500m)
+                                Anda berada di luar radius yang diizinkan (maks. ${hospitalConfig.radius}m)
                             </span>
                         `;
                     }
@@ -389,135 +547,19 @@
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 10000,  // 10 seconds
+                    timeout: 10000,
                     maximumAge: 0
                 }
             );
         }
         
-        // Ubah function checkTodayAttendance untuk menampilkan status yang sesuai
-        function checkTodayAttendance() {
-            fetch('/attendance/check-today')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status && data.data.has_attendance) {
-                        // Already checked in
-                        
-                        // Cek apakah sudah checkout atau belum
-                        if (data.data.check_out && data.data.check_out !== '00:00:00') {
-                            // Sudah checkout (presensi pulang) - warna merah
-                            attendanceStatus.textContent = 'Sudah Presensi Pulang';
-                            attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-green-100', 'text-green-600');
-                            attendanceStatus.classList.add('bg-red-100', 'text-red-600');
-                            
-                            attendanceResult.classList.remove('hidden');
-                            attendanceResult.innerHTML = `
-                                <div class="bg-green-50 border border-green-200 rounded p-3">
-                                    <p class="text-green-700 font-medium">Presensi lengkap</p>
-                                    <p class="text-sm text-green-600">Jam masuk: ${data.data.check_in}</p>
-                                    <p class="text-sm text-green-600">Jam pulang: ${data.data.check_out}</p>
-                                    <p class="text-xs text-green-600 mt-1">${data.data.schedule}</p>
-                                    <div class="mt-2">
-                                        <p class="text-xs text-gray-500">Kode presensi: <span class="font-mono font-medium">${data.data.token}</span></p>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            // Sudah check-in, belum checkout - warna hijau
-                            attendanceStatus.textContent = 'Sudah Presensi';
-                            attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-red-100', 'text-red-600');
-                            attendanceStatus.classList.add('bg-green-100', 'text-green-600');
-                            
-                            attendanceResult.classList.remove('hidden');
-                            attendanceResult.innerHTML = `
-                                <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
-                                    <p class="text-yellow-700 font-medium">Anda sudah check-in</p>
-                                    <p class="text-sm text-yellow-600">Jam masuk: ${data.data.check_in}</p>
-                                    <p class="text-xs text-yellow-600 mt-1">${data.data.schedule}</p>
-                                    <div class="mt-1 mb-2">
-                                        <p class="text-xs text-gray-500">Kode presensi: <span class="font-mono font-medium">${data.data.token}</span></p>
-                                    </div>
-                                    <button id="checkout-btn" class="w-full bg-[#637F26] hover:bg-[#4e6320] text-white font-medium py-2 px-4 rounded-md text-sm">
-                                        Presensi Pulang
-                                    </button>
-                                </div>
-                            `;
-                            
-                            // Attach event listener to checkout button
-                            document.getElementById('checkout-btn').addEventListener('click', submitCheckout);
-                        }
-                        
-                        // Disable input dan button dalam keadaan apapun jika sudah melakukan presensi
-                        tokenInput.disabled = true;
-                        submitBtn.disabled = true;
-                    } else {
-                        // Belum presensi - tetap warna orange default
-                        attendanceStatus.textContent = 'Belum Presensi';
-                        attendanceStatus.classList.remove('bg-green-100', 'text-green-600', 'bg-red-100', 'text-red-600');
-                        attendanceStatus.classList.add('bg-orange-100', 'text-orange-600');
-                        
-                        // Enable input jika belum presensi
-                        tokenInput.disabled = false;
-                        submitBtn.disabled = !currentLocation || !tokenInput.value || tokenInput.value.length < 6;
-                    }
-                })
-                .catch(err => {
-                    console.error('Error checking today attendance:', err);
-                });
-        }
-        
-        // Get location and check attendance on page load
-        getLocation();
-        
-        // Event listeners
-        tokenInput.addEventListener('input', function() {
-            submitBtn.disabled = !this.value || this.value.length < 6 || !currentLocation;
-        });
-        
-        submitBtn.addEventListener('click', submitAttendance);
-        
-        
-        
-        // Tambahkan function showError yang belum didefinisikan
-        function showError(message) {
-            // Buat elemen error jika belum ada
-            let errorElement = document.getElementById('attendance-error');
-            if (!errorElement) {
-                errorElement = document.createElement('div');
-                errorElement.id = 'attendance-error';
-                errorElement.className = 'mt-2 py-2 px-3 text-sm text-red-700 bg-red-100 rounded-md';
-                
-                // Tambahkan elemen ini setelah form submit
-                const form = document.querySelector('.attendance-form') || document.getElementById('token-form');
-                if (form) {
-                    form.appendChild(errorElement);
-                } else {
-                    // Jika tidak ada form, tambahkan ke attendanceResult
-                    const resultDiv = document.getElementById('attendance-result');
-                    if (resultDiv) {
-                        resultDiv.parentNode.insertBefore(errorElement, resultDiv);
-                    }
-                }
-            }
-            
-            // Tampilkan pesan error
-            errorElement.textContent = message;
-            errorElement.classList.remove('hidden');
-            
-            // Otomatis sembunyikan setelah 5 detik
-            setTimeout(() => {
-                errorElement.classList.add('hidden');
-            }, 5000);
-        }
-        
-        // Function untuk submit token attendance - perbaiki error handling
         function submitAttendance() {
             if (!tokenInput.value || !currentLocation) {
                 if (!tokenInput.value) {
                     showError('Silakan masukkan kode presensi');
                 } else if (!currentLocation) {
                     showError('Menunggu data lokasi...');
-                    getLocation(); // Coba refresh location
+                    getLocation();
                 }
                 return;
             }
@@ -540,13 +582,11 @@
                 platform: navigator.platform
             };
             
-            // Tampilkan CSRF token untuk debugging
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             if (!csrfToken) {
                 console.error('CSRF token not found');
                 showError('Error CSRF token tidak ditemukan');
                 
-                // Re-enable input and button
                 tokenInput.disabled = false;
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit';
@@ -568,7 +608,6 @@
                 })
             })
             .then(response => {
-                // Tangani respons non-json
                 if (!response.ok) {
                     if (response.status === 500) {
                         throw new Error('Internal Server Error. Silakan coba lagi nanti.');
@@ -579,94 +618,6 @@
                 }
                 return response.json();
             })
-            .then(data => {
-                if (data.status) {
-                    // Success
-                    attendanceStatus.textContent = 'Sudah Check-In';
-                    attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600');
-                    attendanceStatus.classList.add('bg-green-100', 'text-green-600');
-                    
-                    attendanceResult.classList.remove('hidden');
-                    attendanceResult.innerHTML = `
-                        <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
-                            <p class="text-green-700 font-medium">Presensi berhasil!</p>
-                            <p class="text-sm text-green-600">Jam masuk: ${data.data.check_in_time}</p>
-                            <p class="text-xs text-green-600 mt-1">${data.data.schedule.stase} - ${data.data.schedule.class}</p>
-                            <div class="mt-1 mb-2">
-                                <p class="text-xs text-gray-500">Kode presensi: <span class="font-mono font-medium">${data.data.token}</span></p>
-                            </div>
-                            <button id="checkout-btn" class="w-full bg-[#637F26] hover:bg-[#4e6320] text-white font-medium py-2 px-4 rounded-md text-sm">
-                                Presensi Pulang
-                            </button>
-                        </div>
-                    `;
-                    
-                    // Keep input disabled
-                    tokenInput.disabled = true;
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Submit';
-                    
-                    // Attach event listener to checkout button
-                    document.getElementById('checkout-btn').addEventListener('click', submitCheckout);
-                } else {
-                    // Error handling
-                    showError(data.message);
-                    
-                    // Re-enable input and button
-                    tokenInput.disabled = false;
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Submit';
-                }
-            })
-            .catch(err => {
-                console.error('Error submitting attendance:', err);
-                showError(err.message || 'Terjadi kesalahan saat mengirim presensi');
-                
-                // Re-enable input and button
-                tokenInput.disabled = false;
-                submitBtn.disabled = currentLocation ? false : true;
-                submitBtn.textContent = 'Submit';
-            });
-        }
-        
-        // Ubah function submitAttendance untuk mengubah badge setelah check-in
-        function submitAttendance() {
-            if (!tokenInput.value || !currentLocation) {
-                return;
-            }
-            
-            const token = tokenInput.value.trim().toUpperCase();
-            
-            if (token.length < 6) {
-                showError('Kode presensi harus 6 karakter');
-                return;
-            }
-            
-            // Disable input and button
-            tokenInput.disabled = true;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Memproses...';
-            
-            // Get device info
-            const deviceInfo = {
-                userAgent: navigator.userAgent,
-                platform: navigator.platform
-            };
-            
-            fetch('/attendance/submit-token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    token: token,
-                    latitude: currentLocation.latitude,
-                    longitude: currentLocation.longitude,
-                    device_info: JSON.stringify(deviceInfo)
-                })
-            })
-            .then(response => response.json())
             .then(data => {
                 if (data.status) {
                     // Success
@@ -689,29 +640,24 @@
                         </div>
                     `;
                     
-                    // Keep input disabled
                     tokenInput.disabled = true;
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'Submit';
                     
-                    // Attach event listener to checkout button
                     document.getElementById('checkout-btn').addEventListener('click', submitCheckout);
                 } else {
-                    // Error
                     showError(data.message);
                     
-                    // Re-enable input and button
                     tokenInput.disabled = false;
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit';
                     
-                    // If the error is related to distance, show more details
                     if (data.data && data.data.distance) {
                         attendanceResult.classList.remove('hidden');
                         attendanceResult.innerHTML = `
                             <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
                                 <p class="text-yellow-700 font-medium">Anda berada di luar area presensi</p>
-                                <p class="text-sm text-yellow-600">Jarak Anda: ${data.data.distance} meter (maksimal 500 meter)</p>
+                                <p class="text-sm text-yellow-600">Jarak Anda: ${data.data.distance} meter (maksimal ${hospitalConfig.radius} meter)</p>
                                 <p class="text-xs text-yellow-600 mt-1">Silahkan mendekat ke lokasi presensi</p>
                             </div>
                         `;
@@ -720,76 +666,18 @@
             })
             .catch(err => {
                 console.error('Error submitting attendance:', err);
-                showError('Terjadi kesalahan saat mengirim presensi');
+                showError(err.message || 'Terjadi kesalahan saat mengirim presensi');
                 
-                // Re-enable input and button
                 tokenInput.disabled = false;
                 submitBtn.disabled = currentLocation ? false : true;
                 submitBtn.textContent = 'Submit';
-            });
-        }
-        
-        // Ubah function submitCheckout untuk mengubah badge setelah check-out
-        function submitCheckout() {
-            if (!currentLocation) {
-                getLocation(); // Refresh location if not available
-                showError('Menunggu data lokasi...');
-                return;
-            }
-            
-            // Disable checkout button
-            const checkoutBtn = document.getElementById('checkout-btn');
-            checkoutBtn.disabled = true;
-            checkoutBtn.textContent = 'Memproses...';
-            
-            // Get device info
-            const deviceInfo = {
-                userAgent: navigator.userAgent,
-                platform: navigator.platform
-            };
-            
-            fetch('/attendance/checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    latitude: currentLocation.latitude,
-                    longitude: currentLocation.longitude,
-                    device_info: JSON.stringify(deviceInfo)
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status) {
-                    // Success - Ubah menjadi "Sudah Presensi Pulang" dengan warna merah
-                    attendanceStatus.textContent = 'Sudah Presensi Pulang';
-                    attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-green-100', 'text-green-600');
-                    attendanceStatus.classList.add('bg-red-100', 'text-red-600');
-                    
-                    // Tampilan hasil tetap sama...
-                    attendanceResult.innerHTML = `
-                        <div class="bg-green-50 border border-green-200 rounded p-3">
-                            <p class="text-green-700 font-medium">Presensi pulang berhasil!</p>
-                            <p class="text-sm text-green-600">Jam masuk: ${data.data.check_in}</p>
-                            <p class="text-sm text-green-600">Jam pulang: ${data.data.check_out}</p>
-                            <p class="text-xs text-green-600 mt-1">${data.data.schedule}</p>
-                        </div>
-                    `;
-                } else {
-                    // Error handling tetap sama...
-                }
-            })
-            .catch(err => {
-                // Error handling tetap sama...
             });
         }
     });
 </script>
 
 <script>
-    // The Haversine formula calculation (unchanged)
+    // The Haversine formula calculation
     function calculateDistance(lat1, lon1, lat2, lon2) {
         // Convert degrees to radians
         lat1 = deg2rad(lat1);

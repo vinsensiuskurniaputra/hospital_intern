@@ -220,7 +220,8 @@ class HomeController extends Controller
             $student = Student::where('user_id', $userId)->first();
             
 
-            // Default values jika terjadi error atau data kosong
+
+            // Default values if error or empty data
             $attendanceStats = [
                 'total' => 0,
                 'present' => ['count' => 0, 'percent' => 0],
@@ -232,12 +233,37 @@ class HomeController extends Controller
             $notifications = collect([]);
             $recentGrades = collect([]);
             
-            // Get hospital coordinates from config
+            // Get hospital coordinates and radius from config (no defaults)
             $hospitalCoordinates = [
-                'name' => config('location.hospital.name'),
-                'latitude' => config('location.hospital.latitude'),
-                'longitude' => config('location.hospital.longitude')
+                'name' => config('hospital.name'),
+                'latitude' => config('hospital.coordinates.latitude'),
+                'longitude' => config('hospital.coordinates.longitude')
             ];
+            
+            // Get attendance radius from config (no default)
+            $attendanceRadius = config('hospital.attendance_radius');
+            
+            // Validate that hospital configuration is set
+            if (!$hospitalCoordinates['name'] || 
+                !$hospitalCoordinates['latitude'] || 
+                !$hospitalCoordinates['longitude'] || 
+                !$attendanceRadius) {
+                
+                Log::error('Hospital configuration is not properly set in environment variables');
+                return view('pages.student.dashboard.index', [
+                    'attendanceStats' => $attendanceStats,
+                    'todaySchedules' => collect([]),
+                    'notifications' => collect([]),
+                    'recentGrades' => collect([]),
+                    'student' => null,
+                    'hospitalCoordinates' => [
+                        'name' => 'Hospital',
+                        'latitude' => 0,
+                        'longitude' => 0
+                    ],
+                    'attendanceRadius' => 500
+                ])->with('error', 'Konfigurasi lokasi rumah sakit belum diatur. Silakan hubungi administrator.');
+            }
             
             if ($student) {
                 // Statistik Kehadiran
@@ -267,16 +293,13 @@ class HomeController extends Controller
                     Log::error('Error loading attendance stats: ' . $e->getMessage());
                 }
                 
-                // Jadwal Hari Ini - tanpa waktu mulai/berakhir
+                // Jadwal Hari Ini
                 try {
                     $today = Carbon::now()->format('Y-m-d');
                     
-                    // Gunakan rentang tanggal start_date dan end_date untuk menentukan jadwal hari ini
                     if (Schema::hasTable('schedules')) {
-                        // Student's internship class ID
                         $internshipClassId = $student->internship_class_id;
                         
-                        // Get today's schedules based on start_date and end_date range
                         $todaySchedules = Schedule::where(function($query) use ($today) {
                             $query->where('start_date', '<=', $today)
                                   ->where('end_date', '>=', $today);
@@ -288,12 +311,10 @@ class HomeController extends Controller
                         ->orderBy('id')
                         ->get();
                         
-                        // Jika kosong, tampilkan pesan tidak ada jadwal
                         if ($todaySchedules->isEmpty()) {
                             $todaySchedules = collect([]);
                         }
                     } else {
-                        // Tabel belum ada, buat data dummy
                         $todaySchedules = collect([]);
                     }
                 } catch (\Exception $e) {
@@ -336,42 +357,19 @@ class HomeController extends Controller
                 }
             }
             
-            // Get today's schedules
-            $today = Carbon::now()->format('Y-m-d');
-            
-            
-            $internshipClassId = $student ? $student->internship_class_id : null;
-            
-            
-            // Debug SQL query (dump raw SQL query for schedules)
-            $query = Schedule::where(function($query) use ($today) {
-                $query->where('start_date', '<=', $today)
-                      ->where('end_date', '>=', $today);
-            })
-            ->when($internshipClassId, function($query) use ($internshipClassId) {
-                $query->where('internship_class_id', $internshipClassId);
-            });
-            
-            
-            // Execute query and log results
-            $todaySchedules = $query->with(['stase', 'internshipClass'])
-                ->orderBy('id')
-                ->get();
-                
-            
-            
             return view('pages.student.dashboard.index', compact(
                 'todaySchedules', 
                 'student',
                 'notifications',
                 'recentGrades',
                 'attendanceStats',
-                'hospitalCoordinates'
+                'hospitalCoordinates',
+                'attendanceRadius'
             ));
         } catch (\Exception $e) {
             \Log::error('Error in studentDashboard: ' . $e->getMessage());
             
-            // Error handling code...
+            // Error handling with validation check
             return view('pages.student.dashboard.index', [
                 'attendanceStats' => [
                     'total' => 0,
@@ -382,7 +380,13 @@ class HomeController extends Controller
                 'todaySchedules' => collect([]),
                 'notifications' => collect([]),
                 'recentGrades' => collect([]),
-                'student' => null
+                'student' => null,
+                'hospitalCoordinates' => [
+                    'name' => config('hospital.name') ?: 'Hospital',
+                    'latitude' => config('hospital.coordinates.latitude') ?: 0,
+                    'longitude' => config('hospital.coordinates.longitude') ?: 0
+                ],
+                'attendanceRadius' => config('hospital.attendance_radius') ?: 500
             ])->with('error', 'Terjadi kesalahan saat memuat dashboard.');
         }
     }
@@ -744,10 +748,19 @@ class HomeController extends Controller
                 ]);
             }
 
-            // Periksa jika mahasiswa berada dalam radius yang diperbolehkan
-            $hospitalLatitude = config('location.hospital.latitude');
-            $hospitalLongitude = config('location.hospital.longitude');
+            // Check if hospital configuration is set
+            $hospitalLatitude = config('hospital.coordinates.latitude');
+            $hospitalLongitude = config('hospital.coordinates.longitude');
+            $maxRadius = config('hospital.attendance_radius');
             
+            if (!$hospitalLatitude || !$hospitalLongitude || !$maxRadius) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Konfigurasi lokasi rumah sakit belum diatur. Silakan hubungi administrator.'
+                ]);
+            }
+            
+            // Periksa jika mahasiswa berada dalam radius yang diperbolehkan
             $distance = $this->calculateDistance(
                 $request->latitude, 
                 $request->longitude, 
@@ -755,14 +768,13 @@ class HomeController extends Controller
                 $hospitalLongitude
             );
             
-            // Ubah nilai 12 menjadi 500
-            if ($distance > 500) { // Batasan radius 500 meter
+            if ($distance > $maxRadius) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Anda berada di luar radius presensi yang diizinkan',
                     'data' => [
                         'distance' => round($distance),
-                        'max_radius' => 500
+                        'max_radius' => $maxRadius
                     ]
                 ]);
             }
@@ -855,9 +867,17 @@ class HomeController extends Controller
                 ]);
             }
             
-            // Periksa jarak dari lokasi rumah sakit
-            $hospitalLatitude = config('location.hospital.latitude');
-            $hospitalLongitude = config('location.hospital.longitude');
+            // Check if hospital configuration is set
+            $hospitalLatitude = config('hospital.coordinates.latitude');
+            $hospitalLongitude = config('hospital.coordinates.longitude');
+            $maxRadius = config('hospital.attendance_radius');
+            
+            if (!$hospitalLatitude || !$hospitalLongitude || !$maxRadius) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Konfigurasi lokasi rumah sakit belum diatur. Silakan hubungi administrator.'
+                ]);
+            }
             
             $distance = $this->calculateDistance(
                 $request->latitude, 
@@ -866,13 +886,13 @@ class HomeController extends Controller
                 $hospitalLongitude
             );
             
-            if ($distance > 500) { // Batasan radius 500 meter
+            if ($distance > $maxRadius) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Anda berada di luar radius presensi yang diizinkan',
                     'data' => [
                         'distance' => round($distance),
-                        'max_radius' => 500
+                        'max_radius' => $maxRadius
                     ]
                 ]);
             }
