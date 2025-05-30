@@ -66,32 +66,6 @@
                     </div>
                 </div>
 
-                <!-- Jadwal Hari Ini -->
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h2 class="text-lg font-semibold mb-4">Jadwal Hari Ini</h2>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @php
-                            $displayedScheduleIds = [];
-                        @endphp
-                        
-                        @forelse($todaySchedules as $schedule)
-                            @if(!in_array($schedule->id, $displayedScheduleIds))
-                                @php
-                                    $displayedScheduleIds[] = $schedule->id;
-                                @endphp
-                                <div class="bg-gray-100 rounded-lg p-4 shadow">
-                                    <h3 class="font-medium">{{ $schedule->internshipClass->name ?? 'Kelas' }}</h3>
-                                    <div class="text-xs text-gray-500 mt-1">{{ $schedule->stase->name ?? 'Departemen' }}</div>
-                                </div>
-                            @endif
-                        @empty
-                        <div class="col-span-2 text-center p-6 text-gray-500">
-                            <p>Tidak ada jadwal untuk hari ini</p>
-                        </div>
-                        @endforelse
-                    </div>
-                </div>
             </div>
 
             <!-- Right Column -->
@@ -135,34 +109,28 @@
                     </div>
                 </div>
 
-                <!-- Mahasiswa yang harus dinilai -->
+                <!-- Jadwal Hari Ini -->
                 <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold">Mahasiswa yang harus dinilai</h2>
-                        <a href="{{ route('responsible.grades') }}" class="bg-[#637F26] hover:bg-[#566d1e] text-white px-4 py-2 rounded-md text-sm flex items-center transition-colors">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            Lihat Semua
-                        </a>
-                    </div>
+                    <h2 class="text-lg font-semibold mb-4">Jadwal Hari Ini</h2>
                     
-                    <div class="space-y-4">
-                        @forelse($studentsToGrade as $student)
-                        <div class="flex items-center py-3 border-b border-gray-100">
-                            <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($student->user->name ?? 'Student') }}" alt="Student" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-medium">{{ $student->user->name ?? 'Nama Mahasiswa' }}</p>
-                            </div>
-                            <div class="text-sm text-gray-500 mr-4">{{ $student->nim ?? 'NIM' }}</div>
-                            <div class="text-sm text-gray-500">{{ $student->internshipClass->name ?? 'Kelas' }}</div>
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @php
+                            $displayedScheduleIds = [];
+                        @endphp
+                        
+                        @forelse($todaySchedules as $schedule)
+                            @if(!in_array($schedule->id, $displayedScheduleIds))
+                                @php
+                                    $displayedScheduleIds[] = $schedule->id;
+                                @endphp
+                                <div class="bg-gray-100 rounded-lg p-4 shadow">
+                                    <h3 class="font-medium">{{ $schedule->internshipClass->name ?? 'Kelas' }}</h3>
+                                    <div class="text-xs text-gray-500 mt-1">{{ $schedule->stase->name ?? 'Departemen' }}</div>
+                                </div>
+                            @endif
                         @empty
-                        <div class="text-center py-4 text-gray-500">
-                            <p>Tidak ada mahasiswa yang perlu dinilai</p>
+                        <div class="col-span-2 text-center p-6 text-gray-500">
+                            <p>Tidak ada jadwal untuk hari ini</p>
                         </div>
                         @endforelse
                     </div>

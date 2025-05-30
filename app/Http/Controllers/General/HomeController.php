@@ -97,7 +97,6 @@ class HomeController extends Controller
                     'todaySchedules' => collect([]),
                     'notifications' => collect([]),
                     'chartData' => ['labels' => [], 'data' => []],
-                    'studentsToGrade' => collect([])
                 ]);
             }
             
@@ -153,17 +152,6 @@ class HomeController extends Controller
             // 4. Data untuk chart kehadiran
             $chartData = $this->getAttendanceChartData($staseIds);
             
-            // 5. Data mahasiswa yang harus dinilai
-            $studentsToGrade = Student::whereDoesntHave('grades', function($query) use ($staseIds) {
-                $query->whereIn('stase_id', $staseIds);
-            })
-            ->whereHas('schedules', function($query) use ($staseIds, $today) {
-                $query->whereIn('stase_id', $staseIds)
-                    ->where('end_date', '<', $today);
-            })
-            ->with('user')
-            ->take(5)
-            ->get();
             
             return view('pages.responsible.dashboard.index', [
                 'responsible' => $responsible,
@@ -171,7 +159,6 @@ class HomeController extends Controller
                 'studentCount' => $studentCount,
                 'notifications' => $notifications,
                 'chartData' => $chartData,
-                'studentsToGrade' => $studentsToGrade
             ]);
             
         } catch (\Exception $e) {
@@ -184,7 +171,6 @@ class HomeController extends Controller
                 'todaySchedules' => collect([]),
                 'notifications' => collect([]),
                 'chartData' => ['labels' => [], 'data' => []],
-                'studentsToGrade' => collect([])
             ]);
         }
     }

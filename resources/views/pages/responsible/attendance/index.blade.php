@@ -7,29 +7,48 @@
     <h4 class="mb-4 px-4 pt-4 font-semibold text-lg">Presensi Mahasiswa</h4>
     
     <div class="px-4 pb-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+            <!-- Stase Filter -->
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Stase</label>
                 <select class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="stase-filter">
-                    @foreach($stases as $stase)
-                        <option value="{{ $stase->id }}" {{ $stase->id == $defaultStase->id ? 'selected' : '' }}>
-                            {{ $stase->name }}
-                        </option>
-                    @endforeach
+                    @if($stases->count() > 0)
+                        @foreach($stases as $stase)
+                            <option value="{{ $stase->id }}" {{ $loop->first ? 'selected' : '' }}>
+                                {{ $stase->name }}
+                            </option>
+                        @endforeach
+                    @else
+                        <option value="">Tidak ada stase</option>
+                    @endif
                 </select>
             </div>
+            
+            <!-- Class Year Filter -->
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Angkatan</label>
+                <select class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="class-year-filter">
+                    <option value="">Pilih stase terlebih dahulu</option>
+                </select>
+            </div>
+            
+            <!-- Class Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
                 <select class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="class-filter">
-                    @foreach($internshipClasses as $class)
-                        <option value="{{ $class->id }}" {{ $class->id == $defaultClass->id ? 'selected' : '' }}>
-                            {{ $class->name }}
-                        </option>
-                    @endforeach
+                    <option value="">Pilih tahun angkatan terlebih dahulu</option>
                 </select>
             </div>
+            
+            <!-- Date Filter -->
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
                 <input type="date" value="{{ $today }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="date-filter">
             </div>
+            
+            <!-- Search Filter -->
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
                 <div class="relative">
                     <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search" id="search-filter">
                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -41,112 +60,26 @@
             </div>
         </div>
         
+        <!-- Table -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <!-- Kolom untuk foto profile -->
-                        <th scope="col" class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
-                            <!-- Header untuk kolom foto -->
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            NIM
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            NAMA
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            PRODI
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            STATUS
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            CHECK IN
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            CHECK OUT
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            BUKTI
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            AKSI
-                        </th>
+                        <th scope="col" class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10"></th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIM</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NAMA</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRODI</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CHECK IN</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CHECK OUT</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BUKTI</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AKSI</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200" id="student-list">
-                    @foreach($students as $student)
-                    <tr class="hover:bg-gray-50">
-                        <td class="pl-4 pr-2 py-4 whitespace-nowrap">
-                            <div class="flex-shrink-0">
-                                <input type="checkbox" class="hidden">
-                                <img class="h-8 w-8 rounded-full" src="{{ $student->user->photo_profile_url ? asset($student->user->photo_profile_url) : asset('img/avatar/default.jpg') }}" alt="Profile">
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $student->nim }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $student->user->name }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $student->studyProgram->name }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @php
-                                $presence = $student->presences->first();
-                                $status = $presence ? $presence->status : '-';
-                                $statusText = '-';
-                                
-                                if ($status === 'present') {
-                                    $statusText = 'Hadir';
-                                } elseif ($status === 'sick') {
-                                    $statusText = 'Sakit';
-                                } elseif ($status === 'excused') {
-                                    $statusText = 'Izin';
-                                } elseif ($status === 'absent') {
-                                    $statusText = 'Absen';
-                                }
-                            @endphp
-                            <span class="text-sm text-gray-900">{{ $statusText }}</span>
-                        </td>
-
-                        <!-- CHECK IN column -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($presence && $presence->check_in)
-                                <span class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($presence->check_in)->format('H:i') }}</span>
-                            @else
-                                <span class="text-sm text-gray-900">-</span>
-                            @endif
-                        </td>
-
-                        <!-- CHECK OUT column -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($presence && $presence->check_out)
-                                <span class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($presence->check_out)->format('H:i') }}</span>
-                            @else
-                                <span class="text-sm text-gray-900">-</span>
-                            @endif
-                        </td>
-
-                        <!-- BUKTI column starts here -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($presence && ($status === 'sick' || $status === 'excused') && $presence->attendanceExcuse && $presence->attendanceExcuse->proof_url)
-                                <a href="{{ asset('storage/' . $presence->attendanceExcuse->proof_url) }}" target="_blank" class="text-green-600 hover:text-green-900">Lihat</a>
-                            @else
-                                <span class="text-sm text-gray-900">-</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-md mr-1 edit-btn" data-id="{{ $student->id }}" data-name="{{ $student->user->name }}" data-status="{{ $status }}">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                            </button>
-                        </td>
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-gray-500">Silakan lengkapi filter untuk melihat data mahasiswa</td>
                     </tr>
-                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -217,13 +150,82 @@
     document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('editAttendanceModal');
         const staseFilter = document.getElementById('stase-filter');
+        const classYearFilter = document.getElementById('class-year-filter');
         const classFilter = document.getElementById('class-filter');
         const dateFilter = document.getElementById('date-filter');
         const searchFilter = document.getElementById('search-filter');
         
-        // Function to load classes based on stase selection
-        function loadClasses(staseId) {
-            fetch(`/responsible/attendance/classes?stase_id=${staseId}`, {
+        // Function to load class years based on stase selection
+        function loadClassYears(staseId) {
+            // Clear dependent filters
+            classYearFilter.innerHTML = '<option value="">Loading...</option>';
+            classFilter.innerHTML = '<option value="">Pilih tahun angkatan terlebih dahulu</option>';
+            clearStudentList('Silakan lengkapi filter untuk melihat data mahasiswa');
+            
+            if (!staseId) {
+                classYearFilter.innerHTML = '<option value="">Pilih stase terlebih dahulu</option>';
+                return;
+            }
+            
+            fetch(`/responsible/attendance/class-years?stase_id=${staseId}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    classYearFilter.innerHTML = '';
+                    
+                    if (data.class_years.length === 0) {
+                        classYearFilter.innerHTML = '<option value="">Tidak ada tahun angkatan</option>';
+                        clearStudentList('Tidak ada tahun angkatan untuk stase yang dipilih');
+                        return;
+                    }
+                    
+                    // Add placeholder option
+                    const placeholderOption = document.createElement('option');
+                    placeholderOption.value = '';
+                    placeholderOption.textContent = 'Pilih tahun angkatan';
+                    classYearFilter.appendChild(placeholderOption);
+                    
+                    // Add class year options
+                    data.class_years.forEach(classYear => {
+                        const option = document.createElement('option');
+                        option.value = classYear.id;
+                        option.textContent = classYear.class_year;
+                        classYearFilter.appendChild(option);
+                    });
+                    
+                    // Auto-select current year if available
+                    const currentYear = new Date().getFullYear();
+                    const currentYearOption = data.class_years.find(cy => cy.class_year == currentYear);
+                    if (currentYearOption) {
+                        classYearFilter.value = currentYearOption.id;
+                        // Trigger class loading
+                        loadClasses(staseId, currentYearOption.id);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading class years:', error);
+                classYearFilter.innerHTML = '<option value="">Error loading class years</option>';
+            });
+        }
+        
+        // Function to load classes based on stase and class year selection
+        function loadClasses(staseId, classYearId) {
+            // Clear dependent filters
+            classFilter.innerHTML = '<option value="">Loading...</option>';
+            clearStudentList('Silakan lengkapi filter untuk melihat data mahasiswa');
+            
+            if (!staseId || !classYearId) {
+                classFilter.innerHTML = '<option value="">Pilih stase dan tahun angkatan terlebih dahulu</option>';
+                return;
+            }
+            
+            fetch(`/responsible/attendance/classes?stase_id=${staseId}&class_year_id=${classYearId}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
@@ -233,6 +235,20 @@
             .then(data => {
                 if (data.success) {
                     classFilter.innerHTML = '';
+                    
+                    if (data.classes.length === 0) {
+                        classFilter.innerHTML = '<option value="">Tidak ada kelas</option>';
+                        clearStudentList('Tidak ada kelas untuk stase dan tahun angkatan yang dipilih');
+                        return;
+                    }
+                    
+                    // Add placeholder option
+                    const placeholderOption = document.createElement('option');
+                    placeholderOption.value = '';
+                    placeholderOption.textContent = 'Pilih kelas';
+                    classFilter.appendChild(placeholderOption);
+                    
+                    // Add class options
                     data.classes.forEach(cls => {
                         const option = document.createElement('option');
                         option.value = cls.id;
@@ -240,21 +256,35 @@
                         classFilter.appendChild(option);
                     });
                     
-                    // Trigger load students
-                    loadStudents();
+                    // Auto-select first class if only one available
+                    if (data.classes.length === 1) {
+                        classFilter.value = data.classes[0].id;
+                        // Trigger student loading
+                        loadStudents();
+                    }
                 }
             })
-            .catch(error => console.error('Error loading classes:', error));
+            .catch(error => {
+                console.error('Error loading classes:', error);
+                classFilter.innerHTML = '<option value="">Error loading classes</option>';
+            });
         }
         
         // Function to load students based on selected filters
         function loadStudents() {
             const staseId = staseFilter.value;
+            const classYearId = classYearFilter.value;
             const classId = classFilter.value;
             const date = dateFilter.value;
             const search = searchFilter.value;
             
-            // Format date for display in a more readable format (e.g., "12 Mei 2023")
+            // Don't load if required filters are not set
+            if (!staseId || !classYearId || !classId || !date) {
+                clearStudentList('Silakan lengkapi filter untuk melihat data mahasiswa');
+                return;
+            }
+            
+            // Format date for display
             const formattedDate = new Date(date).toLocaleDateString('id-ID', {
                 day: 'numeric',
                 month: 'long',
@@ -262,9 +292,9 @@
             });
             
             // Show loading indicator
-            document.getElementById('student-list').innerHTML = '<tr><td colspan="9" class="text-center py-4">Loading...</td></tr>';
+            clearStudentList('Loading...');
             
-            fetch(`/responsible/attendance/students?stase_id=${staseId}&class_id=${classId}&date=${date}`, {
+            fetch(`/responsible/attendance/students?stase_id=${staseId}&class_year_id=${classYearId}&class_id=${classId}&date=${date}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
@@ -273,9 +303,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Check if presence session exists
                     if (data.hasPresenceSession === false) {
-                        // Show message that no presence session exists for this date
                         document.getElementById('student-list').innerHTML = 
                             `<tr><td colspan="9" class="text-center py-8 text-gray-500">
                                 <p class="text-base">Sesi Presensi belum dibuat untuk tanggal yang dipilih</p>
@@ -286,15 +314,19 @@
                         renderStudents(data.students, search);
                     }
                 } else {
-                    document.getElementById('student-list').innerHTML = 
-                        `<tr><td colspan="9" class="text-center py-4 text-red-500">${data.message || 'Failed to load data'}</td></tr>`;
+                    clearStudentList(`Error: ${data.message || 'Failed to load data'}`);
                 }
             })
             .catch(error => {
                 console.error('Error loading students:', error);
-                document.getElementById('student-list').innerHTML = 
-                    '<tr><td colspan="9" class="text-center py-4 text-red-500">Failed to load student data</td></tr>';
+                clearStudentList('Failed to load student data');
             });
+        }
+        
+        // Helper function to clear student list with a message
+        function clearStudentList(message) {
+            document.getElementById('student-list').innerHTML = 
+                `<tr><td colspan="9" class="text-center py-4 text-gray-500">${message}</td></tr>`;
         }
         
         // Function to render students in the table
@@ -325,11 +357,31 @@
                 const presence = student.presences.length > 0 ? student.presences[0] : null;
                 const status = presence ? presence.status : '-';
                 
-                let statusText = '-';
-                if (status === 'present') statusText = 'Hadir';
-                else if (status === 'sick') statusText = 'Sakit';
-                else if (status === 'excused') statusText = 'Izin';
-                else if (status === 'absent') statusText = 'Absen';
+                // Function to get status badge with colors
+                function getStatusBadge(status) {
+                    let statusText = '-';
+                    let badgeClass = 'bg-gray-100 text-gray-800'; // Default for no status
+                    
+                    if (status === 'present') {
+                        statusText = 'Hadir';
+                        badgeClass = 'bg-green-100 text-green-800';
+                    } else if (status === 'sick') {
+                        statusText = 'Sakit';
+                        badgeClass = 'bg-yellow-100 text-yellow-800';
+                    } else if (status === 'excused') {
+                        statusText = 'Izin';
+                        badgeClass = 'bg-yellow-100 text-yellow-800';
+                    } else if (status === 'absent') {
+                        statusText = 'Absen';
+                        badgeClass = 'bg-red-100 text-red-800';
+                    }
+                    
+                    if (status === '-') {
+                        return `<span class="text-sm text-gray-500">${statusText}</span>`;
+                    }
+                    
+                    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">${statusText}</span>`;
+                }
                 
                 // Format check-in time
                 let checkInTime = '-';
@@ -345,18 +397,17 @@
                 
                 let proofLink = '';
                 if (presence && (status === 'sick' || status === 'excused')) {
-                    // Look for excuse directly in the data
                     const attendanceExcuse = student.attendance_excuses && student.attendance_excuses.find(excuse => 
                         excuse.presence_sessions_id === presence.presence_session_id
                     );
                     
                     if (attendanceExcuse && attendanceExcuse.letter_url) {
-                        proofLink = `<a href="/storage/${attendanceExcuse.letter_url}" target="_blank" class="text-green-600 hover:text-green-900">Lihat</a>`;
+                        proofLink = `<a href="/storage/${attendanceExcuse.letter_url}" target="_blank" class="text-blue-600 hover:text-blue-900 text-sm underline">Lihat</a>`;
                     } else {
-                        proofLink = '<span class="text-sm text-gray-900">-</span>';
+                        proofLink = '<span class="text-sm text-gray-500">-</span>';
                     }
                 } else {
-                    proofLink = '<span class="text-sm text-gray-900">-</span>';
+                    proofLink = '<span class="text-sm text-gray-500">-</span>';
                 }
                 
                 const profilePhoto = student.user.photo_profile_url 
@@ -381,7 +432,7 @@
                             <div class="text-sm text-gray-900">${student.study_program.name}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-sm text-gray-900">${statusText}</span>
+                            ${getStatusBadge(status)}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="text-sm text-gray-900">${checkInTime}</span>
@@ -393,10 +444,11 @@
                             ${proofLink}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-md mr-1 edit-btn" 
+                            <button class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-md mr-1 edit-btn transition-colors" 
                                 data-id="${student.id}" 
                                 data-name="${student.user.name}" 
-                                data-status="${status}">
+                                data-status="${status}"
+                                title="Edit Presensi">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
@@ -432,13 +484,17 @@
         
         // Event listeners for filters
         staseFilter.addEventListener('change', function() {
-            loadClasses(this.value);
+            loadClassYears(this.value);
+        });
+        
+        classYearFilter.addEventListener('change', function() {
+            loadClasses(staseFilter.value, this.value);
         });
         
         classFilter.addEventListener('change', loadStudents);
         dateFilter.addEventListener('change', loadStudents);
+        
         searchFilter.addEventListener('input', function() {
-            // Debounce search filtering
             clearTimeout(this._timeout);
             this._timeout = setTimeout(() => {
                 loadStudents();
@@ -507,19 +563,19 @@
             }
         });
         
-        // Initialize event handlers for existing edit buttons
-        document.querySelectorAll('.edit-btn').forEach(attachEditButtonHandler);
+        // IMPORTANT: Load initial data on page load
+        if (staseFilter.value) {
+            loadClassYears(staseFilter.value);
+        }
     });
     
     // Helper function to format time from timestamp
     function formatTime(timeString) {
-        // Handle both datetime strings and time-only strings
         if (!timeString) return '-';
         
         try {
             const date = new Date(timeString);
             if (isNaN(date)) {
-                // If it's not a valid date, try parsing as HH:MM:SS
                 const parts = timeString.split(':');
                 return `${parts[0]}:${parts[1]}`;
             }
