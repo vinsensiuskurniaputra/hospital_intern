@@ -93,37 +93,44 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @forelse($todaySchedules as $schedule)
                     <div class="bg-gray-100 rounded-lg p-4 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]">
-                        @if(isset($schedule->internshipClass))
-                            <h3 class="font-medium mb-1">{{ $schedule->internshipClass->name ?? 'Kelas' }}</h3>
-                        @endif
+                        <!-- Header: Nama Kelas dan Periode Jadwal -->
+                        <div class="flex justify-between items-start mb-2">
+                            @if(isset($schedule->internshipClass))
+                                <h3 class="font-medium text-xl">{{ $schedule->internshipClass->name ?? 'Kelas' }}</h3>
+                            @endif
+                            
+                            <!-- Periode jadwal di kanan atas -->
+                            <div class="text-xs text-gray-500 text-right flex-shrink-0 ml-2">
+                                <i class="bi bi-calendar-event mr-1"></i>
+                                <span>{{ \Carbon\Carbon::parse($schedule->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($schedule->end_date)->format('d M Y') }}</span>
+                            </div>
+                        </div>
                         
-                        <div class="text-sm text-gray-600 font-medium">
+                        <!-- Nama Stase -->
+                        <div class="text-md text-gray-600 font-medium mb-2">
                             {{ $schedule->stase->name ?? 'Stase tidak tersedia' }}
                         </div>
                         
-                        @if(isset($schedule->departement))
-                            <div class="text-sm text-gray-500 mb-1">
-                                {{ $schedule->departement->name ?? '' }}
-                            </div>
-                        @endif
-                        
-                        @if(isset($schedule->responsibleUser) && isset($schedule->responsibleUser->user))
-                            <div class="mt-2 text-xs text-gray-500">
+                        <!-- Responsible Users/PIC -->
+                        @if($schedule->responsibleAssignments->isNotEmpty())
+                            <div class="text-md text-gray-500">
                                 <i class="bi bi-person-circle mr-1"></i>
-                                <span>{{ $schedule->responsibleUser->user->name ?? '' }}</span>
+                                <span>
+                                    @foreach($schedule->responsibleAssignments as $assignment)
+                                        {{ $assignment->responsibleUser->user->name ?? 'Unknown' }}
+                                        @if(!$loop->last), @endif
+                                    @endforeach
+                                </span>
                             </div>
                         @endif
-                        
-                        <!-- Tambahkan informasi periode jadwal -->
-                        <div class="mt-2 text-xs text-gray-500">
-                            <i class="bi bi-calendar-event mr-1"></i>
-                            <span>{{ \Carbon\Carbon::parse($schedule->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($schedule->end_date)->format('d M Y') }}</span>
-                        </div>
                     </div>
                 @empty
-                    <div class="col-span-2 text-center p-6 text-gray-500">
-                        <i class="bi bi-calendar-x text-3xl mb-2"></i>
-                        <p>Tidak ada jadwal untuk hari ini</p>
+                    <div class="col-span-1 md:col-span-2">
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="bi bi-calendar-x text-4xl mb-2"></i>
+                            <p class="text-lg font-medium">Tidak ada jadwal hari ini</p>
+                            <p class="text-sm">Jadwal kegiatan akan muncul sesuai dengan periode yang telah ditentukan</p>
+                        </div>
                     </div>
                 @endforelse
             </div>
@@ -206,6 +213,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // ===== Chart Configuration =====
         const ctx = document.getElementById('attendanceChart').getContext('2d');
         
         // Data dari backend - menyimpan data persentase untuk chart
@@ -299,16 +307,17 @@
         // Location variables
         let currentLocation = null;
         
-        // Hospital configuration from backend (now without defaults)
+        // Hospital configuration
         const hospitalConfig = {
             name: "{{ config('hospital.name') }}",
-            latitude: {{ config('hospital.coordinates.latitude') }},
-            longitude: {{ config('hospital.coordinates.longitude') }},
-            radius: {{ config('hospital.attendance_radius') }}
+            latitude: {{ config('hospital.coordinates.latitude') ?? 'null' }},
+            longitude: {{ config('hospital.coordinates.longitude') ?? 'null' }},
+            radius: {{ config('hospital.attendance_radius') ?? 'null' }}
         };
         
         // Validate hospital config on frontend
         if (!hospitalConfig.name || !hospitalConfig.latitude || !hospitalConfig.longitude || !hospitalConfig.radius) {
+            console.error('Hospital configuration is incomplete:', hospitalConfig);
             showError('Konfigurasi lokasi rumah sakit tidak lengkap');
             tokenInput.disabled = true;
             submitBtn.disabled = true;
@@ -324,6 +333,21 @@
                     <p class="text-sm text-red-600">${message}</p>
                 </div>
             `;
+        }
+        
+        // PERBAIKAN: Function untuk hide input elements yang lebih spesifik
+        function hideTokenInputs() {
+            // Hide input and submit button only (not location elements)
+            tokenInput.style.display = 'none';
+            submitBtn.style.display = 'none';
+        }
+        
+        function hideAllAttendanceElements() {
+            // Hide all attendance related elements when completely done
+            tokenInput.style.display = 'none';
+            submitBtn.style.display = 'none';
+            locationStatus.style.display = 'none';
+            hospitalDistance.style.display = 'none';
         }
         
         // Function to check today's attendance
@@ -342,10 +366,13 @@
                     const attendanceData = data.data;
                     
                     if (attendanceData.needs_checkout) {
-                        // Needs checkout
+                        // CASE 1: Sudah masuk, belum pulang
                         attendanceStatus.textContent = 'Sudah Presensi';
-                        attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600');
+                        attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-blue-100', 'text-blue-600');
                         attendanceStatus.classList.add('bg-green-100', 'text-green-600');
+                        
+                        // PERBAIKAN: Hanya hide token input, biarkan location detection tetap aktif
+                        hideTokenInputs();
                         
                         attendanceResult.classList.remove('hidden');
                         attendanceResult.innerHTML = `
@@ -365,25 +392,24 @@
                         // Attach event listener to checkout button
                         document.getElementById('checkout-btn').addEventListener('click', submitCheckout);
                     } else {
-                        // Already checked out
-                        attendanceStatus.textContent = 'Sudah Presensi Pulang';
+                        // CASE 2: Sudah masuk dan pulang - TAMPILAN KONSISTEN
+                        attendanceStatus.textContent = 'Presensi Selesai';
                         attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-green-100', 'text-green-600');
-                        attendanceStatus.classList.add('bg-red-100', 'text-red-600');
+                        attendanceStatus.classList.add('bg-blue-100', 'text-blue-600');
+                        
+                        // PERBAIKAN: Hide semua elemen karena presensi sudah selesai
+                        hideAllAttendanceElements();
                         
                         attendanceResult.classList.remove('hidden');
                         attendanceResult.innerHTML = `
                             <div class="bg-blue-50 border border-blue-200 rounded p-3">
                                 <p class="text-blue-700 font-medium">Presensi hari ini sudah selesai</p>
                                 <p class="text-sm text-blue-600">Jam masuk: ${attendanceData.check_in}</p>
-                                <p class="text-sm text-blue-600">Jam pulang: ${attendanceData.check_out}</p>
+                                <p class="text-sm text-blue-600">Jam pulang: ${attendanceData.check_out && attendanceData.check_out !== '00:00:00' ? attendanceData.check_out : 'Belum checkout'}</p>
                                 <p class="text-xs text-blue-600 mt-1">${attendanceData.schedule || 'Jadwal'}</p>
                             </div>
                         `;
                     }
-                    
-                    // Disable input and button
-                    tokenInput.disabled = true;
-                    submitBtn.disabled = true;
                 }
             })
             .catch(error => {
@@ -423,17 +449,20 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status) {
-                    // Success
-                    attendanceStatus.textContent = 'Sudah Presensi Pulang';
+                    // SUCCESS: TAMPILAN KONSISTEN SEPERTI SAAT RELOAD
+                    attendanceStatus.textContent = 'Presensi Selesai';
                     attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-green-100', 'text-green-600');
-                    attendanceStatus.classList.add('bg-red-100', 'text-red-600');
+                    attendanceStatus.classList.add('bg-blue-100', 'text-blue-600');
+                    
+                    // PERBAIKAN: Hide semua elemen setelah checkout selesai
+                    hideAllAttendanceElements();
                     
                     attendanceResult.innerHTML = `
-                        <div class="bg-green-50 border border-green-200 rounded p-3">
-                            <p class="text-green-700 font-medium">Presensi pulang berhasil!</p>
-                            <p class="text-sm text-green-600">Jam masuk: ${data.data.check_in}</p>
-                            <p class="text-sm text-green-600">Jam pulang: ${data.data.check_out}</p>
-                            <p class="text-xs text-green-600 mt-1">${data.data.schedule}</p>
+                        <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                            <p class="text-blue-700 font-medium">Presensi hari ini sudah selesai</p>
+                            <p class="text-sm text-blue-600">Jam masuk: ${data.data.check_in}</p>
+                            <p class="text-sm text-blue-600">Jam pulang: ${data.data.check_out}</p>
+                            <p class="text-xs text-blue-600 mt-1">${data.data.schedule}</p>
                         </div>
                     `;
                 } else {
@@ -453,7 +482,7 @@
         // Check if we've already done attendance today
         checkTodayAttendance();
         
-        // Get location
+        // PERBAIKAN: Get location selalu dipanggil untuk mendukung checkout
         getLocation();
         
         // Event listeners
@@ -475,6 +504,7 @@
                 </div>
             `;
             
+            // ===== GEOLOCATION LOGS - KEPT FOR DEBUGGING =====
             console.log("Getting location...");
             navigator.geolocation.getCurrentPosition(
                 position => {
@@ -491,6 +521,8 @@
                         hospitalConfig.latitude,
                         hospitalConfig.longitude
                     );
+                    
+                    console.log("Distance calculated:", distance, "meters");
                     
                     // Show distance information
                     hospitalDistance.classList.remove('hidden');
@@ -531,8 +563,8 @@
                         `;
                     }
                     
-                    // Enable the submit button if there's a valid token
-                    if (tokenInput && tokenInput.value && tokenInput.value.length >= 6) {
+                    // Enable the submit button if there's a valid token and elements are visible
+                    if (tokenInput && tokenInput.value && tokenInput.value.length >= 6 && tokenInput.style.display !== 'none') {
                         submitBtn.disabled = false;
                     }
                 },
@@ -620,14 +652,17 @@
             })
             .then(data => {
                 if (data.status) {
-                    // Success
+                    // SUCCESS: Hide only input elements after successful check-in
                     attendanceStatus.textContent = 'Sudah Presensi';
-                    attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-red-100', 'text-red-600');
+                    attendanceStatus.classList.remove('bg-orange-100', 'text-orange-600', 'bg-blue-100', 'text-blue-600');
                     attendanceStatus.classList.add('bg-green-100', 'text-green-600');
+                    
+                    // PERBAIKAN: Hide hanya token input, biarkan location detection untuk checkout
+                    hideTokenInputs();
                     
                     attendanceResult.classList.remove('hidden');
                     attendanceResult.innerHTML = `
-                        <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <div class="bg-green-50 border border-green-200 rounded p-3">
                             <p class="text-green-700 font-medium">Presensi berhasil!</p>
                             <p class="text-sm text-green-600">Jam masuk: ${data.data.check_in_time}</p>
                             <p class="text-xs text-green-600 mt-1">${data.data.schedule.stase} - ${data.data.schedule.class}</p>
@@ -639,10 +674,6 @@
                             </button>
                         </div>
                     `;
-                    
-                    tokenInput.disabled = true;
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Submit';
                     
                     document.getElementById('checkout-btn').addEventListener('click', submitCheckout);
                 } else {
@@ -676,6 +707,7 @@
     });
 </script>
 
+<!-- Keep the distance calculation script unchanged -->
 <script>
     // The Haversine formula calculation
     function calculateDistance(lat1, lon1, lat2, lon2) {
