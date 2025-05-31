@@ -2,27 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 
 class GradeComponent extends Model
 {
     use HasFactory;
-    
-    protected $guarded = ['id'];
-    
+
+    protected $fillable = [
+        'stase_id',
+        'name'
+    ];
+
     /**
      * Get the stase that owns this grade component
      */
-    public function stase(): BelongsTo
+    public function stase()
     {
         return $this->belongsTo(Stase::class);
     }
+
     /**
-     * Get the student grades for this component
+     * Get the student component grades for this component
      */
-    public function studentGrades()
+    public function studentComponentGrades()
     {
         return $this->hasMany(StudentComponentGrade::class);
     }
