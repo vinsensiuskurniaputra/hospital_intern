@@ -1,5 +1,9 @@
 @extends('layouts.auth')
 
+@php
+    use Carbon\Carbon;
+@endphp
+
 @section('content')
     @if(isset($error))
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
@@ -66,6 +70,79 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-6">
+                <!-- Kehadiran Mahasiswa Card -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-lg font-semibold mb-3">
+                        Kehadiran Mahasiswa 
+                        <span class="text-sm text-gray-500 font-normal">({{ Carbon::now()->format('M Y') }})</span>
+                    </h2>
+                    
+                    <div class="mb-3">
+                        <div class="text-sm text-gray-600">Total Kehadiran</div>
+                        <div class="text-2xl font-bold">
+                            {{ array_sum($chartData['data'] ?? [0]) }} Kehadiran
+                        </div>
+                        <div class="flex items-center mt-1">
+                            @php
+                                // PERBAIKAN: Gunakan data dinamis dari controller
+                                $labels = $chartData['labels'] ?? ['Jan'];
+                                $dataArray = $chartData['data'] ?? [0];
+                                
+                                // Index bulan saat ini (0-based)
+                                $currentMonthIndex = Carbon::now()->month - 1;
+                                
+                                // Pastikan index dalam range
+                                if ($currentMonthIndex >= count($dataArray)) {
+                                    $currentMonthIndex = count($dataArray) - 1;
+                                }
+                                if ($currentMonthIndex < 0) {
+                                    $currentMonthIndex = 0;
+                                }
+                                
+                                $currentMonthName = $labels[$currentMonthIndex] ?? Carbon::now()->format('M');
+                                $currentMonthData = $dataArray[$currentMonthIndex] ?? 0;
+                                
+                                // Hitung bulan sebelumnya (dalam range yang ada)
+                                $prevMonthIndex = $currentMonthIndex - 1;
+                                $previousMonthData = 0;
+                                
+                                if ($prevMonthIndex >= 0 && $prevMonthIndex < count($dataArray)) {
+                                    $previousMonthData = $dataArray[$prevMonthIndex] ?? 0;
+                                }
+                                
+                                // Hitung persentase perubahan
+                                $change = 0;
+                                if ($previousMonthData > 0) {
+                                    $change = (($currentMonthData - $previousMonthData) / $previousMonthData) * 100;
+                                } elseif ($currentMonthData > 0 && $previousMonthData == 0) {
+                                    $change = 100;
+                                }
+                            @endphp
+                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-md mr-2">{{ $currentMonthName }}</span>
+                            @if($prevMonthIndex >= 0)
+                                <span class="flex items-center {{ $change >= 0 ? 'text-green-500' : 'text-red-500' }} text-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M{{ $change >= 0 ? '13 7l5 5m0 0l-5 5m5-5H6' : '11 17l-5-5m0 0l5-5m-5 5h12' }}"></path>
+                                    </svg>
+                                    {{ number_format(abs($change), 1) }}%
+                                </span>
+                            @else
+                                <span class="text-gray-500 text-sm">Bulan pertama</span>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Canvas dengan padding dan border atas yang tipis -->
+                    <div class="h-40 mt-6 mb-4 pt-4 border-t border-gray-100">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
                 <!-- Jadwal Hari Ini -->
                 <div class="bg-white p-6 rounded-lg shadow-sm">
                     <h2 class="text-lg font-semibold mb-4">Jadwal Hari Ini</h2>
@@ -81,88 +158,18 @@
                                     $displayedScheduleIds[] = $schedule->id;
                                 @endphp
                                 <div class="bg-gray-100 rounded-lg p-4 shadow">
-                                    <h3 class="font-medium">{{ $schedule->internshipClass->name ?? 'Kelas' }}</h3>
+                                    <h3 class="font-medium">
+                                        {{ $schedule->internshipClass->name ?? 'Kelas' }}
+                                        @if($schedule->internshipClass && $schedule->internshipClass->classYear)
+                                            <span class="text-gray-600">({{ $schedule->internshipClass->classYear->class_year }})</span>
+                                        @endif
+                                    </h3>
                                     <div class="text-xs text-gray-500 mt-1">{{ $schedule->stase->name ?? 'Departemen' }}</div>
                                 </div>
                             @endif
                         @empty
                         <div class="col-span-2 text-center p-6 text-gray-500">
                             <p>Tidak ada jadwal untuk hari ini</p>
-                        </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column -->
-            <div class="space-y-6">
-                <!-- Kehadiran Mahasiswa Card -->
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h2 class="text-lg font-semibold mb-3">Kehadiran Mahasiswa</h2>
-                    
-                    <div class="mb-3">
-                        <div class="text-sm text-gray-600">Total Kehadiran</div>
-                        <div class="text-2xl font-bold">{{ array_sum($chartData['data'] ?? [0]) }} Kehadiran</div>
-                        <div class="flex items-center mt-1">
-                            @php
-                                $labels = $chartData['labels'] ?? ['Jan'];
-                                $lastMonthIndex = count($labels) - 1;
-                                $lastMonth = $lastMonthIndex >= 0 ? $labels[$lastMonthIndex] : 'Jan';
-                            @endphp
-                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-md mr-2">{{ $lastMonth }}</span>
-                            @php
-                                $dataArray = $chartData['data'] ?? [0, 0];
-                                $currentMonthIndex = count($dataArray) - 1;
-                                $prevMonthIndex = $currentMonthIndex - 1;
-                                
-                                $currentMonth = $currentMonthIndex >= 0 ? $dataArray[$currentMonthIndex] : 0;
-                                $previousMonth = $prevMonthIndex >= 0 ? $dataArray[$prevMonthIndex] : 0;
-                                
-                                $change = $previousMonth > 0 ? (($currentMonth - $previousMonth) / $previousMonth) * 100 : 0;
-                            @endphp
-                            <span class="flex items-center {{ $change >= 0 ? 'text-green-500' : 'text-red-500' }} text-sm">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M{{ $change >= 0 ? '13 7l5 5m0 0l-5 5m5-5H6' : '11 17l-5-5m0 0l5-5m-5 5h12' }}"></path>
-                                </svg>
-                                {{ number_format(abs($change), 1) }}%
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <!-- Chart Canvas dengan padding dan border atas yang tipis -->
-                    <div class="h-40 mt-6 mb-4 pt-4 border-t border-gray-100">
-                        <canvas id="attendanceChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Mahasiswa yang harus dinilai -->
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold">Mahasiswa yang harus dinilai</h2>
-                        <a href="{{ route('responsible.grades') }}" class="bg-[#637F26] hover:bg-[#566d1e] text-white px-4 py-2 rounded-md text-sm flex items-center transition-colors">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            Lihat Semua
-                        </a>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        @forelse($studentsToGrade as $student)
-                        <div class="flex items-center py-3 border-b border-gray-100">
-                            <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($student->user->name ?? 'Student') }}" alt="Student" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-medium">{{ $student->user->name ?? 'Nama Mahasiswa' }}</p>
-                            </div>
-                            <div class="text-sm text-gray-500 mr-4">{{ $student->nim ?? 'NIM' }}</div>
-                            <div class="text-sm text-gray-500">{{ $student->internshipClass->name ?? 'Kelas' }}</div>
-                        </div>
-                        @empty
-                        <div class="text-center py-4 text-gray-500">
-                            <p>Tidak ada mahasiswa yang perlu dinilai</p>
                         </div>
                         @endforelse
                     </div>
@@ -258,9 +265,13 @@
             
             if (ctx) {
                 try {
-                    // Data dari controller
-                    const labels = {!! json_encode($chartData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']) !!};
-                    const chartData = {!! json_encode($chartData['data'] ?? [0, 0, 0, 0, 0, 0, 0]) !!};
+                    // PERBAIKAN: Data dari controller dengan range dinamis
+                    const chartDataFromController = {!! json_encode($chartData) !!};
+                    const labels = chartDataFromController.labels || ['Jan'];
+                    const chartData = chartDataFromController.data || [0];
+                    const currentMonthIndex = chartDataFromController.current_month_index || 0;
+                    
+                    console.log('Chart data:', { labels, chartData, currentMonthIndex });
                     
                     new Chart(ctx, {
                         type: 'line',
@@ -270,16 +281,27 @@
                                 label: 'Kehadiran Mahasiswa',
                                 data: chartData,
                                 borderColor: '#637F26',
-                                backgroundColor: 'rgba(240, 240, 245, 0.7)',
+                                backgroundColor: 'rgba(99, 127, 38, 0.1)',
+                                // PERBAIKAN: Semua titik visible dengan style berbeda
                                 pointBackgroundColor: function(context) {
-                                    return context.dataIndex === labels.length - 1 ? '#637F26' : 'transparent';
+                                    // Bulan saat ini highlight dengan warna penuh
+                                    return context.dataIndex === currentMonthIndex ? '#637F26' : '#637F26';
                                 },
                                 pointBorderColor: function(context) {
-                                    return context.dataIndex === labels.length - 1 ? '#fff' : 'transparent';
+                                    // Bulan saat ini dengan border putih, lainnya dengan border hijau
+                                    return context.dataIndex === currentMonthIndex ? '#fff' : '#637F26';
                                 },
-                                pointBorderWidth: 2,
+                                pointBorderWidth: function(context) {
+                                    // Bulan saat ini border lebih tebal
+                                    return context.dataIndex === currentMonthIndex ? 3 : 2;
+                                },
                                 pointRadius: function(context) {
-                                    return context.dataIndex === labels.length - 1 ? 6 : 0;
+                                    // PERBAIKAN: Semua titik visible, bulan saat ini lebih besar
+                                    return context.dataIndex === currentMonthIndex ? 8 : 5;
+                                },
+                                pointHoverRadius: function(context) {
+                                    // Hover effect untuk semua titik
+                                    return context.dataIndex === currentMonthIndex ? 10 : 7;
                                 },
                                 fill: true,
                                 tension: 0.4,
@@ -289,15 +311,39 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            interaction: {
+                                intersect: false,
+                                mode: 'index'
+                            },
                             plugins: {
                                 legend: {
                                     display: false
                                 },
                                 tooltip: {
+                                    // PERBAIKAN: Custom tooltip untuk menampilkan data kehadiran
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    titleColor: '#fff',
+                                    bodyColor: '#fff',
+                                    borderColor: '#637F26',
+                                    borderWidth: 1,
+                                    cornerRadius: 8,
+                                    displayColors: false,
                                     callbacks: {
-                                        // Menampilkan jumlah kehadiran alih-alih persentase
+                                        title: function(tooltipItems) {
+                                            const monthName = tooltipItems[0].label;
+                                            const currentYear = new Date().getFullYear();
+                                            return `${monthName} ${currentYear}`;
+                                        },
                                         label: function(context) {
-                                            return `${context.parsed.y} kehadiran`;
+                                            const count = context.parsed.y;
+                                            return `${count} kehadiran`;
+                                        },
+                                        afterLabel: function(context) {
+                                            // Tambahan info jika ini bulan saat ini
+                                            if (context.dataIndex === currentMonthIndex) {
+                                                return '(Bulan ini)';
+                                            }
+                                            return '';
                                         }
                                     }
                                 }
@@ -307,13 +353,37 @@
                                     beginAtZero: true,
                                     grid: {
                                         display: false
+                                    },
+                                    ticks: {
+                                        stepSize: 1,
+                                        callback: function(value) {
+                                            return Math.floor(value);
+                                        },
+                                        color: '#6B7280',
+                                        font: {
+                                            size: 12
+                                        }
                                     }
                                 },
                                 x: {
                                     grid: {
                                         display: false
+                                    },
+                                    ticks: {
+                                        color: '#6B7280',
+                                        font: {
+                                            size: 12
+                                        }
                                     }
                                 }
+                            },
+                            // PERBAIKAN: Hover animations
+                            hover: {
+                                animationDuration: 200
+                            },
+                            animation: {
+                                duration: 1000,
+                                easing: 'easeInOutQuart'
                             }
                         }
                     });
@@ -406,7 +476,7 @@
                                     tokenExpiry.textContent = 'Berlaku hingga akhir hari';
                                 }
                                 
-                                tokenSchedule.textContent = `${token.stase_name} - ${token.schedule_name}`;
+                                tokenSchedule.textContent = ` ${token.schedule_name}`;
                                 
                                 // Show all available tokens if there are multiple
                                 if (activeTokens.length > 1) {
