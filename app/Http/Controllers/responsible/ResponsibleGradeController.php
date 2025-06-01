@@ -124,10 +124,16 @@ class ResponsibleGradeController extends Controller
             'grades.*' => 'required|numeric|min:0|max:100',
         ]);
         
+        // Get responsible user ID
+        $responsibleUserId = Auth::user()->responsibleUser->id;
+        
+        // Get today's date
+        $today = Carbon::today()->format('Y-m-d');
+        
         // Calculate average grade
         $avgGrade = array_sum($request->grades) / count($request->grades);
         
-        // Save or update grades
+        // Save overall grade to StudentGrade
         StudentGrade::updateOrCreate(
             [
                 'student_id' => $request->student_id,
@@ -138,6 +144,27 @@ class ResponsibleGradeController extends Controller
                 'grade_details' => json_encode($request->grades)
             ]
         );
+        
+        // Save individual component grades to StudentComponentGrade
+        foreach ($request->grades as $componentId => $value) {
+            // Ensure component ID is valid
+            $component = GradeComponent::find($componentId);
+            if (!$component) continue;
+            
+            // Save component grade
+            \App\Models\StudentComponentGrade::updateOrCreate(
+                [
+                    'student_id' => $request->student_id,
+                    'grade_component_id' => $componentId,
+                    'stase_id' => $request->stase_id
+                ],
+                [
+                    'value' => $value,
+                    'evaluation_date' => $today,
+                    'responsible_user_id' => $responsibleUserId
+                ]
+            );
+        }
         
         return redirect()->back()->with('success', 'Nilai berhasil disimpan.');
     }

@@ -88,143 +88,189 @@ class HomeController extends Controller
     private function picDashboard()
     {
         try {
-            // Mendapatkan ID pengguna saat ini
+            // Get logged in user
+            $user = Auth::user();
             $userId = Auth::id();
             
-            // Mengambil data responsible user
+            // Get responsible user data
             $responsible = ResponsibleUser::where('user_id', $userId)->first();
+
+            // Default values if error or empty data
+            $todaySchedules = collect([]);
+            $recentAttendances = collect([]);
+            $notifications = collect([]);
+            $chartData = ['labels' => [], 'data' => []];
+            $studentCount = 0;
             
-            if (!$responsible) {
-                Log::warning('PIC user not found for user_id: ' . $userId);
-                return view('pages.responsible.dashboard.index', [
-                    'error' => 'Data penanggung jawab tidak ditemukan',
-                    'studentCount' => 0,
-                    'todaySchedules' => collect([]),
-                    'notifications' => collect([]),
-                    'chartData' => ['labels' => [], 'data' => []],
-                    'studentsToGrade' => collect([])
-                ]);
-            }
-            
-            // PERUBAHAN DISINI: Mengambil stase yang dipegang oleh PIC ini melalui relasi many-to-many
-            $staseIds = [];
             if ($responsible) {
-                // Gunakan relasi many-to-many melalui tabel pivot
+                // Dapatkan stase IDs dari tabel pivot
                 $staseIds = DB::table('responsible_stase')
                     ->where('responsible_user_id', $responsible->id)
                     ->pluck('stase_id')
                     ->toArray();
-            }
-            
-            if (empty($staseIds)) {
-                Log::info('PIC user does not have any stase: ' . $userId);
-                // Jika tidak ada stase, gunakan semua stase yang ada di database
-                $staseIds = Stase::pluck('id')->toArray();
-                if (empty($staseIds)) {
-                    // Jika stase benar-benar kosong, buat nilai default
-                    $staseIds = [0]; // ID yang tidak ada
+
+                if (!empty($staseIds)) {
+                    // 1. JADWAL HARI INI
+                    try {
+                        $today = Carbon::now()->format('Y-m-d');
+                        
+                        // Dapatkan jadwal terkait stase tersebut hari ini
+                        $scheduleIds = Schedule::whereIn('stase_id', $staseIds)
+                            ->where('start_date', '<=', $today)
+                            ->where('end_date', '>=', $today)
+                            ->pluck('id')
+                            ->unique()
+                            ->values()
+                            ->toArray();
+                        
+                        // Include classYear relationship
+                        $todaySchedules = Schedule::whereIn('id', $scheduleIds)
+                            ->with([
+                                'stase', 
+                                'internshipClass.classYear'
+                            ])
+                            ->take(6)
+                            ->get();
+                    } catch (\Exception $e) {
+                        Log::error('Error loading schedules: ' . $e->getMessage());
+                        $todaySchedules = collect([]);
+                    }
+
+                    // 2. MAHASISWA YANG DIBIMBING
+                    try {
+                        // Hitung jumlah mahasiswa dari semua kelas yang ada di stase yang dipegang PIC
+                        $internshipClassIds = Schedule::whereIn('stase_id', $staseIds)
+                            ->distinct()
+                            ->pluck('internship_class_id')
+                            ->toArray();
+                        
+                        $studentCount = Student::whereIn('internship_class_id', $internshipClassIds)
+                            ->count();
+                            
+                        Log::info('Student count calculation', [
+                            'stase_ids' => $staseIds,
+                            'internship_class_ids' => $internshipClassIds,
+                            'student_count' => $studentCount
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Error calculating student count: ' . $e->getMessage());
+                        $studentCount = 0;
+                    }
+
+                    // 3. CHART DATA KEHADIRAN MAHASISWA
+                    try {
+                        $chartData = $this->getAttendanceChartData($staseIds);
+                    } catch (\Exception $e) {
+                        Log::error('Error loading chart data: ' . $e->getMessage());
+                        $chartData = $this->getDefaultChartData();
+                    }
+                } else {
+                    // Jika PIC tidak memiliki stase, set default values
+                    $todaySchedules = collect([]);
+                    $studentCount = 0;
+                    $chartData = $this->getDefaultChartData();
+                    
+                    Log::warning('PIC has no assigned stase', ['responsible_id' => $responsible->id]);
+                }
+                
+                // 4. NOTIFIKASI
+                try {
+                    $notifications = Notification::where('user_id', $userId)
+                        ->orderBy('created_at', 'desc')
+                        ->take(3)
+                        ->get();
+                } catch (\Exception $e) {
+                    Log::error('Error loading notifications: ' . $e->getMessage());
+                    $notifications = collect([]);
                 }
             }
             
-            // 1. Data jadwal hari ini (dari stase yang dipegang PIC)
-            $today = Carbon::now()->format('Y-m-d');
-            
-            // Gunakan hanya start_date dan end_date
-            $scheduleIds = Schedule::whereIn('stase_id', $staseIds)
-                ->where('start_date', '<=', $today)
-                ->where('end_date', '>=', $today)
-                ->pluck('id')
-                ->unique()
-                ->values()
-                ->toArray();
-            
-            // Kemudian ambil data lengkap
-            $todaySchedules = Schedule::whereIn('id', $scheduleIds)
-                ->with(['stase', 'internshipClass'])
-                ->take(6)
-                ->get();
-                
-            // 2. Mahasiswa yang dibimbing (menghitung total)
-            $studentCount = Student::whereHas('schedules', function($query) use ($staseIds) {
-                $query->whereIn('stase_id', $staseIds);
-            })->count();
-            
-            // 3. Data notifikasi terbaru untuk PIC
-            $notifications = Notification::where('user_id', $userId)
-                ->orderBy('created_at', 'desc')
-                ->take(3)
-                ->get();
-            
-            // 4. Data untuk chart kehadiran
-            $chartData = $this->getAttendanceChartData($staseIds);
-            
-            // 5. Data mahasiswa yang harus dinilai
-            $studentsToGrade = Student::whereDoesntHave('grades', function($query) use ($staseIds) {
-                $query->whereIn('stase_id', $staseIds);
-            })
-            ->whereHas('schedules', function($query) use ($staseIds, $today) {
-                $query->whereIn('stase_id', $staseIds)
-                    ->where('end_date', '<', $today);
-            })
-            ->with('user')
-            ->take(5)
-            ->get();
-            
-            return view('pages.responsible.dashboard.index', [
-                'responsible' => $responsible,
-                'todaySchedules' => $todaySchedules,
-                'studentCount' => $studentCount,
-                'notifications' => $notifications,
-                'chartData' => $chartData,
-                'studentsToGrade' => $studentsToGrade
-            ]);
-            
+            return view('pages.responsible.dashboard.index', compact(
+                'todaySchedules', 
+                'recentAttendances',
+                'notifications',
+                'chartData',
+                'studentCount'
+            ));
         } catch (\Exception $e) {
-            Log::error('Error loading PIC dashboard: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
+            Log::error('Error in picDashboard: ' . $e->getMessage());
             
             return view('pages.responsible.dashboard.index', [
-                'error' => 'Terjadi kesalahan saat memuat dashboard: ' . $e->getMessage(),
-                'studentCount' => 0,
                 'todaySchedules' => collect([]),
+                'recentAttendances' => collect([]),
                 'notifications' => collect([]),
-                'chartData' => ['labels' => [], 'data' => []],
-                'studentsToGrade' => collect([])
-            ]);
+                'chartData' => $this->getDefaultChartData(),
+                'studentCount' => 0
+            ])->with('error', 'Terjadi kesalahan saat memuat dashboard.');
         }
     }
 
-    // Helper method untuk chart kehadiran
+    // Helper method untuk chart kehadiran - PERBAIKAN: Januari sampai bulan saat ini
     private function getAttendanceChartData($staseIds)
     {
-        // Mengambil data 7 bulan terakhir untuk chart
-        $months = [];
-        $attendanceData = [];
-        
-        for ($i = 6; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
-            $monthName = $month->format('M');
-            $months[] = $monthName;
+        try {
+            $currentYear = Carbon::now()->year;
+            $currentMonth = Carbon::now()->month; // 1-12
+            $months = [];
+            $attendanceData = [];
             
-            // Menghitung kehadiran untuk bulan tersebut
-            $startOfMonth = $month->copy()->startOfMonth()->format('Y-m-d');
-            $endOfMonth = $month->copy()->endOfMonth()->format('Y-m-d');
-            
-            // Hitung semua kehadiran pada stase yang dipegang PIC untuk bulan ini
-            $attendanceCount = Presence::whereHas('presenceSession.schedule', function($query) use ($staseIds) {
-                    $query->whereIn('stase_id', $staseIds);
-                })
-                ->whereDate('date_entry', '>=', $startOfMonth)
-                ->whereDate('date_entry', '<=', $endOfMonth)
-                ->where('status', 'present')
-                ->count();
+            // PERBAIKAN: Loop dari Januari (bulan 1) sampai bulan saat ini
+            for ($month = 1; $month <= $currentMonth; $month++) {
+                $monthCarbon = Carbon::create($currentYear, $month, 1);
+                $monthName = $monthCarbon->format('M'); // Jan, Feb, Mar, ...
+                $months[] = $monthName;
                 
-            $attendanceData[] = $attendanceCount;
+                // Menghitung kehadiran untuk bulan tersebut
+                $startOfMonth = $monthCarbon->startOfMonth()->format('Y-m-d');
+                $endOfMonth = $monthCarbon->copy()->endOfMonth()->format('Y-m-d');
+                
+                // Hitung kehadiran mahasiswa pada stase yang dipegang PIC untuk bulan ini
+                $attendanceCount = Presence::whereHas('presenceSession.schedule', function($query) use ($staseIds) {
+                        $query->whereIn('stase_id', $staseIds);
+                    })
+                    ->whereDate('date_entry', '>=', $startOfMonth)
+                    ->whereDate('date_entry', '<=', $endOfMonth)
+                    ->where('status', 'present')
+                    ->count();
+                    
+                $attendanceData[] = $attendanceCount;
+            }
+            
+            Log::info('Chart data generated for year ' . $currentYear . ' (Jan - ' . Carbon::now()->format('M') . ')', [
+                'stase_ids' => $staseIds,
+                'months' => $months,
+                'attendance_data' => $attendanceData,
+                'total_attendance' => array_sum($attendanceData),
+                'year' => $currentYear,
+                'current_month' => $currentMonth
+            ]);
+            
+            return [
+                'labels' => $months,
+                'data' => $attendanceData,
+                'current_month_index' => $currentMonth - 1 // 0-based index untuk JavaScript
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error in getAttendanceChartData: ' . $e->getMessage());
+            return $this->getDefaultChartData();
+        }
+    }
+
+    // Helper method untuk default chart data - PERBAIKAN: Hanya sampai bulan saat ini
+    private function getDefaultChartData()
+    {
+        $currentMonth = Carbon::now()->month;
+        $months = [];
+        
+        // Hanya sampai bulan saat ini
+        for ($month = 1; $month <= $currentMonth; $month++) {
+            $months[] = Carbon::create(Carbon::now()->year, $month, 1)->format('M');
         }
         
         return [
             'labels' => $months,
-            'data' => $attendanceData
+            'data' => array_fill(0, count($months), 0),
+            'current_month_index' => $currentMonth - 1
         ];
     }
     
@@ -237,9 +283,8 @@ class HomeController extends Controller
             
             // Get student data
             $student = Student::where('user_id', $userId)->first();
-            
 
-            // Default values jika terjadi error atau data kosong
+            // Default values if error or empty data
             $attendanceStats = [
                 'total' => 0,
                 'present' => ['count' => 0, 'percent' => 0],
@@ -251,12 +296,37 @@ class HomeController extends Controller
             $notifications = collect([]);
             $recentGrades = collect([]);
             
-            // Get hospital coordinates from config
+            // Get hospital coordinates and radius from config (no defaults)
             $hospitalCoordinates = [
-                'name' => config('location.hospital.name'),
-                'latitude' => config('location.hospital.latitude'),
-                'longitude' => config('location.hospital.longitude')
+                'name' => config('hospital.name'),
+                'latitude' => config('hospital.coordinates.latitude'),
+                'longitude' => config('hospital.coordinates.longitude')
             ];
+            
+            // Get attendance radius from config (no default)
+            $attendanceRadius = config('hospital.attendance_radius');
+            
+            // Validate that hospital configuration is set
+            if (!$hospitalCoordinates['name'] || 
+                !$hospitalCoordinates['latitude'] || 
+                !$hospitalCoordinates['longitude'] || 
+                !$attendanceRadius) {
+                
+                Log::error('Hospital configuration is not properly set in environment variables');
+                return view('pages.student.dashboard.index', [
+                    'attendanceStats' => $attendanceStats,
+                    'todaySchedules' => collect([]),
+                    'notifications' => collect([]),
+                    'recentGrades' => collect([]),
+                    'student' => null,
+                    'hospitalCoordinates' => [
+                        'name' => 'Hospital',
+                        'latitude' => 0,
+                        'longitude' => 0
+                    ],
+                    'attendanceRadius' => 500
+                ])->with('error', 'Konfigurasi lokasi rumah sakit belum diatur. Silakan hubungi administrator.');
+            }
             
             if ($student) {
                 // Statistik Kehadiran
@@ -286,33 +356,24 @@ class HomeController extends Controller
                     Log::error('Error loading attendance stats: ' . $e->getMessage());
                 }
                 
-                // Jadwal Hari Ini - tanpa waktu mulai/berakhir
+                // Jadwal Hari Ini
                 try {
                     $today = Carbon::now()->format('Y-m-d');
+                    $internshipClassId = $student->internship_class_id;
                     
-                    // Gunakan rentang tanggal start_date dan end_date untuk menentukan jadwal hari ini
-                    if (Schema::hasTable('schedules')) {
-                        // Student's internship class ID
-                        $internshipClassId = $student->internship_class_id;
-                        
-                        // Get today's schedules based on start_date and end_date range
-                        $todaySchedules = Schedule::where(function($query) use ($today) {
-                            $query->where('start_date', '<=', $today)
-                                  ->where('end_date', '>=', $today);
-                        })
-                        ->when($internshipClassId, function($query) use ($internshipClassId) {
-                            $query->where('internship_class_id', $internshipClassId);
-                        })
-                        ->with(['stase', 'internshipClass', 'responsibleUser.user'])
-                        ->orderBy('id')
-                        ->get();
-                        
-                        // Jika kosong, tampilkan pesan tidak ada jadwal
-                        if ($todaySchedules->isEmpty()) {
-                            $todaySchedules = collect([]);
-                        }
+                    if (Schema::hasTable('schedules') && $internshipClassId) {
+                        // Query dengan relationship yang benar
+                        $todaySchedules = Schedule::where('internship_class_id', $internshipClassId)
+                            ->where('start_date', '<=', $today)
+                            ->where('end_date', '>=', $today)
+                            ->with([
+                                'stase.departement',
+                                'internshipClass',
+                                'responsibleAssignments.responsibleUser.user'
+                            ])
+                            ->orderBy('start_date')
+                            ->get();
                     } else {
-                        // Tabel belum ada, buat data dummy
                         $todaySchedules = collect([]);
                     }
                 } catch (\Exception $e) {
@@ -345,7 +406,7 @@ class HomeController extends Controller
                 // Nilai Terbaru
                 try {
                     $recentGrades = StudentGrade::where('student_id', $student->id)
-                        ->with(['departement', 'stase'])
+                        ->with(['stase'])
                         ->orderBy('created_at', 'desc')
                         ->take(3)
                         ->get();
@@ -355,42 +416,19 @@ class HomeController extends Controller
                 }
             }
             
-            // Get today's schedules
-            $today = Carbon::now()->format('Y-m-d');
-            
-            
-            $internshipClassId = $student ? $student->internship_class_id : null;
-            
-            
-            // Debug SQL query (dump raw SQL query for schedules)
-            $query = Schedule::where(function($query) use ($today) {
-                $query->where('start_date', '<=', $today)
-                      ->where('end_date', '>=', $today);
-            })
-            ->when($internshipClassId, function($query) use ($internshipClassId) {
-                $query->where('internship_class_id', $internshipClassId);
-            });
-            
-            
-            // Execute query and log results
-            $todaySchedules = $query->with(['stase', 'internshipClass'])
-                ->orderBy('id')
-                ->get();
-                
-            
-            
             return view('pages.student.dashboard.index', compact(
                 'todaySchedules', 
                 'student',
                 'notifications',
                 'recentGrades',
                 'attendanceStats',
-                'hospitalCoordinates'
+                'hospitalCoordinates',
+                'attendanceRadius'
             ));
         } catch (\Exception $e) {
-            \Log::error('Error in studentDashboard: ' . $e->getMessage());
+            Log::error('Error in studentDashboard: ' . $e->getMessage());
             
-            // Error handling code...
+            // Error handling with validation check
             return view('pages.student.dashboard.index', [
                 'attendanceStats' => [
                     'total' => 0,
@@ -401,7 +439,13 @@ class HomeController extends Controller
                 'todaySchedules' => collect([]),
                 'notifications' => collect([]),
                 'recentGrades' => collect([]),
-                'student' => null
+                'student' => null,
+                'hospitalCoordinates' => [
+                    'name' => config('hospital.name') ?: 'Hospital',
+                    'latitude' => config('hospital.coordinates.latitude') ?: 0,
+                    'longitude' => config('hospital.coordinates.longitude') ?: 0
+                ],
+                'attendanceRadius' => config('hospital.attendance_radius') ?: 500
             ])->with('error', 'Terjadi kesalahan saat memuat dashboard.');
         }
     }
@@ -547,29 +591,23 @@ class HomeController extends Controller
         try {
             $userId = Auth::id();
             $today = Carbon::now()->format('Y-m-d');
-            Log::info("Getting active tokens for user ID: {$userId}, today: {$today}");
             
             // Dapatkan responsible user
             $responsible = ResponsibleUser::where('user_id', $userId)->first();
             
             if (!$responsible) {
-                Log::warning("Responsible user not found for user ID: {$userId}");
                 return response()->json([
                     'status' => false,
                     'message' => 'Data penanggung jawab tidak ditemukan'
                 ]);
             }
             
-            Log::info("Found responsible user with ID: {$responsible->id}");
-            
             // Dapatkan stase IDs dari tabel pivot
             $staseIds = DB::table('responsible_stase')
                 ->where('responsible_user_id', $responsible->id)
                 ->pluck('stase_id')
                 ->toArray();
-        
-            Log::info("Found stase IDs: " . implode(', ', $staseIds ?: ['none']));
-        
+    
             // Jika tidak ada stase, kembalikan array kosong
             if (empty($staseIds)) {
                 return response()->json([
@@ -582,7 +620,6 @@ class HomeController extends Controller
             }
             
             // Dapatkan semua jadwal terkait stase tersebut hari ini
-            $today = Carbon::now()->format('Y-m-d');
             $scheduleIds = Schedule::whereIn('stase_id', $staseIds)
                 ->where('start_date', '<=', $today)
                 ->where('end_date', '>=', $today)
@@ -591,15 +628,13 @@ class HomeController extends Controller
                 ->values()
                 ->toArray();
             
-            // Debug log
-            Log::info("Schedule IDs for today: " . implode(', ', $scheduleIds));
-            
-            // Ambil data lengkap
+            // PERBAIKAN: Include classYear relationship
             $schedules = Schedule::whereIn('id', $scheduleIds)
-                ->with(['stase', 'internshipClass'])
+                ->with([
+                    'stase', 
+                    'internshipClass.classYear' // Include classYear relationship
+                ])
                 ->get();
-                
-            Log::info("Found {$schedules->count()} schedules for today");
             
             // Dapatkan semua sesi presensi aktif untuk jadwal tersebut
             $now = Carbon::now();
@@ -631,23 +666,45 @@ class HomeController extends Controller
                         }
                     }
                     
+                    // PERBAIKAN: Include class year in schedule name
+                    $className = $schedule->internshipClass->name ?? 'Kelas';
+                    $classYear = $schedule->internshipClass->classYear->class_year ?? '';
+                    $staseName = $schedule->stase->name ?? 'Stase';
+                    
+                    $scheduleDisplayName = $className;
+                    if ($classYear) {
+                        $scheduleDisplayName .= " ({$classYear})";
+                    }
+                    $scheduleDisplayName .= " - {$staseName}";
+                    
                     $activeSessions->push([
                         'id' => $session->id,
                         'token' => $session->token,
                         'schedule_id' => $schedule->id,
-                        'schedule_name' => $schedule->internshipClass->name ?? 'Kelas',
-                        'stase_name' => $schedule->stase->name ?? 'Stase',
+                        'schedule_name' => $scheduleDisplayName,
+                        'stase_name' => $staseName,
                         'expiration_time' => $expirationTime,
                         'created_at' => $session->created_at->format('Y-m-d H:i:s')
                     ]);
                 }
             }
             
-            // Format schedule options - mark schedules with active tokens
+            // PERBAIKAN: Format schedule options dengan class year
             $scheduleOptions = $schedules->map(function($schedule) use ($activeScheduleIds) {
+                $className = $schedule->internshipClass->name ?? 'Kelas';
+                $classYear = $schedule->internshipClass->classYear->class_year ?? '';
+                $staseName = $schedule->stase->name ?? 'Stase';
+                
+                // Format nama dengan class year
+                $displayName = $className;
+                if ($classYear) {
+                    $displayName .= " ({$classYear})";
+                }
+                $displayName .= " - {$staseName}";
+                
                 return [
                     'id' => $schedule->id,
-                    'name' => ($schedule->internshipClass->name ?? 'Kelas') . ' - ' . ($schedule->stase->name ?? 'Stase'),
+                    'name' => $displayName,
                     'has_active_token' => in_array($schedule->id, $activeScheduleIds)
                 ];
             })->toArray();
@@ -660,8 +717,7 @@ class HomeController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            Log::error("Fatal error in getActiveTokens: " . $e->getMessage());
-            Log::error($e->getTraceAsString());
+            Log::error("Error in getActiveTokens: " . $e->getMessage());
             
             return response()->json([
                 'status' => false,
@@ -680,9 +736,6 @@ class HomeController extends Controller
     public function submitAttendanceToken(Request $request)
     {
         try {
-            // Log input untuk debugging
-            Log::info('Submit token request:', $request->all());
-            
             $validator = Validator::make($request->all(), [
                 'token' => 'required|string',
                 'latitude' => 'required|numeric',
@@ -763,10 +816,19 @@ class HomeController extends Controller
                 ]);
             }
 
-            // Periksa jika mahasiswa berada dalam radius yang diperbolehkan
-            $hospitalLatitude = config('location.hospital.latitude');
-            $hospitalLongitude = config('location.hospital.longitude');
+            // Check if hospital configuration is set
+            $hospitalLatitude = config('hospital.coordinates.latitude');
+            $hospitalLongitude = config('hospital.coordinates.longitude');
+            $maxRadius = config('hospital.attendance_radius');
             
+            if (!$hospitalLatitude || !$hospitalLongitude || !$maxRadius) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Konfigurasi lokasi rumah sakit belum diatur. Silakan hubungi administrator.'
+                ]);
+            }
+            
+            // Periksa jika mahasiswa berada dalam radius yang diperbolehkan
             $distance = $this->calculateDistance(
                 $request->latitude, 
                 $request->longitude, 
@@ -774,14 +836,13 @@ class HomeController extends Controller
                 $hospitalLongitude
             );
             
-            // Ubah nilai 12 menjadi 500
-            if ($distance > 500) { // Batasan radius 500 meter
+            if ($distance > $maxRadius) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Anda berada di luar radius presensi yang diizinkan',
                     'data' => [
                         'distance' => round($distance),
-                        'max_radius' => 500
+                        'max_radius' => $maxRadius
                     ]
                 ]);
             }
@@ -799,8 +860,6 @@ class HomeController extends Controller
                 'device_info' => $request->device_info ?? 'Web Browser'
             ]);
             
-            Log::info('Presence created successfully', ['presence_id' => $presence->id]);
-            
             return response()->json([
                 'status' => true,
                 'message' => 'Presensi berhasil',
@@ -817,7 +876,6 @@ class HomeController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error in submitAttendanceToken: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
             
             return response()->json([
                 'status' => false,
@@ -832,8 +890,6 @@ class HomeController extends Controller
     public function checkoutAttendance(Request $request)
     {
         try {
-            Log::info('Checkout request:', $request->all());
-            
             $validator = Validator::make($request->all(), [
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
@@ -874,9 +930,17 @@ class HomeController extends Controller
                 ]);
             }
             
-            // Periksa jarak dari lokasi rumah sakit
-            $hospitalLatitude = config('location.hospital.latitude');
-            $hospitalLongitude = config('location.hospital.longitude');
+            // Check if hospital configuration is set
+            $hospitalLatitude = config('hospital.coordinates.latitude');
+            $hospitalLongitude = config('hospital.coordinates.longitude');
+            $maxRadius = config('hospital.attendance_radius');
+            
+            if (!$hospitalLatitude || !$hospitalLongitude || !$maxRadius) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Konfigurasi lokasi rumah sakit belum diatur. Silakan hubungi administrator.'
+                ]);
+            }
             
             $distance = $this->calculateDistance(
                 $request->latitude, 
@@ -885,13 +949,13 @@ class HomeController extends Controller
                 $hospitalLongitude
             );
             
-            if ($distance > 500) { // Batasan radius 500 meter
+            if ($distance > $maxRadius) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Anda berada di luar radius presensi yang diizinkan',
                     'data' => [
                         'distance' => round($distance),
-                        'max_radius' => 500
+                        'max_radius' => $maxRadius
                     ]
                 ]);
             }
@@ -923,7 +987,6 @@ class HomeController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error in checkoutAttendance: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
             
             return response()->json([
                 'status' => false,
@@ -966,6 +1029,17 @@ class HomeController extends Controller
                 $token = $todayPresence->presenceSession->token ?? '';
             }
             
+            // PERBAIKAN: Logika untuk menentukan apakah perlu checkout
+            $needsCheckout = false;
+            $checkOutValue = $todayPresence->check_out;
+            
+            // Check out diperlukan jika:
+            // 1. check_out adalah null, ATAU
+            // 2. check_out adalah '00:00:00' (placeholder value)
+            if ($checkOutValue === null || $checkOutValue === '00:00:00') {
+                $needsCheckout = true;
+            }
+            
             return response()->json([
                 'status' => true,
                 'data' => [
@@ -973,7 +1047,7 @@ class HomeController extends Controller
                     'presence_id' => $todayPresence->id,
                     'check_in' => $todayPresence->check_in,
                     'check_out' => $todayPresence->check_out,
-                    'needs_checkout' => $todayPresence->check_out === null,
+                    'needs_checkout' => $needsCheckout,
                     'token' => $token,
                     'schedule' => $scheduleName
                 ]
