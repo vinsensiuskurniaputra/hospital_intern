@@ -17,9 +17,32 @@ class AdminCertificateController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $students = Student::where('is_finished', true)->paginate(10);   
+        $query = Student::where('is_finished', true);
+
+        if ($request->has('status') && $request->status != '') {
+            if ($request->status == 'generated') {
+                $query->whereHas('certificate');
+            } elseif ($request->status == 'pending') {
+                $query->whereDoesntHave('certificate');
+            }
+        }
+
+        if ($request->has('start_date') && $request->start_date != '') {
+            $query->whereHas('certificate', function ($q) use ($request) {
+                $q->whereDate('created_at', '>=', $request->start_date);
+            });
+        }
+
+        if ($request->has('end_date') && $request->end_date != '') {
+            $query->whereHas('certificate', function ($q) use ($request) {
+                $q->whereDate('created_at', '<=', $request->end_date);
+            });
+        }
+
+        $students = $query->paginate(10);
+
         return view('pages.admin.certificate.index', compact('students'));
     }
 
@@ -108,6 +131,28 @@ class AdminCertificateController extends Controller
 
         // Just return the PDF file for download
         return $pdf->download($filename);
+    }
+
+    public function generateAllCertificates()
+    {
+        $studentsWithoutCertificates = Student::where('is_finished', true)
+            ->whereDoesntHave('certificate')
+            ->get();
+
+        foreach ($studentsWithoutCertificates as $student) {
+            $tanggal = Carbon::now()->format('Ymd');
+            $countToday = Certificate::whereDate('created_at', Carbon::today())->count() + 1;
+            $urut = str_pad($countToday, 4, '0', STR_PAD_LEFT);
+            $kode = "CERT-{$tanggal}-{$urut}";
+
+            Certificate::create([
+                'student_id' => $student->id,
+                'kode' => $kode,
+                'certificate_url' => '-',
+            ]);
+        }
+
+        return redirect()->route('admin.certificates.index')->with('success', 'Semua sertifikat berhasil dibuat.');
     }
 
 
