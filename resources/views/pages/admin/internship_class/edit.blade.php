@@ -23,7 +23,7 @@
         'required' => true,
         'placeholder' => 'Enter description...',
     ])
-    <label class="block text-sm font-medium text-gray-700 mb-1">Class Year</label>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Angkatan</label>
     <select name="class_year_id" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
         <option value="{{ $internshipClass->classYear->id }}">{{ $internshipClass->classYear->class_year }}</option>
         @foreach ($classYears as $data)
@@ -33,7 +33,7 @@
     @error('class_year_id')
         <span class="text-red-500 text-sm">{{ $message }}</span>
     @enderror
-    <label class="block text-sm font-medium text-gray-700 mb-1">Campus</label>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Kampus</label>
     <select name="campus_id" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
         <option value="{{ $internshipClass->campus->id }}">{{ $internshipClass->campus->name }}</option>
         @foreach ($campuses as $data)

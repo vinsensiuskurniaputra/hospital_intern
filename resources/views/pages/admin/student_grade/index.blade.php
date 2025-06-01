@@ -1,20 +1,20 @@
 @extends('layouts.auth')
 
-@section('title', 'Student Grades')
+@section('title', 'Nilai Mahasiswa')
 
 @section('content')
     <div class="p-6 space-y-6">
-        <!-- Header Card -->
+        <!-- Kartu Header -->
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">Student Grades</h2>
-                    <p class="text-sm text-gray-500 mt-1">View and manage student performance</p>
+                    <h2 class="text-2xl font-semibold text-gray-800">Nilai Mahasiswa</h2>
+                    <p class="text-sm text-gray-500 mt-1">Lihat dan kelola performa mahasiswa</p>
                 </div>
-                <!-- Stats Summary -->
+                <!-- Ringkasan Statistik -->
                 <div class="flex items-center gap-3 bg-[#F5F7F0] px-4 py-2 rounded-lg">
                     <div>
-                        <p class="text-sm font-medium text-gray-600">Average Grade</p>
+                        <p class="text-sm font-medium text-gray-600">Rata-rata Nilai</p>
                         <div class="flex items-center gap-2">
                             <span class="text-2xl font-bold text-[#637F26]">{{ number_format($currentAvg, 2) }}</span>
                             <span class="{{ $isDown ? 'text-red-500' : 'text-green-500' }} text-xs flex items-center">
@@ -33,35 +33,35 @@
             </div>
         </div>
 
-        <!-- Main Content Card -->
+        <!-- Kartu Konten Utama -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-            <!-- Filters & Actions -->
+            <!-- Filter & Aksi -->
             <div class="border-b border-gray-100 p-6">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <!-- Filters -->
+                    <!-- Filter -->
                     <div class="flex items-center gap-4">
                         <select id="studyProgramFilter"
                             class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                            <option value="">All Program Study</option>
+                            <option value="">Semua Program Studi</option>
                             @foreach ($studyPrograms as $studyProgram)
                                 <option value="{{ $studyProgram->id }}">{{ $studyProgram->name }}</option>
                             @endforeach
                         </select>
                         <select id="departementFilter"
                             class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                            <option value="">All Departement</option>
+                            <option value="">Semua Departemen</option>
                             @foreach ($departements as $departement)
                                 <option value="{{ $departement->id }}">{{ $departement->name }}</option>
                             @endforeach
                         </select>
 
                         <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Search students..."
+                            <input type="text" id="searchInput" placeholder="Cari mahasiswa..."
                                 class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26] w-full lg:w-[240px]">
                             <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
                         </div>
                     </div>
-                    <!-- Actions -->
+                    <!-- Aksi -->
                     {{-- <div class="flex gap-3">
                         <button
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
@@ -74,7 +74,7 @@
                 </div>
             </div>
 
-            <!-- Table -->
+            <!-- Tabel -->
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-50 border-y border-gray-100">
@@ -82,12 +82,12 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 No</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Student</th>
+                                Mahasiswa</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stase
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Department</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade
+                                Departemen</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai
                             </th>
                         </tr>
                     </thead>
@@ -100,7 +100,7 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+            <!-- Paginasi -->
             @include('components.general.pagination', [
                 'datas' => $studentGrades,
             ])
