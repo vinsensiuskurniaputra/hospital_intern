@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\General;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Stase;
 use App\Models\Student;
-use App\Models\Notification;
 use App\Models\Presence;
 use App\Models\Schedule;
-use App\Models\StudentGrade;
-use App\Models\ResponsibleUser;
-use App\Models\Stase;
-use App\Models\PresenceSession;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Notification;
+use App\Models\StudentGrade;
+use Illuminate\Http\Request;
+use App\Models\PresenceSession;
+use App\Models\ResponsibleUser;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Validator;
 
 class HomeController extends Controller
 {
@@ -70,14 +71,43 @@ class HomeController extends Controller
     private function adminDashboard()
     {
         // Data minimal untuk admin dashboard
-        return view('pages.admin.dashboard.index', [
-            'stats' => [
-                'students' => Student::count(),
-                'schedules' => Schedule::count(),
-                'presences' => Presence::count()
-            ]
-        ]);
+        $stats = [
+            'students' => Student::count(),
+            'pics' => ResponsibleUser::count(),
+            'admins' => User::whereHas('roles', fn($q) => $q->where('name', 'admin'))->count(),
+            'presences' => Presence::count(),
+        ];
+    
+        $upcomingSchedules = Schedule::with(['stase.departement', 'internshipClass'])
+            ->where('start_date', '>=', now())
+            ->orderBy('start_date', 'asc')
+            ->take(5)
+            ->get();
+
+        // Fetch attendance data grouped by month
+        $attendanceData = Presence::selectRaw('MONTH(date_entry) as month, COUNT(*) as count')
+            ->whereYear('date_entry', now()->year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Prepare chart data
+        $chartData = [
+            'labels' => [],
+            'data' => []
+        ];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $monthName = Carbon::create()->month($month)->format('M'); // Jan, Feb, etc.
+            $chartData['labels'][] = $monthName;
+
+            $attendanceCount = $attendanceData->firstWhere('month', $month)->count ?? 0;
+            $chartData['data'][] = $attendanceCount;
+        }
+    
+        return view('pages.admin.dashboard.index', compact('stats', 'upcomingSchedules', 'chartData'));
     }
+    
     
     // Ganti method nama:
     private function picDashboard()

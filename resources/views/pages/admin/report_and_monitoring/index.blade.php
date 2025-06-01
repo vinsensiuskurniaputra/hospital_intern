@@ -33,7 +33,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Total Mahasiswa</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{$countStudent}}</h3>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $countStudent }}</h3>
                     </div>
                     <div class="p-3 bg-[#F5F7F0] rounded-lg">
                         <i class="bi bi-people text-xl text-[#637F26]"></i>
@@ -44,7 +44,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Total Dokter</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{$countPIC}}</h3>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $countPIC }}</h3>
                     </div>
                     <div class="p-3 bg-[#F5F7F0] rounded-lg">
                         <i class="bi bi-person-badge text-xl text-[#637F26]"></i>
@@ -55,7 +55,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Total Admin</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{$countAdmin}}</h3>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $countAdmin }}</h3>
                     </div>
                     <div class="p-3 bg-[#F5F7F0] rounded-lg">
                         <i class="bi bi-person text-xl text-[#637F26]"></i>
@@ -72,13 +72,8 @@
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Kehadiran Mahasiswa</h3>
-                            <p class="text-sm text-gray-500">Ikhtisar kehadiran 7 hari terakhir</p>
+                            <p class="text-sm text-gray-500">Ikhtisar kehadiran bulanan</p>
                         </div>
-                        <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm">
-                            <option>7 hari terakhir</option>
-                            <option>30 hari terakhir</option>
-                            <option>90 hari terakhir</option>
-                        </select>
                     </div>
                 </div>
                 <div class="p-6">
@@ -94,11 +89,6 @@
                             <h3 class="text-lg font-semibold text-gray-800">Kinerja Mahasiswa</h3>
                             <p class="text-sm text-gray-500">Rata-rata nilai per departemen</p>
                         </div>
-                        <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm">
-                            <option>Semua Departemen</option>
-                            <option>Bedah</option>
-                            <option>Penyakit Dalam</option>
-                        </select>
                     </div>
                 </div>
                 <div class="p-6">
@@ -106,21 +96,20 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Enhanced chart configurations
+                // Attendance Chart
                 const attendanceChart = new Chart(document.getElementById('attendanceChart'), {
                     type: 'line',
                     data: {
-                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        labels: @json($attendanceChart['labels']),
                         datasets: [{
-                            label: 'Attendance',
-                            data: [95, 88, 92, 85, 89, 90, 88],
+                            label: 'Kehadiran',
+                            data: @json($attendanceChart['data']),
                             borderColor: '#637F26',
                             backgroundColor: '#F5F7F0',
                             tension: 0.4,
@@ -137,7 +126,7 @@
                         },
                         scales: {
                             y: {
-                                beginAtZero: false,
+                                beginAtZero: true,
                                 grid: {
                                     display: true,
                                     drawBorder: false
@@ -152,13 +141,14 @@
                     }
                 });
 
+                // Performance Chart
                 const performanceChart = new Chart(document.getElementById('performanceChart'), {
                     type: 'bar',
                     data: {
-                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        labels: @json($performanceChart['labels']),
                         datasets: [{
-                            label: 'Performance',
-                            data: [80, 85, 90, 88, 92, 87, 89],
+                            label: 'Rata-rata Nilai',
+                            data: @json($performanceChart['data']),
                             backgroundColor: '#85A832',
                             borderColor: '#637F26',
                             borderWidth: 1

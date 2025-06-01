@@ -100,6 +100,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
         ->name('presences.schedules.filter');
   
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
+    Route::get('admin/student-presences/export', [AdminPresenceController::class, 'export'])->name('admin.studentPresences.export');
 
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
@@ -109,6 +110,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/presences/generate-certificates/{id}', [AdminCertificateController::class, 'generateCertificate'])->name('admin.certificate.generate');
     Route::get('/presences/certificate/download/{id}', [AdminCertificateController::class, 'downloadCertificate'])
     ->name('certificate.download');
+    Route::post('/admin/certificates/generate-all', [AdminCertificateController::class, 'generateAllCertificates'])->name('admin.certificate.generateAll');
 
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
 
