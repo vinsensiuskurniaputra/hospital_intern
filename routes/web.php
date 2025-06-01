@@ -100,6 +100,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
         ->name('presences.schedules.filter');
   
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
+    Route::get('admin/student-presences/export', [AdminPresenceController::class, 'export'])->name('admin.studentPresences.export');
 
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
