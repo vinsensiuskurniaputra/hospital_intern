@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
 use App\Http\Controllers\Responsible\ResponsibleScheduleController;
+use App\Http\Controllers\Responsible\ResponsibleStudentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -186,6 +187,7 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
     Route::resource('schedules', AdminScheduleController::class);
     Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
+    Route::get('/reports/download-csv', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'downloadCsv'])->name('reports.download-csv');
 
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
