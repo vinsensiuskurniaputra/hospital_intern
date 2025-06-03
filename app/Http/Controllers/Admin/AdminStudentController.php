@@ -172,6 +172,10 @@ class AdminStudentController extends Controller
     public function filter(Request $request)
     {
         $query = Student::with(['certificate', 'user', 'studyProgram', 'internshipClass']);
+        $studentCount = Student::count();
+        $studyPrograms = StudyProgram::all();
+        $campuses = Campus::all();
+        $classYears = ClassYear::all();
 
         if ($request->filled('study_program')) {
             $query->whereHas('studyProgram', function ($q) use ($request) {
@@ -191,6 +195,10 @@ class AdminStudentController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('is_finished', $request->status === 'finished');
+        }
+
         if ($request->filled('search')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
@@ -201,11 +209,7 @@ class AdminStudentController extends Controller
 
         $students = $query->paginate(10)->withQueryString();
 
-        if ($request->ajax()) {
-            return view('components.admin.student.table', compact('students'))->render();
-        }
-
-        return view('pages.admin.student.index', compact('students'));
+        return view('pages.admin.student.index', compact('students', 'studentCount', 'studyPrograms','campuses','classYears'));
     }
 
     public function import(Request $request)
