@@ -113,6 +113,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::get('/responsible/schedule/get-schedules', [ResponsibleScheduleController::class, 'getSchedules'])
         ->name('responsible.schedule.get-schedules');
+    Route::get('/responsible/schedule/student-detail', [ResponsibleScheduleController::class, 'getStudentDetail'])
+        ->name('schedule.student-detail');
 
     Route::get('/home/profile', [StudentProfileController::class, 'index'])->name('student-profile');
 });

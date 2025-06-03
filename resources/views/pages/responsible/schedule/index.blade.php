@@ -168,7 +168,7 @@ function loadSchedules(date) {
 
             const schedulesHTML = data.schedules.map(schedule => `
                 <div class="bg-[#F5F7F0] rounded-lg p-3 mb-2">
-                    <h6 class="text-base font-medium mb-1">${schedule.class_name}</h6>
+                    <h6 class="text-base font-medium mb-1">${schedule.class_name}${schedule.academic_year ? ` (${schedule.academic_year})` : ''}</h6>
                     <div class="text-sm text-gray-600 mb-1">${schedule.stase_name}</div>
                     <div class="text-sm text-gray-600">${schedule.department}</div>
                 </div>
@@ -568,6 +568,97 @@ function toggleStudentList() {
     }
 }
 
+function showStudentDetail(studentId) {
+    // Show loading state in modal
+    document.getElementById('student-modal').classList.remove('hidden');
+    document.getElementById('student-modal-content').innerHTML = `
+        <div class="flex items-center justify-center p-6">
+            <svg class="animate-spin h-5 w-5 mr-3 text-gray-500" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Memuat data mahasiswa...</span>
+        </div>
+    `;
+    
+    // Fetch student details
+    fetch(`/responsible/schedule/student-detail?student_id=${studentId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Terjadi kesalahan');
+            }
+            
+            const student = data.student;
+            
+            // Populate modal with student details - fixed telp property reference
+            document.getElementById('student-modal-content').innerHTML = `
+                <div class="p-6">
+                    <div class="flex items-start mb-6">
+                        <div class="mr-4">
+                            <img src="${student.user?.photo_profile_url || '/images/default-avatar.png'}" 
+                                alt="Profile" 
+                                class="w-20 h-20 rounded-full object-cover border border-gray-200">
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800">${student.user?.name || 'N/A'}</h3>
+                            <p class="text-gray-600">${student.nim || 'N/A'}</p>
+                            <p class="text-gray-600">${student.study_program?.name || 'N/A'} • ${student.study_program?.campus?.name || 'N/A'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <h4 class="font-medium text-gray-700 mb-2">Informasi Akademik</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Kelas</p>
+                                <p class="text-gray-700">${student.internship_class?.name || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Tahun Akademik</p>
+                                <p class="text-gray-700">${student.internship_class?.class_year?.class_year || 'N/A'}</p>
+                            </div>
+                            <div class="col-span-2">
+                                <p class="text-sm text-gray-500 mb-2">Status</p>
+                                <span class="inline-block px-3 py-1.5 text-xs rounded-full ${student.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${student.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-medium text-gray-700 mb-2">Informasi Kontak</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Email</p>
+                                <p class="text-gray-700">${student.user?.email || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">No. Telepon</p>
+                                <p class="text-gray-700">${student.telp || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // For debugging
+            console.log("Student data:", student);
+        })
+        .catch(error => {
+            document.getElementById('student-modal-content').innerHTML = `
+                <div class="p-6 text-center text-red-500">
+                    ${error.message || 'Terjadi kesalahan saat memuat data mahasiswa'}</div>
+            `;
+        });
+}
+
+function closeStudentModal() {
+    document.getElementById('student-modal').classList.add('hidden');
+}
+
+// Update loadClassDetails to add click event to rows
 function loadClassDetails(staseId, classId) {
     if (!staseId || !classId) return;
 
@@ -589,35 +680,65 @@ function loadClassDetails(staseId, classId) {
                 throw new Error(data.message || 'Terjadi kesalahan');
             }
 
-            const studentList = data.students.map(student => `
-                <div class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div class="flex-shrink-0">
-                        <img 
-                            src="${student.user?.photo_profile_url || '/images/default-avatar.png'}" 
-                            alt="Profile" 
-                            class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                        >
-                    </div>
-                    <div class="flex-grow">
-                        <h6 class="text-sm font-medium text-gray-900">${student.user?.name || 'N/A'}</h6>
-                        <p class="text-xs text-gray-500">NIM: ${student.nim || 'N/A'}</p>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xs text-gray-500">${student.study_program?.name || 'N/A'}</span>
-                            <span class="text-xs text-gray-400">•</span>
-                            <span class="text-xs text-gray-500">${student.study_program?.campus?.name || 'N/A'}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
+            // Create table format with white background & centered headers
             container.innerHTML = `
-                <div class="p-6">
+                <div class="p-6 bg-white rounded-lg">
                     <div class="flex justify-between items-center mb-4">
                         <h6 class="text-base font-medium">Daftar Mahasiswa</h6>
                         <span class="text-sm text-gray-500">${data.students.length} mahasiswa</span>
                     </div>
-                    <div class="divide-y divide-gray-100">
-                        ${studentList}
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Nama</th>
+                                    <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">NIM</th>
+                                    <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Program Studi</th>
+                                    <th class="px-8 py-4 text-center text-base font-bold text-gray-700 border border-gray-200">Kampus</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${data.students.map(student => {
+                                    // Find campus name using different possible paths
+                                    let campusName = 'N/A';
+                                    
+                                    if (student.study_program && student.study_program.campus) {
+                                        campusName = student.study_program.campus.name;
+                                    } else if (student.study_program && student.study_program.campus_id) {
+                                        // If we just have campus_id, try to get the name from the name field
+                                        // This might require adding campus names to a lookup object from your backend
+                                        const campusId = student.study_program.campus_id;
+                                        // Map campus IDs to names based on your database
+                                        const campusMap = {
+                                            1: 'Politeknik Negeri Semarang',
+                                            2: 'Universitas Diponegoro',
+                                            3: 'Universitas Negeri Semarang',
+                                            // Add other mappings as needed
+                                        };
+                                        campusName = campusMap[campusId] || 'N/A';
+                                    }
+                                    
+                                    return `
+                                    <tr class="hover:bg-gray-50 cursor-pointer" onclick="showStudentDetail(${student.id})">
+                                        <td class="px-8 py-4 text-sm border border-gray-200">
+                                            <div class="flex items-center">
+                                                <img 
+                                                    src="${student.user?.photo_profile_url || '/images/default-avatar.png'}" 
+                                                    alt="Profile" 
+                                                    class="w-10 h-10 rounded-full object-cover border border-gray-200 mr-8"
+                                                >
+                                                <span>${student.user?.name || 'N/A'}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-4 text-sm text-center border border-gray-200">${student.nim || 'N/A'}</td>
+                                        <td class="px-8 py-4 text-sm text-center border border-gray-200">${student.study_program?.name || 'N/A'}</td>
+                                        <td class="px-8 py-4 text-sm text-center border border-gray-200">${campusName}</td>
+                                    </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             `;
@@ -684,7 +805,11 @@ function onStaseChange() {
             }
             
             data.classes.forEach(cls => {
-                classFilter.innerHTML += `<option value="${cls.id}">${cls.name}</option>`;
+                // Include the academic year in the format requested
+                const academicYear = cls.class_year?.class_year || '';
+                const displayName = academicYear ? `${cls.name} (${academicYear})` : cls.name;
+                
+                classFilter.innerHTML += `<option value="${cls.id}">${displayName}</option>`;
             });
         })
         .catch(error => {
@@ -794,15 +919,20 @@ function onStaseChange() {
 
 <!-- Right Side - Schedule Cards -->
 <div class="w-[calc(100%-400px-24px)] flex items-start"> 
-    <div id="today-schedules" class="w-full mt-14 h-[calc(100%-8rem)]"> <!-- Tambahkan fixed height -->
+    <div id="today-schedules" class="w-full mt-14 h-[calc(100%-8rem)]">
         @forelse($todaySchedules as $schedule)
         <div class="bg-[#F5F7F0] rounded-lg p-3 mb-2">
-            <h6 class="text-base font-medium mb-1">{{ $schedule->internshipClass->name ?? 'N/A' }}</h6>
+            <h6 class="text-base font-medium mb-1">
+                {{ $schedule->internshipClass->name ?? 'N/A' }}
+                @if($schedule->internshipClass && $schedule->internshipClass->classYear)
+                    ({{ $schedule->internshipClass->classYear->class_year }})
+                @endif
+            </h6>
             <div class="text-sm text-gray-600 mb-1">{{ $schedule->stase->name ?? 'N/A' }}</div>
             <div class="text-sm text-gray-600">{{ $schedule->stase->departement->name ?? 'N/A' }}</div>
         </div>
         @empty
-        <div class="bg-gray-50 rounded-lg h-[280px] flex items-center justify-center"> <!-- Sesuaikan height dengan tinggi kalender -->
+        <div class="bg-gray-50 rounded-lg h-[280px] flex items-center justify-center">
             <div class="text-center">
                 <div class="text-gray-400 mb-2">
                     <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -860,7 +990,12 @@ function onStaseChange() {
             }}
         </td>
         <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->stase->name ?? 'N/A' }}</td>
-        <td class="px-8 py-4 text-sm text-center border border-gray-200">{{ $schedule->internshipClass->name ?? 'N/A' }}</td>
+        <td class="px-8 py-4 text-sm text-center border border-gray-200">
+            {{ $schedule->internshipClass->name ?? 'N/A' }}
+            @if($schedule->internshipClass && $schedule->internshipClass->classYear)
+                ({{ $schedule->internshipClass->classYear->class_year }})
+            @endif
+        </td>
     </tr>
     @empty
     <tr>
@@ -901,8 +1036,8 @@ function onStaseChange() {
                         @endforeach
                     </select>
 
-                    <!-- Kelas Filter - Initially hidden -->
-                    <select id="class-filter" class="form-select w-36 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer hidden" onchange="updateFilters()">
+                    <!-- Kelas Filter - Increased width from w-36 to w-56 -->
+                    <select id="class-filter" class="form-select w-48 pl-4 pr-10 py-2 rounded-lg border border-gray-300 appearance-none cursor-pointer hidden" onchange="updateFilters()">
                         <option value="">Pilih Kelas</option>
                     </select>
                 </div>
@@ -917,3 +1052,25 @@ function onStaseChange() {
         </div>
     </div>
 @endsection
+
+<!-- Student Detail Modal (Hidden by default) -->
+<div id="student-modal" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+        <div class="flex justify-between items-center border-b p-4">
+            <h3 class="text-lg font-medium">Detail Mahasiswa</h3>
+            <button onclick="closeStudentModal()" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div id="student-modal-content">
+            <!-- Content will be loaded dynamically -->
+        </div>
+        <div class="border-t p-4 flex justify-end">
+            <button onclick="closeStudentModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
