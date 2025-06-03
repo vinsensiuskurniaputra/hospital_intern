@@ -82,7 +82,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::post('/internshipClasses/insertStudent', [AdminInternshipClassController::class, 'insertStudentStore'])->name('admin.internshipClasses.insertStudent.store');
 
     Route::middleware(['auth', 'menu'])->group(function () {
-        // Pastikan route filter-by-date didefinisikan sebelum resource route
+        // Pastikan route filter-by-date didefinikan sebelum resource route
         Route::get('/presences/schedules/filter-by-date', [AdminScheduleController::class, 'filterByDate'])
             ->name('presences.schedules.filter-by-date');
             
@@ -104,6 +104,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
+    Route::get('/admin/student-grades/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
     
 
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');

@@ -5,7 +5,7 @@
 @section('content')
     <div class="p-6 space-y-6">
         <!-- Kartu Header -->
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        {{-- <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                     <h2 class="text-2xl font-semibold text-gray-800">Nilai Mahasiswa</h2>
@@ -31,7 +31,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Kartu Konten Utama -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -83,17 +83,22 @@
                                 No</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Mahasiswa</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stase
-                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Departemen</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stase
+                                yang Telah Dilalui
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai
+                                Per Stase
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai
+                                Rata Rata
                             </th>
                         </tr>
                     </thead>
                     <tbody id="TableBody">
                         @include('components.admin.student_grade.table', [
-                            'studentGrades' => $studentGrades,
+                            'students' => $students,
                         ])
 
                     </tbody>
@@ -102,7 +107,7 @@
 
             <!-- Paginasi -->
             @include('components.general.pagination', [
-                'datas' => $studentGrades,
+                'datas' => $students,
             ])
         </div>
     </div>
@@ -123,7 +128,6 @@
                         search: search
                     },
                     success: function(data) {
-                        console.log(data);
                         $('#TableBody').html(data);
                     }
                 });
