@@ -1,7 +1,25 @@
 @extends('layouts.app')
 
 @section('base-content')
-    <div class="flex" x-data="{ sidebarOpen: true, open: {}, userDropdownOpen: false }">
+    <div class="flex" x-data="{
+        sidebarOpen: true,
+        open: {},
+        userDropdownOpen: false,
+        searchTerm: '',
+        searchResults: [],
+        allMenus: {{ json_encode($menusSideBar->flatMap(fn($menu) => collect($menu->children ?? []))) }},
+    
+        searchMenus() {
+            if (!this.searchTerm) {
+                this.searchResults = [];
+                return;
+            }
+            const term = this.searchTerm.toLowerCase();
+            this.searchResults = this.allMenus
+                .filter(menu => menu.name.toLowerCase().includes(term))
+                .slice(0, 5);
+        }
+    }">
         <!-- Sidebar -->
         <aside :class="{ 'w-72': sidebarOpen, 'w-20': !sidebarOpen }"
             class="w-72 flex flex-col h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
@@ -82,19 +100,36 @@
                         <div class="flex-1 max-w-lg">
                             @php
                                 $userRole = Auth::user()->roles()->first()->name ?? '';
-                                $hideSearchBar = in_array($userRole, ['student', 'responsible']);
+                                $hideSearchBar = in_array($userRole, ['student', 'pic']);
                             @endphp
 
                             @if (!$hideSearchBar)
                                 <div class="relative">
-                                    <input type="text"
+                                    <input type="text" x-model="searchTerm" @input="searchMenus" @focus="searchMenus"
+                                        @click.outside="searchResults = []"
                                         class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26] text-sm"
-                                        placeholder="Search...">
+                                        placeholder="Search menu...">
                                     <div class="absolute left-3 top-2.5 text-gray-400">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
+                                        <i class="bi bi-search"></i>
+                                    </div>
+
+                                    <!-- Search Results Dropdown -->
+                                    <div x-show="searchResults.length > 0"
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                        x-transition:enter-end="opacity-100 transform translate-y-0"
+                                        class="absolute left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
+                                        <template x-for="result in searchResults" :key="result.id">
+                                            <a :href="result.url"
+                                                class="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                                                <i :class="result.icon + ' w-5 h-5 text-gray-400 mr-3'"></i>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700" x-text="result.name"></p>
+                                                    <p class="text-xs text-gray-500"
+                                                        x-text="result.parent_id ? 'Sub Menu' : 'Main Menu'"></p>
+                                                </div>
+                                            </a>
+                                        </template>
                                     </div>
                                 </div>
                             @else
@@ -112,7 +147,7 @@
 
                                 if ($userRole == 'student') {
                                     $notificationRoute = route('student.notifications');
-                                } elseif ($userRole == 'responsible') {
+                                } elseif ($userRole == 'pic') {
                                     $notificationRoute = route('responsible.notifications');
                                 } else {
                                     $notificationRoute = route('notification.index');
@@ -211,3 +246,9 @@
         });
     </script>
 @endsection
+
+<head>
+    <!-- Kode head lainnya -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Kode head lainnya -->
+</head>

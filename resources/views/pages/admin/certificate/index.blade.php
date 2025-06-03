@@ -61,21 +61,21 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
-                    {{-- <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-100">
                         @foreach ($students as $student)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        <img src="{{ asset('images/' . $student['avatar']) }}" alt="Avatar"
+                                        <img src="{{ $student->user->photo_profile_url ? asset('storage/' . $student->user->photo_profile_url) : 'https://ui-avatars.com/api/?name=' . urlencode($student->user->name) }}"
                                             class="w-8 h-8 rounded-full">
                                         <div class="ml-3">
-                                            <p class="text-sm font-medium text-gray-800">{{ $student['nama'] }}</p>
-                                            <p class="text-xs text-gray-500">{{ $student['nim'] }}</p>
+                                            <p class="text-sm font-medium text-gray-800">{{ $student->user->name }}</p>
+                                            <p class="text-xs text-gray-500">{{ $student->nim }}</p>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if ($student['badge'] === 'Generated')
+                                    @if ($student->certificate != null)
                                         <span
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             <i class="bi bi-check-circle-fill mr-1"></i>Generated
@@ -88,11 +88,11 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">
-                                    {{ $student['tanggal'] }}
+                                    {{ $student->certificate ? $student->certificate->created_at->format('d M Y') : '-' }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
-                                        @if ($student['badge'] === 'Generated')
+                                        @if ($student->certificate != null)
                                             <button class="text-blue-600 hover:text-blue-700">
                                                 <i class="bi bi-download text-lg"></i>
                                             </button>
@@ -104,25 +104,14 @@
                                 </td>
                             </tr>
                         @endforeach
-                    </tbody> --}}
+                    </tbody>
                 </table>
             </div>
 
-            <!-- Enhanced Pagination -->
-            <div class="px-6 py-4 border-t border-gray-100">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm text-gray-500">Showing 1 to 5 of 25 entries</p>
-                    <div class="flex gap-2">
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-[#637F26]">Previous</button>
-                        <div class="flex gap-1">
-                            <button class="px-3 py-1 text-sm font-medium text-white bg-[#637F26] rounded-lg">1</button>
-                            <button class="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">2</button>
-                            <button class="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">3</button>
-                        </div>
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-[#637F26]">Next</button>
-                    </div>
-                </div>
-            </div>
+            <!-- Pagination -->
+            @include('components.general.pagination', [
+                'datas' => $students,
+            ])
         </div>
     </div>
 @endsection

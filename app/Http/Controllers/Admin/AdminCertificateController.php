@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\Student;
 use App\Models\Certificate;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class AdminCertificateController extends Controller
 {
@@ -13,7 +14,8 @@ class AdminCertificateController extends Controller
      */
     public function index()
     {
-        return view('pages.admin.certificate.index');
+        $students = Student::where('is_finished', true)->paginate(10);   
+        return view('pages.admin.certificate.index', compact('students'));
     }
 
     /**

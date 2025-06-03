@@ -58,5 +58,10 @@ class DatabaseSeeder extends Seeder
 
         // Tambahkan seeder jadwal untuk user ID 2
         $this->call(UserScheduleSeeder::class);
+
+        // Seeder untuk data dummy user responsible dengan ID 3
+        $this->call(ResponsibleDataSeeder::class);
+
+        $this->call(StudentsForResponsibleSeeder::class);
     }
 }

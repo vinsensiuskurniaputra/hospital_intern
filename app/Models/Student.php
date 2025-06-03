@@ -89,4 +89,22 @@ class Student extends Model
         return $this->hasMany(StudentGrade::class);
     }
 
+    public function schedules()
+    {
+        return $this->hasManyThrough(
+            Schedule::class,
+            InternshipClass::class,
+            'id', // Foreign key pada internship_class yang menunjuk ke local key di tabel student
+            'internship_class_id', // Foreign key pada schedules yang menunjuk ke primary key di tabel internship_class
+            'internship_class_id', // Local key pada student
+            'id' // Primary key pada internship_class
+        );
+    }
+    /**
+     * Get all component grades for this student
+     */
+    public function componentGrades()
+    {
+        return $this->hasMany(StudentComponentGrade::class);
+    }
 }

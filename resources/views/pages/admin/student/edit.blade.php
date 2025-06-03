@@ -13,7 +13,7 @@
     }">
         <div class="flex items-center mb-6">
             <a href="{{ route('admin.students.index') }}"><i class="bi bi-chevron-left mr-4  fw-bold"></i></a>
-            <h2 class="text-2xl font-semibold text-gray-800">Edit Student</h2>
+            <h2 class="text-2xl font-semibold text-gray-800">Ubah Mahasiswa</h2>
         </div>
 
         <!-- Error Summary -->
@@ -21,7 +21,7 @@
             <div class="mb-6 p-4 rounded-lg bg-red-50 border-l-4 border-red-500">
                 <div class="flex items-center mb-2">
                     <i class="bi bi-exclamation-circle text-red-500 mr-2"></i>
-                    <h3 class="text-sm font-medium text-red-800">There were errors with your submission</h3>
+                    <h3 class="text-sm font-medium text-red-800">Terdapat kesalahan pada pengiriman Anda</h3>
                 </div>
                 <ul class="ml-4 text-sm text-red-700 list-disc list-inside">
                     @foreach ($errors->all() as $error)
@@ -39,7 +39,7 @@
 
             <!-- Profile Picture Upload -->
             <div x-data="imageUpload('{{ $student->user->photo_profile_url ? asset('storage/' . $student->user->photo_profile_url) : '' }}')" class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Foto Profil</label>
 
                 <!-- Upload Area -->
                 <div class="w-full border-2 border-dashed rounded-lg p-4 relative flex flex-col items-center justify-center"
@@ -62,8 +62,8 @@
                     <label x-show="!imageUrl"
                         class="flex flex-col items-center w-full p-6 cursor-pointer hover:bg-gray-100 transition rounded-lg">
                         <i class="bi bi-cloud-arrow-up text-3xl text-gray-400"></i>
-                        <span class="mt-2 text-sm text-gray-500">Drag and drop your photo here, or</span>
-                        <span class="mt-1 text-sm font-medium text-green-700">Browse Files</span>
+                        <span class="mt-2 text-sm text-gray-500">Seret dan jatuhkan foto Anda di sini, atau</span>
+                        <span class="mt-1 text-sm font-medium text-green-700">Telusuri Berkas</span>
                         <input type="file" name="photo_profile" class="hidden" x-ref="fileInput"
                             @change="handleFileSelect" accept="image/*">
                     </label>
@@ -77,7 +77,7 @@
             <!-- Other Form Fields -->
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengguna</label>
                     <input type="text" name="username" value="{{ old('username', $student->user->username) }}" required
                         class="w-full px-4 py-2 border rounded-lg @error('username') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
                     @error('username')
@@ -95,7 +95,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
                     <input type="text" name="name" value="{{ old('name', $student->user->name) }}" required
                         class="w-full px-4 py-2 border rounded-lg @error('name') border-red-300 ring-red-100 @else focus:ring-[#637F26] focus:border-[#637F26] @enderror">
                     @error('name')
@@ -114,7 +114,7 @@
 
                 <!-- Campus Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Campus</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kampus</label>
                     <select x-init="new TomSelect($el, { create: false, sortField: 'text' })" x-model="selectedCampus"
                         @change="programStudies = allProgramStudies[selectedCampus] || []" class="w-full">
                         <option value="{{ $student->studyProgram->campus->id }}">
@@ -127,7 +127,7 @@
 
                 <!-- Study Program -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Study Program</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Program Studi</label>
                     <select name="study_program_id" required class="w-full px-4 py-2 border border-gray-200 rounded-lg">
                         <option value="{{ $student->studyProgram->id }}">{{ $student->studyProgram->name }}</option>
                         <template x-for="study in programStudies" :key="study.id">
@@ -141,11 +141,11 @@
 
                 <!-- Class Year Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Class Year</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Masuk</label>
                     <select x-init="new TomSelect($el, { create: false, sortField: 'text' })" x-model="selectedClassYear"
                         @change="internshipClasses = allInternshipClasses[selectedClassYear] || []" class="w-full">
                         <option value="{{ $student->internshipClass->classYear->id ?? null }}">
-                            {{ $student->internshipClass->classYear->id ?? 'Select Class Year' }}</option>
+                            {{ $student->internshipClass->classYear->id ?? 'Pilih Tahun Masuk' }}</option>
                         @foreach ($classYears as $classYear)
                             <option value="{{ $classYear->id }}">{{ $classYear->class_year }}</option>
                         @endforeach
@@ -154,10 +154,10 @@
 
                 <!-- Internship Class -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Internship Class</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas Magang</label>
                     <select name="internship_class_id" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
                         <option value="{{ $student->internshipClass->id ?? null }}">
-                            {{ $student->internshipClass->name ?? 'Select Internship Class' }}</option>
+                            {{ $student->internshipClass->name ?? 'Pilih Kelas Magang' }}</option>
                         <template x-for="internshipClass in internshipClasses" :key="internshipClass.id">
                             <option :value="internshipClass.id" x-text="internshipClass.name"></option>
                         </template>
@@ -180,7 +180,7 @@
                     </a>
                     <button type="submit"
                         class="px-4 py-2 text-sm font-medium text-white bg-green-700 rounded-lg hover:bg-green-800">
-                        Save Changes
+                        Simpan Perubahan
                     </button>
                 </div>
             </div>

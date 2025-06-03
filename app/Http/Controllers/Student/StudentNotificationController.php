@@ -11,26 +11,22 @@ class StudentNotificationController extends Controller
 {
     public function index()
     {
-        // Ambil notifikasi user yang sedang login dari database
+        // Get notifications for logged in user
         $notifications = Notification::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($notification) {
                 return [
                     'id' => $notification->id,
-                    'title' => $notification->title,
-                    'message' => $notification->message,
-                    'created_at' => $notification->created_at,
-                    'read_at' => $notification->is_read ? $notification->updated_at : null,
-                    'is_read' => $notification->is_read,
+                    'title' => $notification->title, 
+                    'description' => $notification->message,
+                    'date' => $notification->created_at->format('d F Y - H:i'),
                     'type' => $notification->type,
-                    'icon' => $notification->icon
+                    'isRead' => $notification->is_read
                 ];
             });
-        
-        return view('pages.student.notifications.index', [
-            'notifications' => $notifications
-        ]);
+
+        return view('pages.student.notifications.index', compact('notifications'));
     }
     
     public function markAsRead($id)
@@ -54,5 +50,20 @@ class StudentNotificationController extends Controller
             ->update(['is_read' => true]);
         
         return back();
+    }
+    
+    public function show($id)
+    {
+        $notification = Notification::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Mark notification as read when viewed
+        if (!$notification->is_read) {
+            $notification->is_read = true;
+            $notification->save();
+        }
+
+        return view('pages.student.notifications.detail', compact('notification'));
     }
 }

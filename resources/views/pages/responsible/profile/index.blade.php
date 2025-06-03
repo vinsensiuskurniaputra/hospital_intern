@@ -31,9 +31,9 @@
             <button class="p-2 bg-white text-gray-700 rounded-full shadow-sm hover:bg-gray-50">
                 <i class="bi bi-bell text-lg"></i>
             </button>
-            <button class="px-6 py-2 bg-[#E8F3DC] text-[#637F26] rounded-lg shadow-sm hover:bg-[#E8F3DC]/80 font-medium">
+            <a href="{{ route('responsible.profile.edit') }}" class="px-6 py-2 bg-[#E8F3DC] text-[#637F26] rounded-lg shadow-sm hover:bg-[#E8F3DC]/80 font-medium">
                 Edit
-            </button>
+            </a>
         </div>
 
         <!-- Profile Content -->
@@ -69,12 +69,12 @@
 
             <!-- Security Settings -->
             <div class="mt-8">
-                
                 <div class="border rounded-lg">
-                    <button class="w-full px-4 py-3 text-left hover:bg-gray-50 flex justify-between items-center">
+                    <a href="{{ route('responsible.profile.change-password') }}" 
+                       class="w-full px-4 py-3 text-left hover:bg-gray-50 flex justify-between items-center">
                         <span class="font-medium">Ganti Password</span>
                         <i class="bi bi-chevron-right"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
 
