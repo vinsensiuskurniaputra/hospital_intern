@@ -86,9 +86,24 @@
 
             <!-- Main Content Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                <!-- Card Header -->
+                <!-- Card Header with Action Buttons -->
                 <div class="border-b border-gray-100 p-6">
                     <div class="flex flex-col lg:items-center lg:justify-between gap-4">
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end space-x-4 w-full">
+                            <!-- Add Student Button -->
+                            <button @click="addStudent = true"
+                                class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
+                                <i class="bi bi-plus-lg mr-2"></i>Tambah Mahasiswa
+                            </button>
+
+                            <!-- Import Button -->
+                            <button @click="showImportModal = true"
+                                class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
+                                <i class="bi bi-file-earmark-arrow-up mr-2"></i>Import
+                            </button>
+                        </div>
+
                         <!-- Search & Filters -->
                         <div class="flex w-full overflow-x-auto items-center gap-4">
                             <!-- Filter & Search Section -->
@@ -210,10 +225,11 @@
 
             </div>
         </div>
+
         @include('components.general.import_modal', [
             'show' => 'showImportModal',
-            'title' => 'Students',
-            'description' => 'Upload your CSV file to import student data',
+            'title' => 'Import Students',
+            'description' => 'Upload your CSV file to import student data.',
             'action' => route('students.import'),
             'template_url' => route('students.downloadTemplate'),
         ])

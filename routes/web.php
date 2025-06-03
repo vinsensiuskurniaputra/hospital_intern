@@ -42,8 +42,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/users/students', AdminStudentController::class)->names('admin.students');
     Route::get('/students/filter', [AdminStudentController::class, 'filter'])->name('students.filter');
     Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
+    Route::get('/students/download-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.downloadTemplate');
     Route::put('/students/{student}/change-status', [AdminStudentController::class, 'changeStatus'])->name('students.change_status');
-    Route::get('/download-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.downloadTemplate');
 
     Route::resource('/users/admins', AdminUserAdminController::class)->names('admin.admins');
     Route::get('/admins/filter', [AdminUserAdminController::class, 'filter'])->name('admins.filter');

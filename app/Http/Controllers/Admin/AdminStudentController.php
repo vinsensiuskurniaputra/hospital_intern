@@ -231,7 +231,7 @@ class AdminStudentController extends Controller
             $row = array_combine($headers, $row);
 
             // Skip jika username atau nim sudah ada
-            if (User::where('username', $row['username'])->exists() || Student::where('nim', $row['nim'])->exists()) {
+            if (User::where('username', $row['username'])->exists() || Student::where('nim', $row['nim'])->exists() || User::where('email', $row['email'])->exists()) {
                 $skipped++;
                 continue;
             }
@@ -252,7 +252,7 @@ class AdminStudentController extends Controller
             // Buat student
             Student::createStudent([
                 'user_id' => $user->id,
-                'internship_class_id' => $row['internship_class_id'] ?? null,
+                'internship_class_id' => !empty($row['internship_class_id']) ? intval($row['internship_class_id']) : null,
                 'study_program_id' => $row['study_program_id'],
                 'nim' => $row['nim'],
                 'telp' => $row['telp'],
@@ -271,7 +271,6 @@ class AdminStudentController extends Controller
             'Content-Disposition' => 'attachment; filename="student_import_template.csv"',
         ];
 
-        // Header sesuai dengan array keys yang digunakan di fungsi import()
         $columns = [
             'username',
             'name',
@@ -285,8 +284,6 @@ class AdminStudentController extends Controller
         $callback = function () use ($columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
-
-            // Contoh baris data kosong (atau dummy) sebagai panduan
             fputcsv($file, ['johndoe', 'John Doe', 'john@example.com', '1', '', '123456789', '08123456789']);
             fclose($file);
         };
