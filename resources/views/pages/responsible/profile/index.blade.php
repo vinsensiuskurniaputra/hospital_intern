@@ -28,9 +28,6 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-end gap-2 px-6 mt-4">
-            <button class="p-2 bg-white text-gray-700 rounded-full shadow-sm hover:bg-gray-50">
-                <i class="bi bi-bell text-lg"></i>
-            </button>
             <a href="{{ route('responsible.profile.edit') }}" class="px-6 py-2 bg-[#E8F3DC] text-[#637F26] rounded-lg shadow-sm hover:bg-[#E8F3DC]/80 font-medium">
                 Edit
             </a>
@@ -77,66 +74,7 @@
                     </a>
                 </div>
             </div>
-
-            <!-- Notification Settings -->
-            <div class="mt-8" x-data="{ emailToggle: true, smsToggle: false }">
-                <div class="border rounded-lg">
-                    <!-- Notification Title -->
-                    <div class="p-4 border-b">
-                        <h2 class="text-lg font-semibold text-gray-800">Pengaturan Notifikasi</h2>
-                    </div>
-                    
-                    <div class="space-y-4 p-4">
-                        <!-- Email Notification -->
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="font-medium">Notifikasi Email</h3>
-                                <p class="text-sm text-gray-500">menerima pembaruan email tentang magang Anda</p>
-                            </div>
-                            <div class="relative flex-shrink-0">
-                                <input type="checkbox" id="email-toggle" class="hidden" x-model="emailToggle">
-                                <label for="email-toggle" class="cursor-pointer">
-                                    <div class="w-11 h-6 flex items-center rounded-full duration-300 ease-in-out" 
-                                         :class="emailToggle ? 'bg-[#637F26]' : 'bg-gray-300'">
-                                        <div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ml-0.5"
-                                             :class="emailToggle ? 'translate-x-5' : 'translate-x-0'">
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- SMS Notification -->
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="font-medium">Notifikasi SMS</h3>
-                                <p class="text-sm text-gray-500">menerima peringatan SMS untuk pembaruan penting</p>
-                            </div>
-                            <div class="relative flex-shrink-0">
-                                <input type="checkbox" id="sms-toggle" class="hidden" x-model="smsToggle">
-                                <label for="sms-toggle" class="cursor-pointer">
-                                    <div class="w-11 h-6 flex items-center rounded-full duration-300 ease-in-out"
-                                         :class="smsToggle ? 'bg-[#637F26]' : 'bg-gray-300'">
-                                        <div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ml-0.5"
-                                             :class="smsToggle ? 'translate-x-5' : 'translate-x-0'">
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('toggles', () => ({
-        emailToggle: true,
-        smsToggle: false
-    }))
-})
-</script>
 @endsection
