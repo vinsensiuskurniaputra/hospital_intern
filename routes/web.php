@@ -114,6 +114,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::post('/admin/certificates/generate-all', [AdminCertificateController::class, 'generateAllCertificates'])->name('admin.certificate.generateAll');
 
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
+    Route::get('admin/presences/reportAndMonitorings/export', [AdminReportAndMonitoringController::class, 'export'])->name('admin.reportAndMonitorings.export');
 
     Route::resource('/notification', NotificationController::class)->names('notification');
 

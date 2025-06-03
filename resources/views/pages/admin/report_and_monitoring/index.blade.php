@@ -16,13 +16,29 @@
                     <p class="mt-1 text-sm text-gray-500">Pantau kinerja dan kehadiran mahasiswa</p>
                 </div>
                 <div class="flex gap-3">
-                    <button
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <i class="bi bi-filter mr-2"></i>Filter Data
-                    </button>
-                    <button class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                        <i class="bi bi-download mr-2"></i>Unduh Laporan
-                    </button>
+                    <form action="{{ route('admin.reportAndMonitorings.index') }}" method="GET"
+                        class="flex items-center gap-3">
+                        <select name="internship_class_id" class="px-4 py-2 text-sm border border-gray-200 rounded-lg">
+                            <option value="">Semua Kelas</option>
+                            @foreach ($internshipClasses as $class)
+                                <option value="{{ $class->id }}"
+                                    {{ request('internship_class_id') == $class->id ? 'selected' : '' }}>
+                                    {{ $class->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+                            <i class="bi bi-filter mr-2"></i>Filter Data
+                        </button>
+                    </form>
+                    <form action="{{ route('admin.reportAndMonitorings.export') }}" method="GET">
+                        <input type="hidden" name="internship_class_id" value="{{ request('internship_class_id') }}">
+                        <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
+                            <i class="bi bi-download mr-2"></i>Unduh Laporan
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
