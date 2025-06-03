@@ -6,14 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\StudentGrade;
-use App\Models\Presence;
 use App\Models\Stase;
 use App\Models\InternshipClass;
 use App\Models\ResponsibleUser;
-use App\Models\Schedule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; // Tambahkan import ini
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ResponsibleReportController extends Controller
 {
@@ -26,17 +25,16 @@ class ResponsibleReportController extends Controller
     {
         // Get the responsible user record
         $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
-        
+
         if (!$responsibleUser) {
             return redirect()->back()->with('error', 'No responsible user record found');
         }
-        
+
         // Get only stases assigned to this responsible user
         $stases = Stase::whereHas('responsibleUsers', function($query) use ($responsibleUser) {
             $query->where('responsible_user_id', $responsibleUser->id);
         })->get();
-        
-        // If no stases found, handle that case
+
         if ($stases->isEmpty()) {
             Log::warning('User ID ' . Auth::id() . ' has no assigned stases.');
             return view('pages.responsible.reports.index', [
@@ -51,116 +49,119 @@ class ResponsibleReportController extends Controller
                 'staseName' => 'None'
             ])->with('error', 'No stases assigned to your account');
         }
-        
+
         // Default to the first stase assigned to the user if no stase is selected
-        $stase = $request->filled('stase') ? 
-                Stase::whereIn('id', $stases->pluck('id'))
-                     ->where('id', $request->stase)
-                     ->first() : 
-                $stases->first();
-        
+        $stase = $request->filled('stase') ?
+            Stase::whereIn('id', $stases->pluck('id'))
+                ->where('id', $request->stase)
+                ->first() :
+            $stases->first();
+
         // Get only internship classes that have schedules with the user's stases
         $internshipClasses = InternshipClass::whereHas('schedules', function($query) use ($stases) {
             $query->whereIn('stase_id', $stases->pluck('id'));
         })->get();
-        
-        // FIXED: Modified query to show all students in the selected stase's classes
-        // Base query with relationships
+
+        // Filter students
         $studentsQuery = Student::with(['user', 'internshipClass.classYear', 'studyProgram.campus'])
             ->whereHas('internshipClass', function($query) use ($stase) {
                 $query->whereHas('schedules', function($q) use ($stase) {
                     $q->where('stase_id', $stase->id);
                 });
             });
-    
-        // Apply search filter if it exists
+
         if ($request->filled('search')) {
             $search = $request->search;
             $studentsQuery->where(function($query) use ($search) {
                 $query->where('nim', 'like', "%{$search}%")
-                      ->orWhereHas('user', function($q) use ($search) {
-                          $q->where('name', 'like', "%{$search}%");
-                      });
+                    ->orWhereHas('user', function($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
         }
-        
-        // Apply internship class filter if it exists
         if ($request->filled('internship_class')) {
             $studentsQuery->where('internship_class_id', $request->internship_class);
         }
-
-        // Apply class year filter if it exists
         if ($request->filled('class_year')) {
             $studentsQuery->whereHas('internshipClass', function($query) use ($request) {
                 $query->where('class_year_id', $request->class_year);
             });
         }
 
-        // Get filtered students
         $students = $studentsQuery->get();
+        $studentIds = $students->pluck('id')->toArray();
 
-        // Get active stase for filtering
-        $activeStase = $request->filled('stase') ? 
-                      Stase::whereIn('id', $stases->pluck('id'))->find($request->stase) : 
-                      $stase;
+        // --- ABSENSI AGGREGATE QUERY ---
+        $absensiData = DB::table('presences')
+            ->select(
+                'students.id as student_id',
+                'users.name as student_name',
+                'students.nim',
+                'internship_classes.name as class_name',
+                DB::raw('COUNT(presences.status) as total_presensi'),
+                DB::raw('COUNT(CASE WHEN presences.status = "present" THEN 1 END) as present'),
+                DB::raw('ROUND(SUM(IF(presences.status = "present", 1, 0)) / COUNT(presences.status) * 100, 2) as persentase_present')
+            )
+            ->join('students', 'presences.student_id', '=', 'students.id')
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->join('internship_classes', 'students.internship_class_id', '=', 'internship_classes.id')
+            ->whereIn('students.id', $studentIds)
+            ->groupBy('students.id', 'users.name', 'students.nim', 'internship_classes.name')
+            ->get()
+            ->keyBy('student_id');
 
-        // Calculate attendance percentage for each student
-        foreach($students as $student) {
-            $totalSessions = Presence::whereHas('presenceSession.schedule', function($query) use ($activeStase) {
-                $query->where('stase_id', $activeStase->id);
-            })->where('student_id', $student->id)->count();
-            
-            $presentSessions = Presence::whereHas('presenceSession.schedule', function($query) use ($activeStase) {
-                $query->where('stase_id', $activeStase->id);
-            })->where('student_id', $student->id)
-              ->where('status', 'present')
-              ->count();
-            
-            $student->attendance_percentage = $totalSessions > 0 ? 
-                round(($presentSessions / $totalSessions) * 100) : 0;
+        // --- NILAI AGGREGATE QUERY ---
+        $gradesData = DB::table('student_grades')
+            ->select(
+                'student_id',
+                DB::raw('AVG(avg_grades) as average_grade')
+            )
+            ->whereIn('student_id', $studentIds)
+            ->where('stase_id', $stase->id)
+            ->groupBy('student_id')
+            ->get()
+            ->keyBy('student_id');
+
+        // Attach absensi & grade data to each student
+        foreach ($students as $student) {
+            $absensi = $absensiData->get($student->id);
+            $student->attendance_percentage = $absensi ? $absensi->persentase_present : 0;
+            $student->total_presensi = $absensi ? $absensi->total_presensi : 0;
+            $student->present = $absensi ? $absensi->present : 0;
+            $student->average_grade = $gradesData->get($student->id)->average_grade ?? 0;
         }
 
-        // Get average grades for filtered students
-        $averageGrades = StudentGrade::whereIn('student_id', $students->pluck('id'))
-            ->where('stase_id', $activeStase->id)
+        // --- TOP PERFORMERS & AVERAGE ---
+        $topPerformers = DB::table('student_grades')
             ->select('student_id', DB::raw('AVG(avg_grades) as average_grade'))
+            ->whereIn('student_id', $studentIds)
+            ->where('stase_id', $stase->id)
             ->groupBy('student_id')
-            ->with('student.user', 'student.studyProgram.campus')
-            ->orderBy('average_grade', 'desc')
-            ->take(4)
-            ->get();
-
-        // Get top performers from filtered students
-        $topPerformers = StudentGrade::whereIn('student_id', $students->pluck('id'))
-            ->where('stase_id', $activeStase->id)
-            ->select('student_id', DB::raw('AVG(avg_grades) as average_grade'))
-            ->groupBy('student_id')
-            ->with('student.user')
             ->orderBy('average_grade', 'desc')
             ->take(5)
             ->get();
 
-        // Calculate overall average for filtered students
-        $overallAverage = StudentGrade::whereIn('student_id', $students->pluck('id'))
-            ->where('stase_id', $activeStase->id)
-            ->avg('avg_grades') ?? 0;
+        // Ambil data user untuk top performers
+        $topPerformerIds = $topPerformers->pluck('student_id')->toArray();
+        $topPerformerUsers = Student::with('user')->whereIn('id', $topPerformerIds)->get()->keyBy('id');
+        foreach ($topPerformers as $performer) {
+            $performer->student = $topPerformerUsers->get($performer->student_id);
+        }
 
-        // Get unique class years for filters
+        $overallAverage = $gradesData->avg('average_grade') ?? 0;
+
+        // Unique class years for filters
         $classYears = $students->map(function($student) {
             return $student->internshipClass->classYear ?? null;
         })->filter()->unique('id');
 
-        // Update the Yellow Header information for the Performa Terbaik card
         $currentYear = date('Y');
-        $staseName = $activeStase->name ?? 'Semua';
+        $staseName = $stase->name ?? 'Semua';
 
-        // Calculate grade distribution for all students in current stase, regardless of filters
-        $gradeDistribution = StudentGrade::whereHas('student.internshipClass', function($query) use ($activeStase) {
-                $query->whereHas('schedules', function($q) use ($activeStase) {
-                    $q->where('stase_id', $activeStase->id);
-                });
-            })
-            ->where('stase_id', $activeStase->id)
+        // Grade distribution for donut chart
+        $gradeDistribution = DB::table('student_grades')
+            ->whereIn('student_id', $studentIds)
+            ->where('stase_id', $stase->id)
             ->select(
                 DB::raw('COUNT(CASE WHEN avg_grades >= 90 THEN 1 END) as above90'),
                 DB::raw('COUNT(CASE WHEN avg_grades >= 70 AND avg_grades < 90 THEN 1 END) as above70'),
@@ -169,18 +170,15 @@ class ResponsibleReportController extends Controller
             )
             ->first();
 
-        // Calculate percentages
-        $totalStudents = $gradeDistribution->total ?: 1; // Prevent division by zero
+        $totalStudents = $gradeDistribution->total ?: 1;
         $gradePercentages = [
             'above90' => round(($gradeDistribution->above90 / $totalStudents) * 100, 1),
             'above70' => round(($gradeDistribution->above70 / $totalStudents) * 100, 1),
             'above50' => round(($gradeDistribution->above50 / $totalStudents) * 100, 1)
         ];
 
-        // Add to compact array
         return view('pages.responsible.reports.index', compact(
             'students',
-            'averageGrades',
             'topPerformers',
             'overallAverage',
             'classYears',
@@ -189,7 +187,142 @@ class ResponsibleReportController extends Controller
             'stase',
             'currentYear',
             'staseName',
-            'gradePercentages' // Tambahkan ini
+            'gradePercentages'
         ));
+    }
+
+    public function downloadCsv(Request $request)
+    {
+        $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
+        if (!$responsibleUser) {
+            return redirect()->back()->with('error', 'No responsible user record found');
+        }
+
+        $stases = Stase::whereHas('responsibleUsers', function($query) use ($responsibleUser) {
+            $query->where('responsible_user_id', $responsibleUser->id);
+        })->get();
+
+        $stase = $request->filled('stase') ?
+            Stase::whereIn('id', $stases->pluck('id'))->where('id', $request->stase)->first() :
+            $stases->first();
+
+        $students = Student::with(['user', 'internshipClass.classYear', 'studyProgram.campus'])
+            ->whereHas('internshipClass', function($query) use ($stase) {
+                $query->whereHas('schedules', function($q) use ($stase) {
+                    $q->where('stase_id', $stase->id);
+                });
+            })->get();
+
+        $studentIds = $students->pluck('id')->toArray();
+
+        // Komponen nilai yang wajib ada di kolom
+        $wantedComponents = [
+            'Keahlian', 'Profesionalisme', 'Komunikasi', 'Kemampuan Menangani Pasien'
+        ];
+
+        // Ambil semua komponen nilai untuk stase ini (id => name)
+        $gradeComponents = DB::table('grade_components')
+            ->where('stase_id', $stase->id)
+            ->pluck('name', 'id'); // hasil: [1 => 'Keahlian', 2 => 'Profesionalisme', ...]
+
+        // Ambil nilai per komponen untuk semua mahasiswa (group by student_id)
+        $componentGrades = DB::table('student_component_grades')
+            ->where('stase_id', $stase->id)
+            ->whereIn('student_id', $studentIds)
+            ->select('student_id', 'grade_component_id', 'value')
+            ->get()
+            ->groupBy('student_id');
+
+        // Ambil absensi lengkap (hadir, izin, alpa, persentase hadir)
+        $absensiData = DB::table('presences')
+            ->select(
+                'students.id as student_id',
+                DB::raw('COUNT(*) as total_presensi'),
+                DB::raw('SUM(CASE WHEN presences.status = "present" THEN 1 ELSE 0 END) as hadir'),
+                DB::raw('SUM(CASE WHEN presences.status = "izin" THEN 1 ELSE 0 END) as izin'),
+                DB::raw('SUM(CASE WHEN presences.status = "alpa" THEN 1 ELSE 0 END) as alpa'),
+                DB::raw('ROUND(SUM(CASE WHEN presences.status = "present" THEN 1 ELSE 0 END) / COUNT(*) * 100, 0) as persentase_present')
+            )
+            ->join('students', 'presences.student_id', '=', 'students.id')
+            ->whereIn('students.id', $studentIds)
+            ->groupBy('students.id')
+            ->get()
+            ->keyBy('student_id');
+
+        // Nilai rata-rata
+        $gradesData = DB::table('student_grades')
+            ->select(
+                'student_id',
+                DB::raw('AVG(avg_grades) as average_grade')
+            )
+            ->whereIn('student_id', $studentIds)
+            ->where('stase_id', $stase->id)
+            ->groupBy('student_id')
+            ->get()
+            ->keyBy('student_id');
+
+        // Susun header kolom
+        $columns = [
+            'NIM', 'Nama', 'Kelas Magang', 'Stase', 'Jurusan', 'Kampus', 'Tahun Angkatan',
+            'Total Presensi', 'Hadir', 'Izin', 'Alpa', 'Persentase Kehadiran (%)',
+            'Keahlian', 'Profesionalisme', 'Komunikasi', 'Kemampuan Menangani Pasien','Nilai Rata-Rata'
+        ];
+
+        $filename = 'rekapitulasi_stase_' . ($stase->name ?? 'all') . '_' . now()->format('Ymd_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function() use ($students, $columns, $stase, $absensiData, $gradesData, $gradeComponents, $componentGrades, $wantedComponents) {
+            $handle = fopen('php://output', 'w');
+            $delimiter = ';';
+
+            // Header
+            fputcsv($handle, $columns, $delimiter);
+
+            foreach ($students as $student) {
+                $absensi = $absensiData->get($student->id);
+                $grade = $gradesData->get($student->id);
+
+                // Mapping komponen: nama => value
+                $studentComponentGrades = $componentGrades->get($student->id, collect());
+                $componentMap = [];
+                foreach ($studentComponentGrades as $comp) {
+                    $compName = $gradeComponents[$comp->grade_component_id] ?? null;
+                    if ($compName) {
+                        $componentMap[$compName] = $comp->value;
+                    }
+                }
+
+                $row = [
+                    $student->nim,
+                    $student->user->name,
+                    $student->internshipClass->name,
+                    $stase->name,
+                    $student->studyProgram->name,
+                    $student->studyProgram->campus->name,
+                    $student->internshipClass->classYear->class_year,
+                    $absensi ? $absensi->total_presensi : 0,
+                    $absensi ? $absensi->hadir : 0,
+                    $absensi ? $absensi->izin : 0,
+                    $absensi ? $absensi->alpa : 0,
+                    $absensi ? $absensi->persentase_present : 0,
+                ];
+
+                // Tambahkan nilai per komponen
+                foreach ($wantedComponents as $compName) {
+                    $row[] = isset($componentMap[$compName])
+                        ? number_format($componentMap[$compName], 2, ',', '')
+                        : '0';
+                }
+
+                // Nilai rata-rata di paling akhir
+                $row[] = $grade ? number_format($grade->average_grade, 2, ',', '') : 0;
+
+                fputcsv($handle, $row, $delimiter);
+            }
+            fclose($handle);
+        }, 200, $headers);
     }
 }

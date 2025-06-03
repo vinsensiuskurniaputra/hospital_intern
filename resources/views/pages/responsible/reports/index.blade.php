@@ -90,7 +90,8 @@
                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Jurusan</th>
                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Kampus</th>
                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Tahun Angkatan</th>
-                        <th class="py-3 px-4 text-center text-sm font-medium text-gray-700">Absensi</th>
+                        <th class="py-3 px-4 text-center text-sm font-medium text-gray-700">Presensi</th>
+                        <th class="py-3 px-4 text-center text-sm font-medium text-gray-700">Nilai Rata-Rata</th> <!-- Tambahkan ini -->
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -116,6 +117,9 @@
                             {{ $student->attendance_percentage >= 75 ? 'text-green-600' : 'text-red-600' }}">
                             {{ $student->attendance_percentage }}%
                         </td>
+                        <td class="py-4 px-4 text-sm text-center font-medium">
+                            {{ round($student->average_grade) }}
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -126,24 +130,7 @@
         <div class="grid grid-cols-2 gap-6">
             <!-- Left Column -->
             <div class="space-y-6">
-                <!-- Nilai Rata-Rata Card -->
-                <div class="bg-slate-50 rounded-xl p-6 shadow-sm">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Nilai Rata-Rata Mahasiswa</h2>
-                    <div class="space-y-4">
-                        @foreach($averageGrades as $grade)
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <img class="h-10 w-10 rounded-full mr-3" src="{{ $grade->student->user->photo_profile_url ?? '/api/placeholder/40/40' }}" alt="Profile">
-                                <div>
-                                    <p class="text-sm font-medium">{{ $grade->student->user->name }}</p>
-                                    <p class="text-xs text-gray-500">{{ $grade->student->studyProgram->campus->name }}</p>
-                                </div>
-                            </div>
-                            <span class="text-lg font-medium">{{ round($grade->average_grade) }}</span>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
+                
                 
                 <!-- Performa Terbaik Card -->
                 <div class="bg-slate-50 rounded-xl p-6 shadow-sm">
@@ -265,12 +252,15 @@
                     <p class="text-sm text-gray-600 mb-4 text-center">
                         Unduh laporan rekapitulasi mahasiswa dibawah ini
                     </p>
-                    <button class="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-2.5 px-6 rounded-lg flex items-center justify-center transition-colors duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                        </svg>
-                        Unduh Rekapitulasi
-                    </button>
+                    <form method="GET" action="{{ route('responsible.reports.download-csv') }}">
+                        <input type="hidden" name="stase" value="{{ $stase->id }}">
+                        <button type="submit" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-2.5 px-6 rounded-lg flex items-center justify-center transition-colors duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Unduh Rekapitulasi
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
