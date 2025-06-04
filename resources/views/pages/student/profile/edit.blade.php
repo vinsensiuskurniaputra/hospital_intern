@@ -14,24 +14,10 @@
                     </div>
                 </div>
                 <div class="flex-1 ml-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">{{ $results['namaLengkap'] }}</h1>
-                            <p class="text-gray-100">{{ Auth::user()->roles()->first()->display_name }}</p>
-                            <p class="text-gray-100 mt-1">Mahasiswa {{ $results['prodi']}}</p>
-                        </div>
-                        <div class="text-white">
-                            <p class="text-sm font-medium mb-2">Proses Magang</p>
-                            <div class="w-80">
-                                <div class="h-2 bg-white/30 rounded-full">
-                                    <div class="h-full w-1/3 bg-[#3B82F6] rounded-full"></div>
-                                </div>
-                                <div class="flex justify-between text-xs mt-2">
-                                    <span>Start: 1 Januari 2025</span>
-                                    <span>Selesai: 1 April 2025</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">{{ $results['namaLengkap'] }}</h1>
+                        <p class="text-gray-100">{{ Auth::user()->roles()->first()->display_name }}</p>
+                        <p class="text-gray-100 mt-1">Mahasiswa {{ $results['prodi']}}</p>
                     </div>
                 </div>
             </div>
@@ -64,7 +50,7 @@
                                id="telp"
                                value="{{ $results['telp'] }}"
                                class="mt-1 block w-full p-2 border border-gray-200 rounded-lg @error('telp') border-red-500 @enderror">
-                        <span id="telpError" class="text-sm text-red-500 hidden">Nomor telepon harus berupa angka</span>
+                        <span id="telpError" class="text-sm text-red-500 hidden">Nomor telepon harus dimulai dengan 0 dan terdiri dari 10-13 digit</span>
                         @error('telp')
                             <span class="text-sm text-red-500">{{ $message }}</span>
                         @enderror
@@ -101,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function validateTelp(telp) {
-        return /^\d+$/.test(telp);
+        return /^0\d{9,12}$/.test(telp); // Must start with 0 and be 10-13 digits
     }
 
     form.addEventListener('submit', function(e) {
@@ -143,7 +129,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Real-time phone validation
     telpInput.addEventListener('input', function() {
+        const value = this.value;
+        // Remove any non-digit characters
+        this.value = value.replace(/\D/g, '');
+        
         if (!validateTelp(this.value)) {
             telpError.classList.remove('hidden');
             this.classList.add('border-red-500');
