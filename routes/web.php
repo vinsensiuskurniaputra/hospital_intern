@@ -179,8 +179,8 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     // Profile
     Route::get('/profile', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'index'])->name('profile');
     
-    // Nilai
-    Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades');
+    // Nilai - PERBAIKAN: Pastikan route ini terdefinisi dengan benar
+    Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades.index');
     Route::post('/grades/store', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'store'])->name('grades.store');
     
     // Laporan & Rekapitulasi
