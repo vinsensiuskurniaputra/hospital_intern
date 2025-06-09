@@ -32,18 +32,12 @@ class ResponsibleScheduleController extends Controller
         // Get stase IDs
         $staseIds = $responsibleUser->stases->pluck('id');
 
-        // Get today's schedules for all assigned stases
-        $todaySchedules = Schedule::with(['internshipClass', 'stase.departement'])
+        // Fix the query for today's schedules to properly check date range
+        $todaySchedules = Schedule::with(['internshipClass.classYear', 'stase.departement'])
             ->whereIn('stase_id', $staseIds)
-            ->whereDate('start_date', Carbon::today())
-            ->get()
-            ->map(function($schedule) {
-                return [
-                    'class_name' => $schedule->internshipClass->name ?? 'N/A',
-                    'stase_name' => $schedule->stase->name ?? 'N/A',
-                    'department' => $schedule->stase->departement->name ?? 'N/A'
-                ];
-            });
+            ->whereDate('start_date', '<=', Carbon::today())
+            ->whereDate('end_date', '>=', Carbon::today())
+            ->get();
 
         // Get all schedules for table, ordered by start_date
         $schedules = Schedule::with(['internshipClass', 'stase.departement'])
@@ -89,6 +83,8 @@ class ResponsibleScheduleController extends Controller
     {
         try {
             $date = $request->date;
+            
+            // Get responsible user data
             $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
             
             if (!$responsibleUser) {
@@ -98,30 +94,32 @@ class ResponsibleScheduleController extends Controller
                 ]);
             }
 
+            // Get stase IDs
             $staseIds = $responsibleUser->stases->pluck('id');
-
-            $schedules = Schedule::with(['internshipClass', 'stase.departement'])
+            
+            // Only fetch schedules for stases assigned to the responsible user
+            $schedules = Schedule::with(['stase.departement', 'internshipClass.classYear'])
                 ->whereIn('stase_id', $staseIds)
-                ->whereDate('start_date', $date)
-                ->get()
-                ->map(function($schedule) {
-                    return [
-                        'class_name' => $schedule->internshipClass->name ?? 'N/A',
-                        'stase_name' => $schedule->stase->name ?? 'N/A',
-                        'department' => $schedule->stase->departement->name ?? 'N/A'
-                    ];
-                });
-
+                ->whereDate('start_date', '<=', $date)
+                ->whereDate('end_date', '>=', $date)
+                ->get();
+                
             return response()->json([
                 'success' => true,
-                'schedules' => $schedules
+                'schedules' => $schedules->map(function($schedule) {
+                    return [
+                        'class_name' => $schedule->internshipClass->name ?? 'N/A',
+                        'academic_year' => $schedule->internshipClass->classYear->class_year ?? null,
+                        'stase_name' => $schedule->stase->name ?? 'N/A',
+                        'department' => $schedule->stase->departement->name ?? 'N/A',
+                    ];
+                })
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -178,7 +176,7 @@ class ResponsibleScheduleController extends Controller
             $students = Student::with([
                 'user:id,name,photo_profile_url', 
                 'studyProgram.campus:id,name',
-                'studyProgram:id,name,campus_id'
+                'StudyProgram:id,name,campus_id'
             ])
             ->where('internship_class_id', $request->class_id)
             ->get();
@@ -203,17 +201,54 @@ class ResponsibleScheduleController extends Controller
                 'stase_id' => 'required|exists:stases,id',
             ]);
 
-            // Get classes that have schedules in this stase
-            $classes = Schedule::where('stase_id', $request->stase_id)
-                ->with('internshipClass:id,name')
-                ->get()
-                ->pluck('internshipClass')
-                ->unique('id')
-                ->values();
+            // Add the class_year relationship to the query
+            $classes = \App\Models\InternshipClass::with('classYear')
+                ->whereHas('schedules', function($query) use ($request) {
+                    $query->where('stase_id', $request->stase_id);
+                })
+                ->get();
 
             return response()->json([
                 'success' => true,
                 'classes' => $classes
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getStudentDetail(Request $request)
+    {
+        try {
+            $request->validate([
+                'student_id' => 'required|exists:students,id',
+            ]);
+
+            // Updated to specifically request the correct column names
+            $student = Student::with([
+                'user:id,name,email,photo_profile_url', 
+                'studyProgram.campus:id,name',
+                'studyProgram:id,name,campus_id',
+                'internshipClass',
+                'internshipClass.classYear:id,class_year' // Request the class_year column specifically
+            ])
+            ->where('id', $request->student_id)
+            ->first();
+
+            if (!$student) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data mahasiswa tidak ditemukan'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'student' => $student
             ]);
 
         } catch (\Exception $e) {

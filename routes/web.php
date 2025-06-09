@@ -114,6 +114,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
 
     Route::get('/responsible/schedule/get-schedules', [ResponsibleScheduleController::class, 'getSchedules'])
         ->name('responsible.schedule.get-schedules');
+    Route::get('/responsible/schedule/student-detail', [ResponsibleScheduleController::class, 'getStudentDetail'])
+        ->name('schedule.student-detail');
 
     Route::get('/home/profile', [StudentProfileController::class, 'index'])->name('student-profile');
 });
@@ -125,8 +127,10 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/home', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard');
     
     // Jadwal
-    Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule');
-    
+    Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule.index');
+    Route::get('/schedule/by-date', [App\Http\Controllers\Student\StudentScheduleController::class, 'getSchedulesByDate'])->name('schedule.by-date');
+    Route::get('/schedule/filtered', [App\Http\Controllers\Student\StudentScheduleController::class, 'getFilteredSchedules'])->name('schedule.filtered');
+    Route::get('/schedule/all', [App\Http\Controllers\Student\StudentScheduleController::class, 'getAllSchedules'])->name('schedule.all');
     // Presensi & Sertifikasi
     Route::get('/attendance', [App\Http\Controllers\Student\StudentAttendanceController::class, 'index'])->name('attendance');
     Route::post('/attendance/checkout', [App\Http\Controllers\Student\StudentAttendanceController::class, 'checkOut'])->name('attendance.checkout');
