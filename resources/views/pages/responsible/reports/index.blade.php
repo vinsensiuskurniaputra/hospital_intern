@@ -11,7 +11,7 @@
             <!-- Filter Container -->
             <div class="flex flex-wrap items-center gap-4">
                 <!-- Search Bar -->
-                <div class="flex-1 min-w-[200px]">
+                <!-- <div class="flex-1 min-w-[200px]">
                     <input 
                         type="text" 
                         name="search" 
@@ -19,7 +19,7 @@
                         value="{{ request('search') }}" 
                         class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
                     >
-                </div>
+                </div> -->
 
                 <!-- Stase Dropdown -->
                 <div class="w-48">
@@ -80,7 +80,10 @@
         
         <!-- Data Table Section -->
         <div class="overflow-x-auto mb-8">
-            <table class="min-w-full border-collapse bg-white">
+            <!-- DataTables CSS -->
+            <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+            <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.tailwindcss.min.css">
+            <table id="rekapTable" class="min-w-full border-collapse bg-white">
                 <thead>
                     <tr class="border-b border-gray-200">
                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">NIM</th>
@@ -91,7 +94,7 @@
                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Kampus</th>
                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Tahun Angkatan</th>
                         <th class="py-3 px-4 text-center text-sm font-medium text-gray-700">Presensi</th>
-                        <th class="py-3 px-4 text-center text-sm font-medium text-gray-700">Nilai Rata-Rata</th> <!-- Tambahkan ini -->
+                        <th class="py-3 px-4 text-center text-sm font-medium text-gray-700">Nilai Rata-Rata</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -124,6 +127,23 @@
                     @endforeach
                 </tbody>
             </table>
+            <!-- DataTables JS -->
+            <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+            <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+            <script src="https://cdn.datatables.net/1.13.8/js/dataTables.tailwindcss.min.js"></script>
+            <script>
+                $(document).ready(function() {
+                    $('#rekapTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.8/i18n/id.json'
+                        },
+                        pageLength: 10,
+                        lengthMenu: [5, 10, 25, 50],
+                        ordering: true,
+                        searching: true
+                    });
+                });
+            </script>
         </div>
         
         <!-- Bottom Sections -->
