@@ -136,21 +136,41 @@ class AdminReportAndMonitoringController extends Controller
     {
         $internshipClassId = $request->get('internship_class_id');
 
-        $studentsQuery = Student::with(['user', 'presences']);
+        $studentsQuery = Student::with(['user', 'presences', 'grades']);
         if ($internshipClassId) {
             $studentsQuery->where('internship_class_id', $internshipClassId);
         }
         $students = $studentsQuery->get();
 
         $csvData = [];
-        $csvData[] = ['Nama Mahasiswa', 'NIM', 'Jumlah Kehadiran', 'Keterangan'];
+        $csvData[] = [
+            'Nama Mahasiswa', 
+            'NIM', 
+            'Present', 
+            'Sick', 
+            'Absent', 
+            'Total Meetings', 
+            'Average Grade in All Stase', 
+            'Attendance Percentage'
+        ];
 
         foreach ($students as $student) {
+            $totalMeetings = $student->presences->count();
+            $present = $student->presences->where('status', 'present')->count();
+            $sick = $student->presences->where('status', 'sick')->count();
+            $absent = $student->presences->where('status', 'absent')->count();
+            $averageGrade = $student->grades->avg('avg_grades');
+            $attendancePercentage = $totalMeetings > 0 ? round(($present / $totalMeetings) * 100, 2) : 0;
+
             $csvData[] = [
                 $student->user->name,
                 $student->nim,
-                $student->presences->count(),
-                $student->is_finished ? 'Selesai' : 'Belum Selesai'
+                $present,
+                $sick,
+                $absent,
+                $totalMeetings,
+                $averageGrade,
+                $attendancePercentage . '%'
             ];
         }
 
