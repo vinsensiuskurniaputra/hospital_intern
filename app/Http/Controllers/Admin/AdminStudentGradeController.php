@@ -8,6 +8,8 @@ use App\Models\Departement;
 use App\Models\StudentGrade;
 use App\Models\StudyProgram;
 use App\Models\Stase;
+use App\Models\InternshipClass;
+use App\Models\ClassYear;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -35,6 +37,16 @@ class AdminStudentGradeController extends Controller
             });
         }
 
+        if ($request->has('internship_class') && $request->internship_class != '') {
+            $query->where('internship_class_id', $request->internship_class);
+        }
+
+        if ($request->has('class_year') && $request->class_year != '') {
+            $query->whereHas('internshipClass.classYear', function ($q) use ($request) {
+                $q->where('id', $request->class_year);
+            });
+        }
+
         if ($request->has('search') && $request->search != '') {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%');
@@ -44,9 +56,11 @@ class AdminStudentGradeController extends Controller
         $students = $query->paginate($perPage)->appends($request->all()); // Append all request parameters to pagination links
         $studyPrograms = StudyProgram::all();
         $departements = Departement::all();
+        $internshipClasses = InternshipClass::all();
+        $classYears = ClassYear::all();
         $stases = Stase::where('departement_id', $defaultDepartementId)->get(); // Fetch stases for the selected department
 
-        return view('pages.admin.student_grade.index', compact('students', 'studyPrograms', 'departements', 'stases', 'defaultDepartementId', 'perPage'));
+        return view('pages.admin.student_grade.index', compact('students', 'studyPrograms', 'departements', 'internshipClasses', 'classYears', 'stases', 'defaultDepartementId', 'perPage'));
     }
 
 
