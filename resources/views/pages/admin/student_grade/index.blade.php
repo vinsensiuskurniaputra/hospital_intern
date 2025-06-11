@@ -4,136 +4,141 @@
 
 @section('content')
     <div class="p-6 space-y-6">
-        <!-- Kartu Header -->
+        <!-- Header Card -->
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">Nilai Mahasiswa</h2>
-                    <p class="text-sm text-gray-500 mt-1">Lihat dan kelola performa mahasiswa</p>
-                </div>
-                <!-- Ringkasan Statistik -->
-                <div class="flex items-center gap-3 bg-[#F5F7F0] px-4 py-2 rounded-lg">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Rata-rata Nilai</p>
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl font-bold text-[#637F26]">{{ number_format($currentAvg, 2) }}</span>
-                            <span class="{{ $isDown ? 'text-red-500' : 'text-green-500' }} text-xs flex items-center">
-                                <i class="bi {{ $isDown ? 'bi-arrow-down-right' : 'bi-arrow-up-right' }}"></i>
-                                <span class="ml-1">{{ number_format(abs($changePercent), 1) }}%</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="h-12 w-px bg-gray-200"></div>
-                    <div>
-                        <span class="text-xs font-medium text-[#637F26] bg-white px-2 py-1 rounded">
-                            {{ \Carbon\Carbon::now()->format('F Y') }}
-                        </span>
-                    </div>
+                    <h1 class="text-2xl font-semibold text-gray-800">Nilai Mahasiswa</h1>
+                    <p class="mt-1 text-sm text-gray-500">Kelola dan lihat nilai mahasiswa</p>
                 </div>
             </div>
         </div>
 
-        <!-- Kartu Konten Utama -->
+        <!-- Main Content Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-            <!-- Filter & Aksi -->
-            <div class="border-b border-gray-100 p-6">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <!-- Filter -->
-                    <div class="flex items-center gap-4">
-                        <select id="studyProgramFilter"
-                            class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                            <option value="">Semua Program Studi</option>
-                            @foreach ($studyPrograms as $studyProgram)
-                                <option value="{{ $studyProgram->id }}">{{ $studyProgram->name }}</option>
-                            @endforeach
-                        </select>
-                        <select id="departementFilter"
-                            class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                            <option value="">Semua Departemen</option>
-                            @foreach ($departements as $departement)
-                                <option value="{{ $departement->id }}">{{ $departement->name }}</option>
-                            @endforeach
-                        </select>
+            <!-- Filter Section -->
+            <div class="p-6 border-b border-gray-100">
+                <form method="GET" action="{{ route('admin.studentScores.index') }}">
+                    <div class="space-y-6">
+                        <!-- Academic Filters -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Filter Akademik</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Program Studi</label>
+                                    <select name="study_program"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] bg-white">
+                                        <option value="">Semua Program Studi</option>
+                                        @foreach ($studyPrograms as $studyProgram)
+                                            <option value="{{ $studyProgram->id }}"
+                                                {{ request('study_program') == $studyProgram->id ? 'selected' : '' }}>
+                                                {{ $studyProgram->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Departemen</label>
+                                    <select name="departement"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] bg-white">
+                                        @foreach ($departements as $departement)
+                                            <option value="{{ $departement->id }}"
+                                                {{ request('departement') == $departement->id ? 'selected' : '' }}>
+                                                {{ $departement->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Kelas</label>
+                                    <select name="class_year"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] bg-white">
+                                        <option value="">Semua Tahun</option>
+                                        @foreach ($classYears as $classYear)
+                                            <option value="{{ $classYear->id }}"
+                                                {{ request('class_year') == $classYear->id ? 'selected' : '' }}>
+                                                {{ $classYear->class_year }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas Internship</label>
+                                    <select name="internship_class"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] bg-white">
+                                        <option value="">Semua Kelas</option>
+                                        @foreach ($internshipClasses as $internshipClass)
+                                            <option value="{{ $internshipClass->id }}"
+                                                {{ request('internship_class') == $internshipClass->id ? 'selected' : '' }}>
+                                                {{ $internshipClass->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
-                        <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Cari mahasiswa..."
-                                class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26] w-full lg:w-[240px]">
-                            <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+                        <!-- Display & Search Filters -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Tampilan & Pencarian</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Per Halaman</label>
+                                    <select name="per_page"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] bg-white">
+                                        <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5 Data
+                                        </option>
+                                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10 Data
+                                        </option>
+                                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 Data
+                                        </option>
+                                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 Data
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cari Mahasiswa</label>
+                                    <div class="relative">
+                                        <input type="text" name="search" value="{{ request('search') }}"
+                                            placeholder="Cari berdasarkan nama mahasiswa..."
+                                            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26] bg-white">
+                                        <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end gap-3">
+                            <button type="reset"
+                                class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100">
+                                Reset Filter
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832']">
+                                Terapkan Filter
+                            </button>
                         </div>
                     </div>
-                    <!-- Aksi -->
-                    {{-- <div class="flex gap-3">
-                        <button
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                            <i class="bi bi-upload mr-2"></i>Import CSV
-                        </button>
-                        <button class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                            <i class="bi bi-plus-lg mr-2"></i>Add Grade
-                        </button>
-                    </div> --}}
-                </div>
+                </form>
             </div>
 
             <!-- Tabel -->
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-50 border-y border-gray-100">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                No</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Mahasiswa</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stase
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Departemen</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="TableBody">
+                    <tbody>
                         @include('components.admin.student_grade.table', [
-                            'studentGrades' => $studentGrades,
+                            'students' => $students,
+                            'stases' => $stases,
                         ])
-
                     </tbody>
                 </table>
             </div>
 
             <!-- Paginasi -->
             @include('components.general.pagination', [
-                'datas' => $studentGrades,
+                'datas' => $students,
             ])
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            function fetchSearch() {
-                var studyProgram = $('#studyProgramFilter').val();
-                var departement = $('#departementFilter').val();
-                var search = $('#searchInput').val();
-
-                $.ajax({
-                    url: "{{ route('studentScores.filter') }}",
-                    type: "GET",
-                    data: {
-                        study_program: studyProgram,
-                        departement: departement,
-                        search: search
-                    },
-                    success: function(data) {
-                        console.log(data);
-                        $('#TableBody').html(data);
-                    }
-                });
-            }
-
-            // Event listener untuk setiap filter
-            $('#studyProgramFilter, #departementFilter, #searchInput').on('change keyup',
-                function() {
-                    fetchSearch();
-                });
-        });
-    </script>
 @endsection

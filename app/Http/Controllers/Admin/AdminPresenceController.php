@@ -74,9 +74,21 @@ class AdminPresenceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Presence $presence)
+    public function show(Request $request, Student $student)
     {
-        //
+        $query = $student->presences()->orderBy('date_entry', 'desc');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('date_entry', [$request->start_date, $request->end_date]);
+        }
+
+        $presences = $query->paginate(10);
+
+        return view('pages.admin.student_presence.show', compact('student', 'presences'));
     }
 
     /**

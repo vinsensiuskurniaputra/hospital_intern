@@ -86,62 +86,109 @@
 
             <!-- Main Content Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                <!-- Card Header -->
+                <!-- Card Header with Action Buttons -->
                 <div class="border-b border-gray-100 p-6">
                     <div class="flex flex-col lg:items-center lg:justify-between gap-4">
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end space-x-4 w-full">
+                            <!-- Add Student Button -->
+                            <button @click="addStudent = true"
+                                class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
+                                <i class="bi bi-plus-lg mr-2"></i>Tambah Mahasiswa
+                            </button>
+
+                            <!-- Import Button -->
+                            <button @click="showImportModal = true"
+                                class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
+                                <i class="bi bi-file-earmark-arrow-up mr-2"></i>Import
+                            </button>
+                        </div>
+
                         <!-- Search & Filters -->
                         <div class="flex w-full overflow-x-auto items-center gap-4">
-                            <!-- Filters -->
-                            <select id="studyProgramFilter"
+                            <!-- Filter & Search Section -->
+                            <form method="GET" action="{{ route('students.filter') }}" class="w-full">
+                                <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                                    <!-- Study Program Filter -->
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Program Studi</label>
+                                        <select name="study_program"
+                                            class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
+                                            <option value="">Semua Program Studi</option>
+                                            @foreach ($studyPrograms as $studyProgram)
+                                                <option value="{{ $studyProgram->id }}"
+                                                    {{ request('study_program') == $studyProgram->id ? 'selected' : '' }}>
+                                                    {{ $studyProgram->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                                class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                                <option value="">Semua Program Studi</option>
+                                    <!-- Class Year Filter -->
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Kelas</label>
+                                        <select name="class_year"
+                                            class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
+                                            <option value="">Semua Tahun</option>
+                                            @foreach ($classYears as $classYear)
+                                                <option value="{{ $classYear->class_year }}"
+                                                    {{ request('class_year') == $classYear->class_year ? 'selected' : '' }}>
+                                                    {{ $classYear->class_year }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                                @foreach ($studyPrograms as $studyProgram)
-                                    <option value="{{ $studyProgram->id }}">{{ $studyProgram->name }}</option>
-                                @endforeach
-                            </select>
+                                    <!-- Campus Filter -->
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Kampus</label>
+                                        <select name="campus"
+                                            class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
+                                            <option value="">Semua Kampus</option>
+                                            @foreach ($campuses as $campus)
+                                                <option value="{{ $campus->id }}"
+                                                    {{ request('campus') == $campus->id ? 'selected' : '' }}>
+                                                    {{ $campus->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                            <select id="classYearFilter"
+                                    <!-- Status Filter -->
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                        <select name="status"
+                                            class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
+                                            <option value="">Semua Status</option>
+                                            <option value="finished"
+                                                {{ request('status') == 'finished' ? 'selected' : '' }}>Selesai
+                                            </option>
+                                            <option value="unfinished"
+                                                {{ request('status') == 'unfinished' ? 'selected' : '' }}>Belum Selesai
+                                            </option>
+                                        </select>
+                                    </div>
 
-                                class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                                <option value="">Semua Tahun</option>
+                                    <!-- Search -->
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Pencarian</label>
+                                        <div class="relative">
+                                            <input type="text" name="search" value="{{ request('search') }}"
+                                                placeholder="Cari berdasarkan nama atau NIM..."
+                                                class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#637F26]">
+                                            <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+                                        </div>
+                                    </div>
 
-                                @foreach ($classYears as $classYear)
-                                    <option value="{{ $classYear->class_year }}">{{ $classYear->class_year }}</option>
-                                @endforeach
-                            </select>
-
-                            <select id="campusFilter"
-
-                                class="px-4 min-w-[100px] py-2 w-full rounded-lg border border-gray-200">
-                                <option value="">Semua Kampus</option>
-
-                                @foreach ($campuses as $campus)
-                                    <option value="{{ $campus->id }}">{{ $campus->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <!-- Action Buttons -->
-                        <div class="flex flex-col lg:flex-row w-full justify-between gap-3">
-                            <!-- Search -->
-                            <div class="w-full lg:w-[360px]">
-                                <div class="relative">
-                                    <input type="text" id="searchStudent" placeholder="Search students..."
-                                        class="filter-input w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#637F26] focus:ring-2 focus:ring-[#637F26]">
-                                    <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+                                    <!-- Submit Button -->
+                                    <div>
+                                        <button type="submit"
+                                            class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
+                                            Filter
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex gap-3">
-                                <button @click="showImportModal = true"
-                                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="bi bi-upload mr-2"></i>Impor CSV
-                                </button>
-                                <button @click="addStudent = true"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                                    <i class="bi bi-plus-lg mr-2"></i>Tambah Mahasiswa
-                                </button>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -171,86 +218,18 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                    <div class="text-sm text-gray-500">
-                        Showing {{ $students->firstItem() }} to {{ $students->lastItem() }} of {{ $students->total() }}
-                        entries
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <!-- Previous Button -->
-                        @if ($students->onFirstPage())
-                            <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                                Previous
-                            </button>
-                        @else
-                            <a href="{{ $students->previousPageUrl() }}"
-                                class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                                Previous
-                            </a>
-                        @endif
-
-                        <!-- Pagination Numbers -->
-                        <div class="flex gap-2">
-                            {{-- Tombol First Page --}}
-                            @if ($students->currentPage() > 2)
-                                <a href="{{ $students->url(1) }}"
-                                    class="px-3 py-1 text-sm font-medium text-black bg-gray-200 rounded-lg hover:bg-gray-300">
-                                    1
-                                </a>
-                                @if ($students->currentPage() > 3)
-                                    <span class="px-3 py-1 text-sm text-gray-500">...</span>
-                                @endif
-                            @endif
-
-                            {{-- Loop Nomor Halaman (Menampilkan halaman di sekitar halaman aktif) --}}
-                            @for ($page = max(1, $students->currentPage() - 1); $page <= min($students->lastPage(), $students->currentPage() + 1); $page++)
-                                @if ($page == $students->currentPage())
-                                    <a href="{{ $students->url($page) }}"
-                                        class="px-3 py-1 text-sm font-medium text-white bg-[#6B7126] rounded-lg shadow-md">
-                                        {{ $page }}
-                                    </a>
-                                @else
-                                    <a href="{{ $students->url($page) }}"
-                                        class="px-3 py-1 text-sm font-medium text-black bg-gray-200 rounded-lg hover:bg-gray-300">
-                                        {{ $page }}
-                                    </a>
-                                @endif
-                            @endfor
-
-                            {{-- Tombol Last Page --}}
-                            @if ($students->currentPage() < $students->lastPage() - 1)
-                                @if ($students->currentPage() < $students->lastPage() - 2)
-                                    <span class="px-3 py-1 text-sm text-gray-500">...</span>
-                                @endif
-                                <a href="{{ $students->url($students->lastPage()) }}"
-                                    class="px-3 py-1 text-sm font-medium text-black bg-gray-200 rounded-lg hover:bg-gray-300">
-                                    {{ $students->lastPage() }}
-                                </a>
-                            @endif
-                        </div>
-
-
-                        <!-- Next Button -->
-                        @if ($students->hasMorePages())
-                            <a href="{{ $students->nextPageUrl() }}"
-                                class="px-3 py-1 text-sm text-gray-500 hover:text-gray-600">
-                                Selanjutnya
-                            </a>
-                        @else
-                            <button class="px-3 py-1 text-sm text-gray-400 disabled:opacity-50" disabled>
-                                Selanjutnya
-                            </button>
-                        @endif
-                    </div>
-                </div>
+                @include('components.general.pagination', [
+                    'datas' => $students->appends(request()->except('page')), // Preserve filter values
+                ])
 
 
             </div>
         </div>
+
         @include('components.general.import_modal', [
             'show' => 'showImportModal',
-            'title' => 'Students',
-            'description' => 'Upload your CSV file to import student data',
+            'title' => 'Import Students',
+            'description' => 'Upload your CSV file to import student data.',
             'action' => route('students.import'),
             'template_url' => route('students.downloadTemplate'),
         ])
@@ -266,18 +245,18 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Get initial filter values from URL or set empty
             let currentFilters = {
                 study_program: new URLSearchParams(window.location.search).get('study_program') || '',
                 class_year: new URLSearchParams(window.location.search).get('class_year') || '',
                 campus: new URLSearchParams(window.location.search).get('campus') || '',
+                status: new URLSearchParams(window.location.search).get('status') || '',
                 search: new URLSearchParams(window.location.search).get('search') || ''
             };
 
-            // Set initial filter values in form
             $('#studyProgramFilter').val(currentFilters.study_program);
             $('#classYearFilter').val(currentFilters.class_year);
             $('#campusFilter').val(currentFilters.campus);
+            $('#statusFilter').val(currentFilters.status);
             $('#searchStudent').val(currentFilters.search);
 
             function fetchStudents(page = 1) {
@@ -285,8 +264,6 @@
                     ...currentFilters,
                     page: page
                 };
-
-                // Remove empty filter values
                 Object.keys(filters).forEach(key => {
                     if (!filters[key]) delete filters[key];
                 });
@@ -297,8 +274,6 @@
                     data: filters,
                     success: function(response) {
                         $('#studentTableBody').html(response);
-
-                        // Update URL without empty parameters
                         const queryString = new URLSearchParams(filters).toString();
                         const newUrl =
                             `${window.location.pathname}${queryString ? '?' + queryString : ''}`;
@@ -307,23 +282,21 @@
                 });
             }
 
-            // Event listeners for filters
             $('.filter-input').on('change keyup', function() {
                 const newFilters = {
                     study_program: $('#studyProgramFilter').val(),
                     class_year: $('#classYearFilter').val(),
                     campus: $('#campusFilter').val(),
+                    status: $('#statusFilter').val(),
                     search: $('#searchStudent').val()
                 };
 
-                // Only update if values actually changed
                 if (JSON.stringify(newFilters) !== JSON.stringify(currentFilters)) {
                     currentFilters = newFilters;
                     fetchStudents(1);
                 }
             });
 
-            // Handle pagination clicks
             $(document).on('click', '.pagination a', function(e) {
                 e.preventDefault();
                 const url = new URL($(this).attr('href'));

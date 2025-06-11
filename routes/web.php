@@ -42,8 +42,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/users/students', AdminStudentController::class)->names('admin.students');
     Route::get('/students/filter', [AdminStudentController::class, 'filter'])->name('students.filter');
     Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
+    Route::get('/students/download-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.downloadTemplate');
     Route::put('/students/{student}/change-status', [AdminStudentController::class, 'changeStatus'])->name('students.change_status');
-    Route::get('/download-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.downloadTemplate');
 
     Route::resource('/users/admins', AdminUserAdminController::class)->names('admin.admins');
     Route::get('/admins/filter', [AdminUserAdminController::class, 'filter'])->name('admins.filter');
@@ -82,7 +82,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::post('/internshipClasses/insertStudent', [AdminInternshipClassController::class, 'insertStudentStore'])->name('admin.internshipClasses.insertStudent.store');
 
     Route::middleware(['auth', 'menu'])->group(function () {
-        // Pastikan route filter-by-date didefinisikan sebelum resource route
+        // Pastikan route filter-by-date didefinikan sebelum resource route
         Route::get('/presences/schedules/filter-by-date', [AdminScheduleController::class, 'filterByDate'])
             ->name('presences.schedules.filter-by-date');
             
@@ -99,11 +99,13 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
         ->name('presences.schedules.filter');
   
+        Route::get('/presences/studentPresences/{student}', [AdminPresenceController::class, 'show'])->name('admin.studentPresencesDetail.show');
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
     Route::get('admin/student-presences/export', [AdminPresenceController::class, 'export'])->name('admin.studentPresences.export');
 
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
+    Route::get('/admin/student-grades/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
     
 
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
@@ -113,6 +115,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::post('/admin/certificates/generate-all', [AdminCertificateController::class, 'generateAllCertificates'])->name('admin.certificate.generateAll');
 
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
+    Route::get('admin/presences/reportAndMonitorings/export', [AdminReportAndMonitoringController::class, 'export'])->name('admin.reportAndMonitorings.export');
 
     Route::resource('/notification', NotificationController::class)->names('notification');
 

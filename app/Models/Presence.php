@@ -11,6 +11,10 @@ class Presence extends Model
     use HasFactory;
     
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'date_entry' => 'date', // Ensure date_entry is cast to a date
+    ];
     
     /**
      * Get the student that owns this presence record

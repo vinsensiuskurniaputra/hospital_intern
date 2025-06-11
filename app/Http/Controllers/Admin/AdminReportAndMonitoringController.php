@@ -8,17 +8,26 @@ use Illuminate\Http\Request;
 use App\Models\ResponsibleUser;
 use App\Models\ReportAndMonitoring;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Response;
 use App\Models\Presence;
 use App\Models\StudentComponentGrade;
+use App\Models\InternshipClass;
 
 class AdminReportAndMonitoringController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $countStudent = Student::count();
+        $internshipClassId = $request->get('internship_class_id');
+
+        $studentsQuery = Student::query();
+        if ($internshipClassId) {
+            $studentsQuery->where('internship_class_id', $internshipClassId);
+        }
+
+        $countStudent = $studentsQuery->count();
         $countPIC = ResponsibleUser::count();
         $countAdmin = User::whereHas('roles', function ($query) {
             $query->where('name', 'admin');
@@ -27,6 +36,11 @@ class AdminReportAndMonitoringController extends Controller
         // Attendance chart data
         $attendanceData = Presence::selectRaw('MONTH(date_entry) as month, COUNT(*) as count')
             ->whereYear('date_entry', now()->year)
+            ->when($internshipClassId, function ($query) use ($internshipClassId) {
+                $query->whereHas('student', function ($q) use ($internshipClassId) {
+                    $q->where('internship_class_id', $internshipClassId);
+                });
+            })
             ->groupBy('month')
             ->orderBy('month')
             ->get();
@@ -44,6 +58,11 @@ class AdminReportAndMonitoringController extends Controller
 
         // Performance chart data
         $performanceData = StudentComponentGrade::selectRaw('stase_id, AVG(value) as avg_grade')
+            ->when($internshipClassId, function ($query) use ($internshipClassId) {
+                $query->whereHas('student', function ($q) use ($internshipClassId) {
+                    $q->where('internship_class_id', $internshipClassId);
+                });
+            })
             ->groupBy('stase_id')
             ->with('stase')
             ->get();
@@ -53,12 +72,15 @@ class AdminReportAndMonitoringController extends Controller
             'data' => $performanceData->pluck('avg_grade')->toArray()
         ];
 
+        $internshipClasses = InternshipClass::all();
+
         return view('pages.admin.report_and_monitoring.index', compact(
             'countStudent',
             'countPIC',
             'countAdmin',
             'attendanceChart',
-            'performanceChart'
+            'performanceChart',
+            'internshipClasses'
         ));
     }
 
@@ -108,5 +130,62 @@ class AdminReportAndMonitoringController extends Controller
     public function destroy(ReportAndMonitoring $reportAndMonitoring)
     {
         //
+    }
+
+    public function export(Request $request)
+    {
+        $internshipClassId = $request->get('internship_class_id');
+
+        $studentsQuery = Student::with(['user', 'presences', 'grades']);
+        if ($internshipClassId) {
+            $studentsQuery->where('internship_class_id', $internshipClassId);
+        }
+        $students = $studentsQuery->get();
+
+        $csvData = [];
+        $csvData[] = [
+            'Nama Mahasiswa', 
+            'NIM', 
+            'Present', 
+            'Sick', 
+            'Absent', 
+            'Total Meetings', 
+            'Average Grade in All Stase', 
+            'Attendance Percentage'
+        ];
+
+        foreach ($students as $student) {
+            $totalMeetings = $student->presences->count();
+            $present = $student->presences->where('status', 'present')->count();
+            $sick = $student->presences->where('status', 'sick')->count();
+            $absent = $student->presences->where('status', 'absent')->count();
+            $averageGrade = $student->grades->avg('avg_grades');
+            $attendancePercentage = $totalMeetings > 0 ? round(($present / $totalMeetings) * 100, 2) : 0;
+
+            $csvData[] = [
+                $student->user->name,
+                $student->nim,
+                $present,
+                $sick,
+                $absent,
+                $totalMeetings,
+                $averageGrade,
+                $attendancePercentage . '%'
+            ];
+        }
+
+        $filename = 'laporan_monitoring_' . now()->format('Ymd_His') . '.csv';
+        $handle = fopen('php://temp', 'w+');
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return Response::make($content, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$filename}",
+        ]);
     }
 }
