@@ -46,11 +46,8 @@ class Stase extends Model
      */
     public function getAllResponsibleUsers()
     {
-        return $this->responsibleAssignments()
-                   ->with('responsibleUser.user')
-                   ->get()
-                   ->map(function($assignment) {
-                       return $assignment->responsibleUser;
-                   });
+        return $this->responsibleUsers()
+                   ->with('user')
+                   ->get();
     }
 }

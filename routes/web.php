@@ -127,8 +127,10 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/home', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard');
     
     // Jadwal
-    Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule');
-    
+    Route::get('/schedule', [App\Http\Controllers\Student\StudentScheduleController::class, 'index'])->name('schedule.index');
+    Route::get('/schedule/by-date', [App\Http\Controllers\Student\StudentScheduleController::class, 'getSchedulesByDate'])->name('schedule.by-date');
+    Route::get('/schedule/filtered', [App\Http\Controllers\Student\StudentScheduleController::class, 'getFilteredSchedules'])->name('schedule.filtered');
+    Route::get('/schedule/all', [App\Http\Controllers\Student\StudentScheduleController::class, 'getAllSchedules'])->name('schedule.all');
     // Presensi & Sertifikasi
     Route::get('/attendance', [App\Http\Controllers\Student\StudentAttendanceController::class, 'index'])->name('attendance');
     Route::post('/attendance/checkout', [App\Http\Controllers\Student\StudentAttendanceController::class, 'checkOut'])->name('attendance.checkout');
@@ -158,9 +160,9 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     
     // Jadwal
     Route::get('/schedule', [ResponsibleScheduleController::class, 'index'])->name('schedule.index');
-    Route::get('/schedule/get-schedules', [ResponsibleScheduleController::class, 'getSchedules'])->name('schedule.get-schedules');
+    Route::get('/schedule/get-schedules', [ResponsibleScheduleController::class, 'getSchedules'])->name('schedule.getSchedules');
     Route::get('/schedule/filter', [ResponsibleScheduleController::class, 'filter'])->name('schedule.filter');
-    Route::get('/schedule/class-details', [ResponsibleScheduleController::class, 'getClassDetails'])->name('schedule.class-details');
+    Route::get('/schedule/class-details', [ResponsibleScheduleController::class, 'getClassDetails'])->name('schedule.classDetails');
     
     // Presensi
     Route::get('/attendance', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'index'])
@@ -181,8 +183,8 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     // Profile
     Route::get('/profile', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'index'])->name('profile');
     
-    // Nilai
-    Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades');
+    // Nilai - PERBAIKAN: Pastikan route ini terdefinisi dengan benar
+    Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades.index');
     Route::post('/grades/store', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'store'])->name('grades.store');
     
     // Laporan & Rekapitulasi
@@ -193,7 +195,7 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
 
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
-    Route::get('/schedule/get-classes', [ResponsibleScheduleController::class, 'getClassesForStase'])->name('schedule.get-classes');
+    Route::get('/schedule/get-classes', [ResponsibleScheduleController::class, 'getClassesForStase'])->name('schedule.getClasses');
     Route::get('/students', [App\Http\Controllers\Responsible\ResponsibleStudentController::class, 'index'])->name('students.index');
 });
 
