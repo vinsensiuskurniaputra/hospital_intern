@@ -787,6 +787,7 @@
 
             // Fungsi untuk fetch data
             function fetchFilteredData(params) {
+                // Show loading state
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="7" class="text-center py-4">
@@ -807,41 +808,44 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
-                        // Update table body
+                        // Update table body with the filtered data
                         tbody.innerHTML = data.html;
 
-                        // Update pagination and results count
+                        // Update pagination container
                         if (paginationContainer) {
                             if (data.total > 0) {
-                                // Show pagination if there are results
-                                paginationContainer.innerHTML = data.pagination;
-                                
-                                // Update results count text
-                                const resultsCount = document.querySelector('.text-sm.text-gray-700') || 
-                                    document.createElement('div');
-                                resultsCount.className = 'text-sm text-gray-700';
-                                resultsCount.innerHTML = `Showing ${data.from} to ${data.to} of ${data.total} results`;
-                                
-                                // Add results count if it doesn't exist
-                                if (!document.querySelector('.text-sm.text-gray-700')) {
-                                    paginationContainer.insertBefore(resultsCount, paginationContainer.firstChild);
-                                }
+                                // Show pagination and results count
+                                let paginationHtml = '<div class="flex flex-col gap-4">';
+                                paginationHtml += `<div class="text-sm text-gray-700">Showing ${data.from} to ${data.to} of ${data.total} results</div>`;
+                                paginationHtml += data.pagination;
+                                paginationHtml += '</div>';
+                                paginationContainer.innerHTML = paginationHtml;
+
+                                // Reattach pagination click handlers
+                                paginationContainer.querySelectorAll('a').forEach(link => {
+                                    link.addEventListener('click', handlePaginationClick);
+                                });
                             } else {
-                                // Show "No results found" message
-                                paginationContainer.innerHTML = `
-                                    <div class="text-sm text-gray-700">No results found</div>
+                                // Show no results message
+                                tbody.innerHTML = `
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-gray-500">
+                                            No results found
+                                        </td>
+                                    </tr>
                                 `;
+                                paginationContainer.innerHTML = '';
                             }
-                            
-                            // Reattach pagination click handlers
-                            paginationContainer.querySelectorAll('a').forEach(link => {
-                                link.addEventListener('click', handlePaginationClick);
-                            });
                         }
-                        
+
                         // Reattach delete form handlers
                         document.querySelectorAll('.delete-form').forEach(form => {
                             form.addEventListener('submit', confirmDelete);
@@ -859,6 +863,9 @@
                             </td>
                         </tr>
                     `;
+                    if (paginationContainer) {
+                        paginationContainer.innerHTML = '';
+                    }
                 });
             }
 
@@ -883,17 +890,18 @@
                 filter.addEventListener('change', debouncedFilter);
             });
 
-            searchInput.addEventListener('keyup', function(e) {
+            searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    applyFilters();
+                    const params = new URLSearchParams({
+                        departemen: departemenFilter.value || '',
+                        tahun: tahunFilter.value || '',
+                        pembimbing: pembimbingFilter.value || '',
+                        search: this.value || ''
+                    });
+                    fetchFilteredData(params);
                 }
             });
-
-            // Add immediate search after a delay
-            // searchInput.addEventListener('input', debounce(() => {
-            //     applyFilters();
-            // }, 500));
 
             // Attach pagination handlers on initial load
             if (paginationContainer) {

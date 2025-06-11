@@ -279,21 +279,12 @@ class AdminScheduleController extends Controller
             $allSchedules = $query->paginate(10)->appends($request->all());
 
             if ($request->ajax()) {
-                // Get the actual count of filtered results
-                $total = $allSchedules->total();
-                $from = $total > 0 ? $allSchedules->firstItem() : 0;
-                $to = $total > 0 ? $allSchedules->lastItem() : 0;
-
                 return response()->json([
                     'success' => true,
                     'html' => view('components.admin.schedule.table-body', [
                         'allSchedules' => $allSchedules
                     ])->render(),
-                    'pagination' => $allSchedules->links()->render(),
-                    'total' => $total,
-                    'from' => $from,
-                    'to' => $to,
-                    'current_page' => $allSchedules->currentPage()
+                    'pagination' => $allSchedules->links()->render()
                 ]);
             }
 

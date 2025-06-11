@@ -813,27 +813,14 @@
                         // Update table body
                         tbody.innerHTML = data.html;
 
-                        // Update pagination and results count
-                        if (paginationContainer) {
-                            if (data.total > 0) {
-                                // Show pagination if there are results
-                                paginationContainer.innerHTML = data.pagination;
-                                
-                                // Update results count text
-                                const resultsCount = document.querySelector('.text-sm.text-gray-700') || 
-                                    document.createElement('div');
-                                resultsCount.className = 'text-sm text-gray-700';
+                        // Update pagination
+                        if (paginationContainer && data.pagination) {
+                            paginationContainer.innerHTML = data.pagination;
+                            
+                            // Update results count text if it exists
+                            const resultsCount = document.querySelector('.text-sm.text-gray-700');
+                            if (resultsCount && data.total) {
                                 resultsCount.innerHTML = `Showing ${data.from} to ${data.to} of ${data.total} results`;
-                                
-                                // Add results count if it doesn't exist
-                                if (!document.querySelector('.text-sm.text-gray-700')) {
-                                    paginationContainer.insertBefore(resultsCount, paginationContainer.firstChild);
-                                }
-                            } else {
-                                // Show "No results found" message
-                                paginationContainer.innerHTML = `
-                                    <div class="text-sm text-gray-700">No results found</div>
-                                `;
                             }
                             
                             // Reattach pagination click handlers
@@ -883,17 +870,12 @@
                 filter.addEventListener('change', debouncedFilter);
             });
 
-            searchInput.addEventListener('keyup', function(e) {
+            searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    e.preventDefault();
+                    e.preventDefault(); // Prevent form submission if within a form
                     applyFilters();
                 }
             });
-
-            // Add immediate search after a delay
-            // searchInput.addEventListener('input', debounce(() => {
-            //     applyFilters();
-            // }, 500));
 
             // Attach pagination handlers on initial load
             if (paginationContainer) {
