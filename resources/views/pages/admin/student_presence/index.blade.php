@@ -77,9 +77,10 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Info Mahasiswa
                             </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tahun Kelas
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Evidence</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th> --}}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detail</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -96,6 +97,9 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td class="px-6 py-4 text-sm text-gray-800">
+                                    {{ $student->internshipClass->classYear->class_year ?? '-' }}
+                                </td>
                                 <td class="px-6 py-4">
                                     {{-- Bilah Progres Gabungan --}}
                                     <div class="w-full bg-gray-200 rounded-full h-4 flex overflow-hidden">
@@ -108,40 +112,30 @@
                                     </div>
 
                                     {{-- Keterangan --}}
-                                    <div class="text-xs text-gray-700 mt-2 space-x-2">
-                                        <span class="inline-block">
-                                            <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1"></span>Hadir:
-                                            {{ $student->present_percentage }}%
-                                        </span>
-                                        <span class="inline-block">
-                                            <span class="inline-block w-3 h-3 bg-yellow-400 rounded-full mr-1"></span>Sakit:
-                                            {{ $student->sick_percentage }}%
-                                        </span>
-                                        <span class="inline-block">
-                                            <span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>Alpa:
-                                            {{ $student->absent_percentage }}%
-                                        </span>
+                                    <div class="text-xs text-gray-700 mt-2 space-y-1">
+                                        <div>
+                                            <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                                            Hadir: {{ $student->present_percentage }}%
+                                            ({{ $student->presences->where('status', 'present')->count() }})
+                                        </div>
+                                        <div>
+                                            <span class="inline-block w-3 h-3 bg-yellow-400 rounded-full mr-1"></span>
+                                            Sakit: {{ $student->sick_percentage }}%
+                                            ({{ $student->presences->where('status', 'sick')->count() }})
+                                        </div>
+                                        <div>
+                                            <span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>
+                                            Alpa: {{ $student->absent_percentage }}%
+                                            ({{ $student->presences->where('status', 'absent')->count() }})
+                                        </div>
                                     </div>
-                                    {{-- <td class="px-6 py-4">
-                                @if ($row['bukti'] !== '-')
-                                    <button
-                                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100">
-                                        <i class="bi bi-eye mr-1"></i> View
-                                    </button>
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td> --}}
-                                    {{-- <td class="px-6 py-4">
-                                <div class="flex gap-2">
-                                    <button class="p-1 text-blue-600 hover:text-blue-700">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="p-1 text-green-600 hover:text-green-700">
-                                        <i class="bi bi-check2"></i>
-                                    </button>
-                                </div>
-                            </td> --}}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <a href="{{ route('admin.studentPresencesDetail.show', ['student' => $student->id]) }}"
+                                        class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600">
+                                        <i class="bi bi-eye mr-1"></i>Detail
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
