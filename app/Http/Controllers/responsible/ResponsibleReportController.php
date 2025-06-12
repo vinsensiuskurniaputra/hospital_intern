@@ -100,6 +100,9 @@ class ResponsibleReportController extends Controller
                 'internship_classes.name as class_name',
                 DB::raw('COUNT(presences.status) as total_presensi'),
                 DB::raw('COUNT(CASE WHEN presences.status = "present" THEN 1 END) as present'),
+                DB::raw('COUNT(CASE WHEN presences.status = "izin" THEN 1 END) as izin'),
+                DB::raw('COUNT(CASE WHEN presences.status = "sakit" THEN 1 END) as sakit'),
+                DB::raw('COUNT(CASE WHEN presences.status = "alpa" THEN 1 END) as alpa'),
                 DB::raw('ROUND(SUM(IF(presences.status = "present", 1, 0)) / COUNT(presences.status) * 100, 2) as persentase_present')
             )
             ->join('students', 'presences.student_id', '=', 'students.id')
@@ -128,6 +131,9 @@ class ResponsibleReportController extends Controller
             $student->attendance_percentage = $absensi ? $absensi->persentase_present : 0;
             $student->total_presensi = $absensi ? $absensi->total_presensi : 0;
             $student->present = $absensi ? $absensi->present : 0;
+            $student->izin = $absensi ? $absensi->izin : 0;
+            $student->sakit = $absensi ? $absensi->sakit : 0;
+            $student->alpa = $absensi ? $absensi->alpa : 0;
             $student->average_grade = $gradesData->get($student->id)->average_grade ?? 0;
         }
 
@@ -233,14 +239,16 @@ class ResponsibleReportController extends Controller
             ->get()
             ->groupBy('student_id');
 
-        // Ambil absensi lengkap (hadir, izin, alpa, persentase hadir)
+        // Ambil absensi lengkap (hadir, izin, sakit, alpa, persentase hadir)
         $absensiData = DB::table('presences')
             ->select(
                 'students.id as student_id',
                 DB::raw('COUNT(*) as total_presensi'),
                 DB::raw('SUM(CASE WHEN presences.status = "present" THEN 1 ELSE 0 END) as hadir'),
-                DB::raw('SUM(CASE WHEN presences.status = "izin" THEN 1 ELSE 0 END) as izin'),
-                DB::raw('SUM(CASE WHEN presences.status = "alpa" THEN 1 ELSE 0 END) as alpa'),
+                DB::raw('SUM(CASE WHEN presences.status = "sick" THEN 1 ELSE 0 END) as sakit'),
+                DB::raw('SUM(CASE WHEN presences.status = "absent" THEN 1 ELSE 0 END) as alpa'),
+                // Gabungkan status izin dan excused
+                DB::raw('SUM(CASE WHEN presences.status = "izin" OR presences.status = "excused" THEN 1 ELSE 0 END) as izin'),
                 DB::raw('ROUND(SUM(CASE WHEN presences.status = "present" THEN 1 ELSE 0 END) / COUNT(*) * 100, 0) as persentase_present')
             )
             ->join('students', 'presences.student_id', '=', 'students.id')
@@ -249,7 +257,19 @@ class ResponsibleReportController extends Controller
             ->get()
             ->keyBy('student_id');
 
-        // Nilai rata-rata
+        // Susun header kolom
+        $columns = [
+            'NIM', 'Nama', 'Kelas Magang', 'Stase', 'Jurusan', 'Kampus', 'Tahun Angkatan',
+            'Total Pertemuan', 'Hadir', 'Izin', 'Sakit', 'Alpa', 'Persentase Kehadiran (%)',
+            'Keahlian', 'Profesionalisme', 'Komunikasi', 'Kemampuan Menangani Pasien','Nilai Rata-Rata'
+        ];
+
+        $filename = 'rekapitulasi_stase_' . ($stase->name ?? 'all') . '_' . now()->format('Ymd_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
         $gradesData = DB::table('student_grades')
             ->select(
                 'student_id',
@@ -260,19 +280,6 @@ class ResponsibleReportController extends Controller
             ->groupBy('student_id')
             ->get()
             ->keyBy('student_id');
-
-        // Susun header kolom
-        $columns = [
-            'NIM', 'Nama', 'Kelas Magang', 'Stase', 'Jurusan', 'Kampus', 'Tahun Angkatan',
-            'Total Presensi', 'Hadir', 'Izin', 'Alpa', 'Persentase Kehadiran (%)',
-            'Keahlian', 'Profesionalisme', 'Komunikasi', 'Kemampuan Menangani Pasien','Nilai Rata-Rata'
-        ];
-
-        $filename = 'rekapitulasi_stase_' . ($stase->name ?? 'all') . '_' . now()->format('Ymd_His') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
 
         return new \Symfony\Component\HttpFoundation\StreamedResponse(function() use ($students, $columns, $stase, $absensiData, $gradesData, $gradeComponents, $componentGrades, $wantedComponents) {
             $handle = fopen('php://output', 'w');
@@ -305,7 +312,8 @@ class ResponsibleReportController extends Controller
                     $student->internshipClass->classYear->class_year,
                     $absensi ? $absensi->total_presensi : 0,
                     $absensi ? $absensi->hadir : 0,
-                    $absensi ? $absensi->izin : 0,
+                    $absensi ? $absensi->izin ?? 0 : 0,   // Jika tidak ada status izin, tetap 0
+                    $absensi ? $absensi->sakit : 0,
                     $absensi ? $absensi->alpa : 0,
                     $absensi ? $absensi->persentase_present : 0,
                 ];

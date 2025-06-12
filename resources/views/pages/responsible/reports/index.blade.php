@@ -3,24 +3,12 @@
 @section('content')
 <div class="min-h-screen bg-gray-100 p-6">
     <!-- Main Content Container -->
-    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 min-h-[100vh] flex flex-col">
         <h1 class="text-xl font-semibold text-gray-800 mb-6">Laporan Rekapitulasi</h1>
         
         <!-- Filters -->
         <form id="filterForm" method="GET" action="{{ route('responsible.reports') }}" class="mb-6">
-            <!-- Filter Container -->
             <div class="flex flex-wrap items-center gap-4">
-                <!-- Search Bar -->
-                <!-- <div class="flex-1 min-w-[200px]">
-                    <input 
-                        type="text" 
-                        name="search" 
-                        placeholder="Search" 
-                        value="{{ request('search') }}" 
-                        class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
-                    >
-                </div> -->
-
                 <!-- Stase Dropdown -->
                 <div class="w-48">
                     <select 
@@ -28,8 +16,9 @@
                         id="stase" 
                         class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 appearance-none"
                     >
+                        <option value="">Pilih Stase</option>
                         @foreach($stases ?? [] as $staseItem)
-                            <option value="{{ $staseItem->id }}" {{ request('stase') == $staseItem->id || ($staseItem->id == $stase->id && !request('stase')) ? 'selected' : '' }}>
+                            <option value="{{ $staseItem->id }}" {{ request('stase') == $staseItem->id || ($staseItem->id == ($stase->id ?? null) && !request('stase')) ? 'selected' : '' }}>
                                 {{ $staseItem->name }}
                             </option>
                         @endforeach
@@ -79,10 +68,15 @@
         </form>
         
         <!-- Data Table Section -->
-        <div class="overflow-x-auto mb-8">
+        <div class="overflow-x-auto mb-8 flex-1 flex flex-col">
             <!-- DataTables CSS -->
             <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
             <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.tailwindcss.min.css">
+
+            @php
+                $filterFilled = request('stase') && request('internship_class') && request('class_year');
+            @endphp
+
             <table id="rekapTable" class="min-w-full border-collapse bg-white">
                 <thead>
                     <tr class="border-b border-gray-200">
@@ -98,36 +92,52 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @foreach($students as $student)
-                    <tr class="hover:bg-gray-50 transition duration-150">
-                        <td class="py-4 px-4 text-sm text-gray-700">{{ $student->nim }}</td>
-                        <td class="py-4 px-4">
-                            <div class="flex items-center space-x-3">
-                                <img 
-                                    class="h-8 w-8 rounded-full object-cover" 
-                                    src="{{ $student->user->photo_profile_url ?? '/api/placeholder/32/32' }}" 
-                                    alt="Profile"
-                                >
-                                <span class="text-sm font-medium text-gray-900">{{ $student->user->name }}</span>
-                            </div>
-                        </td>
-                        <td class="py-4 px-4 text-sm text-gray-700">{{ $student->internshipClass->name }}</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">{{ $staseName }}</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">{{ $student->studyProgram->name }}</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">{{ $student->studyProgram->campus->name }}</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">{{ $student->internshipClass->classYear->class_year }}</td>
-                        <td class="py-4 px-4 text-sm text-center font-medium 
-                            {{ $student->attendance_percentage >= 75 ? 'text-green-600' : 'text-red-600' }}">
-                            {{ $student->attendance_percentage }}%
-                        </td>
-                        <td class="py-4 px-4 text-sm text-center font-medium">
-                            {{ round($student->average_grade) }}
-                        </td>
-                    </tr>
-                    @endforeach
+                    @if(!$filterFilled)
+                        <tr>
+                            <td colspan="9" class="py-8 text-center text-gray-600 text-base font-normal">
+                                Silakan lengkapi filter untuk melihat data mahasiswa
+                            </td>
+                        </tr>
+                    @elseif($students->isEmpty())
+                        <tr>
+                            <td colspan="9" class="py-8 text-center text-gray-500 text-lg font-medium">
+                                Data mahasiswa tidak ditemukan untuk filter yang dipilih.
+                            </td>
+                        </tr>
+                    @else
+                        @foreach($students as $student)
+                        <tr class="hover:bg-gray-50 transition duration-150">
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $student->nim }}</td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center space-x-3">
+                                    <img 
+                                        class="h-8 w-8 rounded-full object-cover" 
+                                        src="{{ $student->user->photo_profile_url ?? '/api/placeholder/32/32' }}" 
+                                        alt="Profile"
+                                    >
+                                    <span class="text-sm font-medium text-gray-900">{{ $student->user->name }}</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $student->internshipClass->name }}</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $staseName }}</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $student->studyProgram->name }}</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $student->studyProgram->campus->name }}</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $student->internshipClass->classYear->class_year }}</td>
+                            <td class="py-4 px-4 text-sm text-center font-medium 
+                                {{ $student->attendance_percentage >= 75 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ $student->attendance_percentage }}%
+                            </td>
+                            <td class="py-4 px-4 text-sm text-center font-medium">
+                                {{ round($student->average_grade) }}
+                            </td>
+                        </tr>
+                        @endforeach
+                    @endif
                 </tbody>
             </table>
-            <!-- DataTables JS -->
+
+            @if($filterFilled && !$students->isEmpty())
+            <!-- DataTables JS hanya aktif jika data tampil -->
             <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
             <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
             <script src="https://cdn.datatables.net/1.13.8/js/dataTables.tailwindcss.min.js"></script>
@@ -144,9 +154,11 @@
                     });
                 });
             </script>
+            @endif
         </div>
         
-        <!-- Bottom Sections -->
+        {{-- Bottom Sections: hanya tampil jika filter sudah lengkap dan data ada --}}
+        @if($filterFilled && !$students->isEmpty())
         <div class="grid grid-cols-2 gap-6">
             <!-- Left Column -->
             <div class="space-y-6">
@@ -284,6 +296,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
     <!-- Footer with updated styling -->
@@ -295,69 +308,53 @@
 <!-- Update style section -->
 <style>
     body {
-        background-color: #F1F5F9;  /* Lighter slate background */
+        background-color: #F1F5F9;
     }
-    
     .bg-slate-50 {
-        background-color: #FFFFFF;  /* Pure white for cards */
+        background-color: #FFFFFF;
     }
-    
-    /* Table styling */
     .divide-y > tr {
         border-color: #F8FAFC;
     }
-    
     th {
         border: none;
         color: #64748B;
         font-weight: 500;
     }
-    
     td {
         border: none;
     }
-    
     tr:hover {
         background-color: #F8FAFC;
     }
-    
-    /* Card styling */
     .shadow-sm {
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
-    
-    /* Button styling */
     .hover\:bg-teal-600:hover {
         background-color: #0D9488;
     }
-    
     .bg-teal-500 {
         background-color: #14B8A6;
     }
-    
-    /* Status badges */
     .bg-yellow-100 {
         background-color: #FEF9C3;
     }
-    
     .bg-green-100 {
         background-color: #DCFCE7;
     }
-    
     .text-yellow-800 {
         color: #854D0E;
     }
-    
     .text-green-800 {
         color: #166534;
     }
-
-    /* Custom select dropdown arrow */
     select {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
         background-position: right 0.5rem center;
         background-repeat: no-repeat;
         background-size: 1.5em 1.5em;
     }
+    /* min-h-[60vh] for main content to keep background stretch even if empty */
+    .min-h-\[100vh\] { min-height: 100vh; }
 </style>
 @endsection
