@@ -131,9 +131,13 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/schedule/by-date', [App\Http\Controllers\Student\StudentScheduleController::class, 'getSchedulesByDate'])->name('schedule.by-date');
     Route::get('/schedule/filtered', [App\Http\Controllers\Student\StudentScheduleController::class, 'getFilteredSchedules'])->name('schedule.filtered');
     Route::get('/schedule/all', [App\Http\Controllers\Student\StudentScheduleController::class, 'getAllSchedules'])->name('schedule.all');
+
     // Presensi & Sertifikasi
     Route::get('/attendance', [App\Http\Controllers\Student\StudentAttendanceController::class, 'index'])->name('attendance');
     Route::post('/attendance/checkout', [App\Http\Controllers\Student\StudentAttendanceController::class, 'checkOut'])->name('attendance.checkout');
+    // Route untuk view sertifikat (buka di tab baru)
+    Route::get('/certificate/view/{id}', [App\Http\Controllers\Student\StudentAttendanceController::class, 'viewCertificate'])
+        ->name('certificate.view');
     
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Student\StudentGradeController::class, 'index'])->name('grades');
@@ -151,6 +155,7 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     Route::get('/notifications/{id}', [App\Http\Controllers\Student\StudentNotificationController::class, 'show'])->name('notifications.show');
     Route::post('/notifications/{id}/read', [App\Http\Controllers\Student\StudentNotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [App\Http\Controllers\Student\StudentNotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+
 });
 
 // Responsible Routes 

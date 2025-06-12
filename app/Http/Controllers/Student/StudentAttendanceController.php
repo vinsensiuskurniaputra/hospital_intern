@@ -17,63 +17,59 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentAttendanceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $student = Auth::user()->student;
-        
-        try {
-            // Get attendance data from database
-            $presences = Presence::where('student_id', $student->id)
-                ->whereMonth('date_entry', Carbon::now()->month)
-                ->whereYear('date_entry', Carbon::now()->year)
-                ->with(['presenceSession.schedule.stase', 'presenceSession.schedule.internshipClass'])
-                ->get();
+        $month = $request->get('month', now()->month);
+        $year = $request->get('year', now()->year);
 
-            // Calculate attendance stats
-            $total = $presences->count();
-            $present = $presences->where('status', 'present')->count();
-            $sick = $presences->where('status', 'sick')->count();
-            $absent = $presences->where('status', 'absent')->count();
+        $presences = Presence::where('student_id', $student->id)
+            ->whereYear('date_entry', $year)
+            ->whereMonth('date_entry', $month)
+            ->with(['presenceSession.schedule.stase', 'presenceSession.schedule.internshipClass'])
+            ->get();
 
-            // Create attendanceStats array that matches what the view expects
-            $attendanceStats = [
-                'total' => $total,
-                'present' => [
-                    'count' => $present,
-                    'percent' => $total > 0 ? round(($present / $total) * 100, 1) : 0
-                ],
-                'sick' => [
-                    'count' => $sick,
-                    'percent' => $total > 0 ? round(($sick / $total) * 100, 1) : 0
-                ],
-                'absent' => [
-                    'count' => $absent,
-                    'percent' => $total > 0 ? round(($absent / $total) * 100, 1) : 0
-                ]
-            ];
+        // Calculate attendance stats
+        $total = $presences->count();
+        $present = $presences->where('status', 'present')->count();
+        $sick = $presences->where('status', 'sick')->count();
+        $absent = $presences->where('status', 'absent')->count();
 
-            // Get stase attendance data from database
-            $stases = $this->getStaseAttendanceData($student->id);
+        // Create attendanceStats array that matches what the view expects
+        $attendanceStats = [
+            'total' => $total,
+            'present' => [
+                'count' => $present,
+                'percent' => $total > 0 ? round(($present / $total) * 100, 1) : 0
+            ],
+            'sick' => [
+                'count' => $sick,
+                'percent' => $total > 0 ? round(($sick / $total) * 100, 1) : 0
+            ],
+            'absent' => [
+                'count' => $absent,
+                'percent' => $total > 0 ? round(($absent / $total) * 100, 1) : 0
+            ]
+        ];
 
-            // Check if certificate is available
-            $certificate = Certificate::where('student_id', $student->id)->first();
-            $allStagesCompleted = $certificate ? true : false;
+        // Get stase attendance data from database
+        $stases = $this->getStaseAttendanceData($student->id);
 
-            return view('pages.student.attendance.index', compact(
-                'presences',
-                'total',
-                'present',
-                'sick',
-                'absent',
-                'attendanceStats',
-                'stases',
-                'allStagesCompleted'
-            ));
+        // Check if certificate is available
+        $certificate = Certificate::where('student_id', $student->id)->first();
+        $allStagesCompleted = $certificate ? true : false;
 
-        } catch (\Exception $e) {
-            Log::error('Error loading attendance stats: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat memuat data kehadiran');
-        }
+        return view('pages.student.attendance.index', compact(
+            'presences',
+            'total',
+            'present',
+            'sick',
+            'absent',
+            'attendanceStats',
+            'stases',
+            'allStagesCompleted'
+        ));
+
     }
 
     private function getStaseAttendanceData($studentId)
@@ -326,43 +322,86 @@ class StudentAttendanceController extends Controller
         ]);
     }
     
-    public function downloadCertificate()
+    public function downloadCertificate($id)
+    {
+        // Cari student berdasarkan id
+        $student = \App\Models\Student::findOrFail($id);
+        
+        // Cari certificate yang terhubung dengan student_id tersebut
+        $certificate = Certificate::where('student_id', $student->id)->first();
+
+        // Cek apakah semua stase sudah selesai
+        $allStaseCompleted = $student->stases()->where('status', '!=', 'completed')->count() === 0;
+        if (!$allStaseCompleted) {
+            return response()->json(['message' => 'Belum menyelesaikan magang'], 403);
+        }
+
+        if (!$certificate) {
+            abort(404, 'Sertifikat tidak ditemukan untuk mahasiswa ini.');
+        }
+
+        $data = [
+            'nama' => $student->user->name,
+            'kode' => $certificate->kode,
+            'periode' => $certificate->periode ?? null,
+        ];
+
+        $pdf = PDF::loadView('components.admin.certificate.template', $data);
+        $pdf->setPaper('A4', 'portrait');
+        $filename = "{$certificate->kode}.pdf";
+
+        return $pdf->download($filename);
+    }
+    
+    public function downloadDemoCertificate()
     {
         $student = Auth::user()->student;
+        $certificate = \App\Models\Certificate::where('student_id', $student->id)->first();
+
+        if (!$certificate || !$certificate->certificate_url) {
+            return redirect()->back()->with('error', 'Sertifikat belum tersedia.');
+        }
+
+        // Path ke file sertifikat
+        $filePath = public_path($certificate->certificate_url);
+
+        // Jika file tidak ada di public, coba di storage
+        if (!file_exists($filePath)) {
+            $filePath = storage_path('app/public/' . $certificate->certificate_url);
+        }
+
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'File sertifikat tidak ditemukan di server.');
+        }
+
+        $filename = 'Sertifikat_Magang_'.$student->name.'.pdf';
+        return response()->download($filePath, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+    
+    public function viewCertificate($id)
+    {
+        // Cari student berdasarkan id
+        $student = \App\Models\Student::findOrFail($id);
         
-        // Check if certificate exists
+        // Cari certificate yang terhubung dengan student_id tersebut
         $certificate = Certificate::where('student_id', $student->id)->first();
-        
+
         if (!$certificate) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Sertifikat belum tersedia. Pastikan Anda telah menyelesaikan semua stase.'
-            ], 404);
+            abort(404, 'Sertifikat tidak ditemukan untuk mahasiswa ini.');
         }
-        
-        try {
-            // Generate PDF certificate
-            $data = [
-                'student' => $student,
-                'certificate' => $certificate,
-                'issue_date' => Carbon::parse($certificate->issue_date)->format('d F Y'),
-                'completion_date' => Carbon::parse($certificate->completion_date)->format('d F Y')
-            ];
-            
-            $pdf = Pdf::loadView('certificates.template', $data);
-            $pdf->setPaper('A4', 'landscape');
-            
-            $filename = 'Sertifikat_' . str_replace(' ', '_', $student->name) . '_' . Carbon::now()->format('Y-m-d') . '.pdf';
-            
-            return $pdf->download($filename);
-            
-        } catch (\Exception $e) {
-            Log::error('Error generating certificate: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'Terjadi kesalahan saat mengunduh sertifikat.'
-            ], 500);
-        }
+
+        $data = [
+            'nama' => $student->user->name,
+            'kode' => $certificate->kode,
+            'periode' => $certificate->periode ?? null,
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('components.admin.certificate.template', $data);
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->stream("Sertifikat_{$certificate->kode}.pdf");
     }
     
     /**
@@ -398,17 +437,21 @@ class StudentAttendanceController extends Controller
     public function getPresences(Request $request)
     {
         $student = Auth::user()->student;
-        $month = $request->month;
-        $year = $request->year;
+        $month = $request->get('month', now()->month);
+        $year = $request->get('year', now()->year);
         
         $presences = Presence::where('student_id', $student->id)
             ->whereYear('date_entry', $year)
             ->whereMonth('date_entry', $month)
-            ->get()
-            ->pluck('status', 'date_entry')
-            ->toArray();
+            ->get();
         
-        return response()->json($presences);
+        // Pastikan mengembalikan format yang sesuai dengan DataTables
+        return response()->json([
+            'data' => $presences,
+            'draw' => $request->get('draw'),
+            'recordsTotal' => $presences->count(),
+            'recordsFiltered' => $presences->count()
+        ]);
     }
 
     public function getPresenceDetail($date)
