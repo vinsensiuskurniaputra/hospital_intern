@@ -185,8 +185,12 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     Route::get('/attendance/class-years', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getClassYears'])
     ->name('attendance.class-years');
     
-    // Profile
+    // Profile Routes
     Route::get('/profile', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/edit', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/password', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/password', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'updatePassword'])->name('profile.update-password');
     
     // Nilai - PERBAIKAN: Pastikan route ini terdefinisi dengan benar
     Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades.index');
