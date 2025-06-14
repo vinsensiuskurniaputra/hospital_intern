@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Presence;
 use App\Models\Certificate;
 use App\Models\StudyProgram;
 use App\Models\InternshipClass;
@@ -19,29 +20,93 @@ class Student extends Model
         'study_program_id',
         'nim',
         'telp',
-        'is_finished',
+        'is_finished'
     ];
 
+    protected $casts = [
+        'is_finished' => 'boolean'
+    ];
+
+    /**
+     * Get the user that owns this student
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the internship class that owns this student
+     */
     public function internshipClass()
     {
         return $this->belongsTo(InternshipClass::class);
     }
 
+    /**
+     * Get the study program that owns this student
+     */
     public function studyProgram()
     {
         return $this->belongsTo(StudyProgram::class);
     }
 
+    /**
+     * Get the presences for this student
+     */
+    public function presences()
+    {
+        return $this->hasMany(Presence::class);
+    }
+
+    /**
+     * Get the attendance excuses for this student
+     */
+    public function attendanceExcuses()
+    {
+        return $this->hasMany(AttendanceExcuse::class);
+    }
+
+    /**
+     * Get the grades for this student
+     */
+    public function grades()
+    {
+        return $this->hasMany(StudentGrade::class);
+    }
+
+    /**
+     * Get the component grades for this student
+     */
+    public function componentGrades()
+    {
+        return $this->hasMany(StudentComponentGrade::class);
+    }
+
+    /**
+     * Get the certificate for this student
+     */
     public function certificate()
     {
         return $this->hasOne(Certificate::class);
     }
 
+    /**
+     * Get schedules through internship class
+     */
+    public function schedules()
+    {
+        return $this->hasManyThrough(
+            Schedule::class,
+            InternshipClass::class,
+            'id', // Foreign key on internship_classes table
+            'internship_class_id', // Foreign key on schedules table
+            'internship_class_id', // Local key on students table
+            'id' // Local key on internship_classes table
+        );
+    }
+
+    // Static methods...
     public static function createStudent($data)
     {
         return self::create([
@@ -56,7 +121,7 @@ class Student extends Model
 
     public static function updateStudent($id, $data)
     {
-        $student = self::findOrFail($id); // Cari student berdasarkan ID
+        $student = self::findOrFail($id);
 
         $student->update([
             'user_id' => $data['user_id'] ?? $student->user_id,
@@ -73,38 +138,5 @@ class Student extends Model
     public static function deleteStudent($id)
     {
         self::where('id', $id)->delete();
-    }
-
-    public function presences()
-    {
-        return $this->hasMany(Presence::class);
-    }
-
-    public function attendanceExcuses()
-    {
-        return $this->hasMany(AttendanceExcuse::class);
-    }
-    public function grades()
-    {
-        return $this->hasMany(StudentGrade::class);
-    }
-
-    public function schedules()
-    {
-        return $this->hasManyThrough(
-            Schedule::class,
-            InternshipClass::class,
-            'id', // Foreign key pada internship_class yang menunjuk ke local key di tabel student
-            'internship_class_id', // Foreign key pada schedules yang menunjuk ke primary key di tabel internship_class
-            'internship_class_id', // Local key pada student
-            'id' // Primary key pada internship_class
-        );
-    }
-    /**
-     * Get all component grades for this student
-     */
-    public function componentGrades()
-    {
-        return $this->hasMany(StudentComponentGrade::class);
     }
 }

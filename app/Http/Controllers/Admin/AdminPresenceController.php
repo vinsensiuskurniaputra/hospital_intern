@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\Student;
 use App\Models\Presence;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class AdminPresenceController extends Controller
 {
@@ -13,7 +14,20 @@ class AdminPresenceController extends Controller
      */
     public function index()
     {
-        return view('pages.admin.student_presence.index');
+        $students = Student::with('presences')->paginate(10);
+
+        $statuses = ['present', 'sick', 'absent'];
+        foreach ($students as $student) {
+            $total = $student->presences->count();
+
+            foreach ($statuses as $status) {
+                $count = $student->presences->where('status', $status)->count();
+                $percentage = $total ? round(($count / $total) * 100, 2) : 0;
+                $student->{$status . '_percentage'} = $percentage;
+            }
+        }
+
+        return view('pages.admin.student_presence.index', compact('students'));
     }
 
     /**

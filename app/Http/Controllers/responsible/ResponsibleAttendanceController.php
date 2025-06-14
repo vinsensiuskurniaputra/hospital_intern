@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\Schedule;
 use App\Models\Stase;
 use App\Models\InternshipClass;
+use App\Models\ClassYear;
 use App\Models\Presence;
 use App\Models\PresenceSession;
 use Carbon\Carbon;
@@ -31,35 +32,23 @@ class ResponsibleAttendanceController extends Controller
         // Get default stase (first one)
         $defaultStase = $stases->first();
         
+        // Initialize empty collections - will be populated via AJAX
+        $classYears = collect();
+        $internshipClasses = collect();
+        $defaultClassYear = null;
+        $defaultClass = null;
+        
         // Get today's date for default filtering
         $today = Carbon::now()->format('Y-m-d');
         
-        // Get internship classes associated with the default stase through schedules
-        $internshipClasses = collect();
-        
-        if ($defaultStase) {
-            $internshipClasses = InternshipClass::whereHas('schedules', function($query) use ($defaultStase) {
-                $query->where('stase_id', $defaultStase->id);
-            })->get();
-        }
-        
-        // Get default internship class (first one)
-        $defaultClass = $internshipClasses->first();
-        
-        // Get students from the default class
+        // Don't load students initially - let JavaScript handle it
         $students = collect();
-        
-        if ($defaultClass) {
-            $students = Student::where('internship_class_id', $defaultClass->id)
-                ->with(['user', 'studyProgram', 'presences' => function($query) use ($today) {
-                    $query->whereDate('date_entry', $today);
-                }])
-                ->get();
-        }
         
         return view('pages.responsible.attendance.index', compact(
             'stases',
             'defaultStase',
+            'classYears',
+            'defaultClassYear',
             'internshipClasses',
             'defaultClass',
             'today',
@@ -68,7 +57,7 @@ class ResponsibleAttendanceController extends Controller
     }
     
     /**
-     * Get students based on stase, class, and date filter
+     * Get students based on stase, class year, class, and date filter
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -77,11 +66,13 @@ class ResponsibleAttendanceController extends Controller
     {
         $request->validate([
             'stase_id' => 'required|exists:stases,id',
+            'class_year_id' => 'required|exists:class_years,id',
             'class_id' => 'required|exists:internship_classes,id',
             'date' => 'required|date',
         ]);
         
         $staseId = $request->stase_id;
+        $classYearId = $request->class_year_id;
         $classId = $request->class_id;
         $date = $request->date;
         
@@ -127,7 +118,36 @@ class ResponsibleAttendanceController extends Controller
     }
     
     /**
-     * Get internship classes based on stase filter
+     * Get class years based on stase filter
+     * Only return class years that have classes with schedules in the selected stase
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getClassYears(Request $request)
+    {
+        $request->validate([
+            'stase_id' => 'required|exists:stases,id',
+        ]);
+        
+        $staseId = $request->stase_id;
+        
+        // Get class years that have internship classes with schedules in this stase
+        $classYears = ClassYear::whereHas('internshipClasses', function($query) use ($staseId) {
+            $query->whereHas('schedules', function($q) use ($staseId) {
+                $q->where('stase_id', $staseId);
+            });
+        })->orderBy('class_year', 'desc')->get();
+        
+        return response()->json([
+            'success' => true,
+            'class_years' => $classYears,
+        ]);
+    }
+    
+    /**
+     * Get internship classes based on stase and class year filter
+     * Only return classes that are in the selected stase AND class year
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -136,14 +156,20 @@ class ResponsibleAttendanceController extends Controller
     {
         $request->validate([
             'stase_id' => 'required|exists:stases,id',
+            'class_year_id' => 'required|exists:class_years,id',
         ]);
         
         $staseId = $request->stase_id;
+        $classYearId = $request->class_year_id;
         
-        // Get internship classes associated with the selected stase through schedules
-        $internshipClasses = InternshipClass::whereHas('schedules', function($query) use ($staseId) {
-            $query->where('stase_id', $staseId);
-        })->get();
+        // Get internship classes that:
+        // 1. Have schedules in the selected stase
+        // 2. Belong to the selected class year
+        $internshipClasses = InternshipClass::where('class_year_id', $classYearId)
+            ->whereHas('schedules', function($query) use ($staseId) {
+                $query->where('stase_id', $staseId);
+            })
+            ->get();
         
         return response()->json([
             'success' => true,

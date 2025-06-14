@@ -52,10 +52,3 @@
         </td>
     </tr>
 @endforeach
-
-<div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-    <div class="text-sm text-gray-500">
-        Showing {{ $students->firstItem() }} to {{ $students->lastItem() }} of {{ $students->total() }} entries
-    </div>
-    {{ $students->appends(request()->query())->links() }}
-</div>

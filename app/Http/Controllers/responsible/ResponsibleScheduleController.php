@@ -32,18 +32,12 @@ class ResponsibleScheduleController extends Controller
         // Get stase IDs
         $staseIds = $responsibleUser->stases->pluck('id');
 
-        // Get today's schedules for all assigned stases
-        $todaySchedules = Schedule::with(['internshipClass', 'stase.departement'])
+        // Fix the query for today's schedules to properly check date range
+        $todaySchedules = Schedule::with(['internshipClass.classYear', 'stase.departement'])
             ->whereIn('stase_id', $staseIds)
-            ->whereDate('start_date', Carbon::today())
-            ->get()
-            ->map(function($schedule) {
-                return [
-                    'class_name' => $schedule->internshipClass->name ?? 'N/A',
-                    'stase_name' => $schedule->stase->name ?? 'N/A',
-                    'department' => $schedule->stase->departement->name ?? 'N/A'
-                ];
-            });
+            ->whereDate('start_date', '<=', Carbon::today())
+            ->whereDate('end_date', '>=', Carbon::today())
+            ->get();
 
         // Get all schedules for table, ordered by start_date
         $schedules = Schedule::with(['internshipClass', 'stase.departement'])
@@ -89,50 +83,7 @@ class ResponsibleScheduleController extends Controller
     {
         try {
             $date = $request->date;
-            $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
             
-            if (!$responsibleUser) {
-                return response()->json([
-                    'success' => true,
-                    'schedules' => []
-                ]);
-            }
-
-            $staseIds = $responsibleUser->stases->pluck('id');
-
-            $schedules = Schedule::with(['internshipClass', 'stase.departement'])
-                ->whereIn('stase_id', $staseIds)
-                ->whereDate('start_date', $date)
-                ->get()
-                ->map(function($schedule) {
-                    return [
-                        'class_name' => $schedule->internshipClass->name ?? 'N/A',
-                        'stase_name' => $schedule->stase->name ?? 'N/A',
-                        'department' => $schedule->stase->departement->name ?? 'N/A'
-                    ];
-                });
-
-            return response()->json([
-                'success' => true,
-                'schedules' => $schedules
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ]);
-        }
-    }
-
-    public function filter(Request $request)
-    {
-        try {
-            $request->validate([
-                'start_date' => 'required|date',
-                'end_date' => 'required|date|after_or_equal:start_date'
-            ]);
-
             // Get responsible user data
             $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
             
@@ -145,20 +96,95 @@ class ResponsibleScheduleController extends Controller
 
             // Get stase IDs
             $staseIds = $responsibleUser->stases->pluck('id');
-
-            $schedules = Schedule::with(['internshipClass', 'stase.departement'])
+            
+            // Only fetch schedules for stases assigned to the responsible user
+            $schedules = Schedule::with(['stase.departement', 'internshipClass.classYear'])
                 ->whereIn('stase_id', $staseIds)
-                ->whereBetween('start_date', [$request->start_date, $request->end_date])
-                ->orderBy('start_date', 'asc')
+                ->whereDate('start_date', '<=', $date)
+                ->whereDate('end_date', '>=', $date)
                 ->get();
+                
+            return response()->json([
+                'success' => true,
+                'schedules' => $schedules->map(function($schedule) {
+                    return [
+                        'class_name' => $schedule->internshipClass->name ?? 'N/A',
+                        'academic_year' => $schedule->internshipClass->classYear->class_year ?? null,
+                        'stase_name' => $schedule->stase->name ?? 'N/A',
+                        'department' => $schedule->stase->departement->name ?? 'N/A',
+                    ];
+                })
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function filter(Request $request)
+    {
+        try {
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+
+            // Get responsible user data
+            $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
+            
+            if (!$responsibleUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak memiliki akses sebagai responsible'
+                ]);
+            }
+
+            // Get stase IDs
+            $staseIds = $responsibleUser->stases->pluck('id');
+
+            // Build query
+            $query = Schedule::with(['internshipClass.classYear', 'stase.departement'])
+                ->whereIn('stase_id', $staseIds);
+
+            // Apply date filters if provided
+            if ($startDate && $endDate) {
+                $query->where(function($q) use ($startDate, $endDate) {
+                    $q->whereBetween('start_date', [$startDate, $endDate])
+                      ->orWhereBetween('end_date', [$startDate, $endDate])
+                      ->orWhere(function($subQ) use ($startDate, $endDate) {
+                          $subQ->where('start_date', '<=', $startDate)
+                               ->where('end_date', '>=', $endDate);
+                      });
+                });
+            }
+
+            $schedules = $query->orderBy('start_date', 'asc')->get();
+
+            // Transform data for frontend
+            $transformedSchedules = $schedules->map(function($schedule) {
+                return [
+                    'id' => $schedule->id,
+                    'start_date' => $schedule->start_date,
+                    'end_date' => $schedule->end_date,
+                    'stase' => [
+                        'id' => $schedule->stase->id ?? null,
+                        'name' => $schedule->stase->name ?? 'N/A'
+                    ],
+                    'internship_class' => [
+                        'id' => $schedule->internshipClass->id ?? null,
+                        'name' => $schedule->internshipClass->name ?? 'N/A',
+                        'class_year' => $schedule->internshipClass->classYear->class_year ?? null
+                    ]
+                ];
+            });
 
             return response()->json([
                 'success' => true,
-                'schedules' => $schedules
+                'schedules' => $transformedSchedules,
+                'message' => 'Data berhasil dimuat'
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Schedule filter error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
@@ -169,23 +195,25 @@ class ResponsibleScheduleController extends Controller
     public function getClassDetails(Request $request)
     {
         try {
-            $request->validate([
-                'stase_id' => 'required|exists:stases,id',
-                'class_id' => 'required|exists:internship_classes,id',
-            ]);
+            $staseId = $request->input('stase_id');
+            $classId = $request->input('class_id');
 
-            // Update query untuk include campus dan photo
-            $students = Student::with([
-                'user:id,name,photo_profile_url', 
-                'studyProgram.campus:id,name',
-                'studyProgram:id,name,campus_id'
-            ])
-            ->where('internship_class_id', $request->class_id)
-            ->get();
+            if (!$staseId || !$classId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Parameter stase_id dan class_id diperlukan'
+                ]);
+            }
+
+            // Get students for the specific class and stase - HAPUS KONDISI STATUS
+            $students = Student::with(['user', 'studyProgram.campus', 'internshipClass.classYear'])
+                ->where('internship_class_id', $classId)
+                ->get(); // Hapus ->where('status', 'active')
 
             return response()->json([
                 'success' => true,
-                'students' => $students
+                'students' => $students,
+                'message' => 'Data mahasiswa berhasil dimuat'
             ]);
 
         } catch (\Exception $e) {
@@ -199,13 +227,28 @@ class ResponsibleScheduleController extends Controller
     public function getClassesForStase(Request $request)
     {
         try {
-            $request->validate([
-                'stase_id' => 'required|exists:stases,id',
-            ]);
+            $staseId = $request->input('stase_id');
 
-            // Get classes that have schedules in this stase
-            $classes = Schedule::where('stase_id', $request->stase_id)
-                ->with('internshipClass:id,name')
+            if (!$staseId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Parameter stase_id diperlukan'
+                ]);
+            }
+
+            // Get responsible user data
+            $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
+            
+            if (!$responsibleUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak memiliki akses sebagai responsible'
+                ]);
+            }
+
+            // Get classes for the specific stase
+            $classes = Schedule::with(['internshipClass.classYear'])
+                ->where('stase_id', $staseId)
                 ->get()
                 ->pluck('internshipClass')
                 ->unique('id')
@@ -213,7 +256,44 @@ class ResponsibleScheduleController extends Controller
 
             return response()->json([
                 'success' => true,
-                'classes' => $classes
+                'classes' => $classes,
+                'message' => 'Data kelas berhasil dimuat'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getStudentDetail(Request $request)
+    {
+        try {
+            $studentId = $request->input('student_id');
+
+            if (!$studentId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Parameter student_id diperlukan'
+                ]);
+            }
+
+            $student = Student::with(['user', 'studyProgram.campus', 'internshipClass.classYear'])
+                ->find($studentId);
+
+            if (!$student) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mahasiswa tidak ditemukan'
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'student' => $student,
+                'message' => 'Data mahasiswa berhasil dimuat'
             ]);
 
         } catch (\Exception $e) {
