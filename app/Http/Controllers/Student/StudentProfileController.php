@@ -50,6 +50,7 @@ class StudentProfileController extends Controller
         return view("pages.student.profile.index", compact('results'));
     }
 
+
     public function showChangePassword()
     {
         $userId = auth()->user()->id;

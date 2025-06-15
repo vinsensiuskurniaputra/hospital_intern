@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use Carbon\Carbon;
+use App\Models\Student;
 use App\Models\Departement;
 use App\Models\StudentGrade;
 use App\Models\StudyProgram;
+use App\Models\Stase;
+use App\Models\InternshipClass;
+use App\Models\ClassYear;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -14,37 +18,49 @@ class AdminStudentGradeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $studentGrades = StudentGrade::paginate(10);
-        $studyPrograms = StudyProgram::all();
-        $departements = Departement::all();
+        $defaultDepartementId = $request->get('departement', 1); // Default to departement ID 1
+        $perPage = $request->get('per_page', 10); // Default to 10 students per page
 
-        // Rata-rata semua data
-        $allStudentAvg = StudentGrade::avg('avg_grades');
+        $query = Student::with(['user', 'grades.stase.departement']);
 
-        // Bulan ini
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-        $currentAvg = StudentGrade::whereMonth('created_at', $currentMonth)
-                        ->whereYear('created_at', $currentYear)
-                        ->avg('avg_grades');
-
-        // Bulan lalu
-        $lastMonthDate = Carbon::now()->subMonth();
-        $lastAvg = StudentGrade::whereMonth('created_at', $lastMonthDate->month)
-                        ->whereYear('created_at', $lastMonthDate->year)
-                        ->avg('avg_grades');
-
-        // Hitung persentase perubahan
-        $changePercent = 0;
-        if ($lastAvg > 0) {
-            $changePercent = (($currentAvg - $lastAvg) / $lastAvg) * 100;
+        if ($request->has('study_program') && $request->study_program != '') {
+            $query->whereHas('studyProgram', function ($q) use ($request) {
+                $q->where('id', $request->study_program);
+            });
         }
 
-        $isDown = $changePercent < 0;
+        if ($defaultDepartementId != '') {
+            $query->whereHas('grades.stase.departement', function ($q) use ($defaultDepartementId) {
+                $q->where('id', $defaultDepartementId);
+            });
+        }
 
-        return view('pages.admin.student_grade.index', compact('studentGrades', 'allStudentAvg', 'currentAvg', 'lastAvg', 'changePercent', 'isDown', 'studyPrograms', 'departements'));
+        if ($request->has('internship_class') && $request->internship_class != '') {
+            $query->where('internship_class_id', $request->internship_class);
+        }
+
+        if ($request->has('class_year') && $request->class_year != '') {
+            $query->whereHas('internshipClass.classYear', function ($q) use ($request) {
+                $q->where('id', $request->class_year);
+            });
+        }
+
+        if ($request->has('search') && $request->search != '') {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $students = $query->paginate($perPage)->appends($request->all()); // Append all request parameters to pagination links
+        $studyPrograms = StudyProgram::all();
+        $departements = Departement::all();
+        $internshipClasses = InternshipClass::all();
+        $classYears = ClassYear::all();
+        $stases = Stase::where('departement_id', $defaultDepartementId)->get(); // Fetch stases for the selected department
+
+        return view('pages.admin.student_grade.index', compact('students', 'studyPrograms', 'departements', 'internshipClasses', 'classYears', 'stases', 'defaultDepartementId', 'perPage'));
     }
 
 
@@ -98,29 +114,33 @@ class AdminStudentGradeController extends Controller
 
     public function filter(Request $request)
     {
-        $query = StudentGrade::query();
+        $departementId = $request->get('departement', 1); // Default to departement ID 1
+        $perPage = $request->get('per_page', 10); // Default to 10 students per page
+
+        $query = Student::with(['user', 'grades.stase.departement']);
 
         if ($request->has('study_program') && $request->study_program != '') {
-            $query->whereHas('student.studyProgram', function ($q) use ($request) {
+            $query->whereHas('studyProgram', function ($q) use ($request) {
                 $q->where('id', $request->study_program);
             });
         }
 
-        if ($request->has('departement') && $request->departement != '') {
-            $query->whereHas('stase.departement', function ($q) use ($request) {
-                $q->where('id', $request->departement);
+        if ($departementId != '') {
+            $query->whereHas('grades.stase.departement', function ($q) use ($departementId) {
+                $q->where('id', $departementId);
             });
         }
 
         if ($request->has('search') && $request->search != '') {
-            $query->whereHas('student.user', function ($q) use ($request) {
+            $query->whereHas('user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%');
             });
         }
-        
-        $studentGrades = $query->paginate(10);
 
-        return view('components.admin.student_grade.table', compact('studentGrades'))->render();
+        $students = $query->paginate($perPage)->appends($request->all()); // Append all request parameters to pagination links
+        $stases = Stase::where('departement_id', $departementId)->get(); // Fetch stases for the selected department
+
+        return view('components.admin.student_grade.table', compact('students', 'stases'))->render();
     }
 
 }
