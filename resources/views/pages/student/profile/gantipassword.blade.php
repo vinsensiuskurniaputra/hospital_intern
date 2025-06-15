@@ -28,24 +28,10 @@
                     </div>
                 </div>
                 <div class="flex-1 ml-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">{{ $results['namaLengkap'] }}</h1>
-                            <p class="text-gray-100">{{ Auth::user()->roles()->first()->display_name }}</p>
-                            <p class="text-gray-100 mt-1">Mahasiswa {{ $results['prodi'] }}</p>
-                        </div>
-                        <div class="text-white">
-                            <p class="text-sm font-medium mb-2">Proses Magang</p>
-                            <div class="w-80">
-                                <div class="h-2 bg-white/30 rounded-full">
-                                    <div class="h-full w-1/3 bg-[#3B82F6] rounded-full"></div>
-                                </div>
-                                <div class="flex justify-between text-xs mt-2">
-                                    <span>Start: 1 Januari 2025</span>
-                                    <span>Selesai: 1 April 2025</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">{{ $results['namaLengkap'] }}</h1>
+                        <p class="text-gray-100">{{ Auth::user()->roles()->first()->display_name }}</p>
+                        <p class="text-gray-100 mt-1">Mahasiswa {{ $results['prodi'] }}</p>
                     </div>
                 </div>
             </div>
