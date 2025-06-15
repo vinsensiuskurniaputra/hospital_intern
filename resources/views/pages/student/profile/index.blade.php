@@ -94,10 +94,62 @@
                        class="w-full px-4 py-3 text-left hover:bg-gray-50 flex justify-between items-center">
                         <span class="font-medium">Ganti Password</span>
                         <i class="bi bi-chevron-right"></i>
-                    </a>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="mt-8" x-data="{ emailToggle: true, smsToggle: false }">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Pengaturan Notifikasi</h2>
+                <div class="space-y-4 border rounded-lg p-4">
+                    <div class="flex items-center justify-between pr-1">
+                        <div>
+                            <h3 class="font-medium">Notifikasi Email</h3>
+                            <p class="text-sm text-gray-500">menerima pembaruan email tentang magang Anda</p>
+                        </div>
+                        <!-- Email Toggle -->
+                        <div class="relative flex-shrink-0">
+                            <input type="checkbox" id="email-toggle" class="hidden" x-model="emailToggle">
+                            <label for="email-toggle" class="cursor-pointer">
+                                <div class="w-14 h-7 flex items-center rounded-full duration-300 ease-in-out" 
+                                     :class="emailToggle ? 'bg-[#637F26]' : 'bg-gray-300'">
+                                    <div class="bg-white w-7 h-7 rounded-full shadow-md transform duration-300"
+                                         :class="emailToggle ? 'translate-x-7' : 'translate-x-0'">
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pr-1">
+                        <div>
+                            <h3 class="font-medium">Notifikasi SMS</h3>
+                            <p class="text-sm text-gray-500">menerima peringatan SMS untuk pembaruan penting</p>
+                        </div>
+                        <!-- SMS Toggle -->
+                        <div class="relative flex-shrink-0">
+                            <input type="checkbox" id="sms-toggle" class="hidden" x-model="smsToggle">
+                            <label for="sms-toggle" class="cursor-pointer">
+                                <div class="w-14 h-7 flex items-center rounded-full duration-300 ease-in-out"
+                                     :class="smsToggle ? 'bg-[#637F26]' : 'bg-gray-300'">
+                                    <div class="bg-white w-7 h-7 rounded-full shadow-md transform duration-300"
+                                         :class="smsToggle ? 'translate-x-7' : 'translate-x-0'">
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('toggles', () => ({
+        emailToggle: true,
+        smsToggle: false
+    }))
+})
+</script>
 @endsection

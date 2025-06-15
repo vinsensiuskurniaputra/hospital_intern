@@ -10,8 +10,14 @@ class ResponsibleUser extends Model
 {
     use HasFactory;
 
+    protected $table = 'responsible_users';
+
     protected $fillable = [
         'user_id',
+        'telp',
+        'nip',
+        'specialization',
+        'status',
         'employee_id',
         'specialization',
         'phone_number',

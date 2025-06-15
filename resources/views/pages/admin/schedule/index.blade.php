@@ -314,22 +314,79 @@
                                 </div>
                             </a>
                         `;
-                        });
-
-                        if (data.schedules.length === 0) {
-                            html =
-                                '<div class="text-center text-gray-500 py-4">Tidak ada jadwal pada tanggal ini</div>';
-                        }
-
-                        scheduleList.innerHTML = html;
+                    });
+                    
+                    if (data.schedules.length === 0) {
+                        html = '<div class="text-center text-gray-500 py-4">Tidak ada jadwal pada tanggal ini</div>';
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    const scheduleList = document.querySelector('.lg\\:col-span-3 .space-y-2');
-                    scheduleList.innerHTML =
-                        '<div class="text-center text-gray-500 py-4">Terjadi kesalahan saat memuat jadwal</div>';
+                    
+                    scheduleList.innerHTML = html;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const scheduleList = document.querySelector('.lg\\:col-span-3 .space-y-2');
+                scheduleList.innerHTML = '<div class="text-center text-gray-500 py-4">Terjadi kesalahan saat memuat jadwal</div>';
+            });
+        }
+
+        function updateTableFilters() {
+            const departemen = document.getElementById('departemen-filter').value;
+            const tahun = document.getElementById('tahun-filter').value;
+            const pembimbing = document.getElementById('pembimbing-filter').value;
+            const search = document.querySelector('input[type="text"][placeholder="Cari"]').value;
+
+            fetch(`/presences/schedules/filter?departemen=${departemen}&tahun=${tahun}&pembimbing=${pembimbing}&search=${search}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.querySelector('table tbody');
+                tbody.innerHTML = '';
+                
+                data.schedules.forEach(schedule => {
+                    const row = `
+                        <tr>
+                            <td class="py-3 px-4">${schedule.internship_class?.name || 'N/A'}</td>
+                            <td class="py-3 px-4">${schedule.stase?.name || 'N/A'}</td>
+                            <td class="py-3 px-4">${schedule.stase?.departement?.name || 'N/A'}</td>
+                            <td class="py-3 px-4">${schedule.internship_class?.class_year?.class_year || 'N/A'}</td>
+                            <td class="py-3 px-4">${schedule.stase?.responsible_user?.user?.name || 'N/A'}</td>
+                            <td class="py-3 px-4">${formatDate(schedule.start_date)} s/d ${formatDate(schedule.end_date)}</td>
+                            <td class="py-3 px-4">
+                                <div class="flex gap-2">
+                                    <a href="/presences/schedules/${schedule.id}/edit" class="text-blue-500">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </a>
+                                    <form action="/presences/schedules/${schedule.id}" method="POST" class="inline delete-form">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
                 });
+
+                // Reattach event listeners for delete forms
+                document.querySelectorAll('.delete-form').forEach(form => {
+                    form.addEventListener('submit', confirmDelete);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
         // Add helper functions for date formatting
@@ -351,10 +408,24 @@
 
         // Update event listener untuk initialization
         document.addEventListener('DOMContentLoaded', function() {
+            const monthSelect = document.getElementById('month-select');
+            const yearSelect = document.getElementById('year-select');
+            
+            // Month change handler
+            monthSelect.addEventListener('change', function() {
+                generateCalendar(
+                    parseInt(yearSelect.value),
+                    parseInt(this.value)
+                );
+            });
 
-            // Load jadwal hari ini sebagai default
-            const today = new Date().toISOString().split('T')[0];
-            updateScheduleList(today);
+            // Year change handler
+            yearSelect.addEventListener('change', function() {
+                generateCalendar(
+                    parseInt(this.value),
+                    parseInt(monthSelect.value)
+                );
+            });
 
             // Handle Pilih Tanggal button
             const doneButton = document.querySelector('.calendar-done');
@@ -365,7 +436,50 @@
                     }
                 });
             }
+
+            // Handle Cancel button
+            const cancelButton = document.querySelector('.calendar-cancel');
+            if (cancelButton) {
+                cancelButton.addEventListener('click', function() {
+                    const today = new Date();
+                    selectedDate = today.toISOString().split('T')[0];
+                    monthSelect.value = today.getMonth() + 1;
+                    yearSelect.value = today.getFullYear();
+                    generateCalendar(today.getFullYear(), today.getMonth() + 1);
+                    updateScheduleList(selectedDate);
+                });
+            }
+
+            // Initialize calendar dengan tanggal hari ini
+            const today = new Date();
+            selectedDate = today.toISOString().split('T')[0];
+            generateCalendar(today.getFullYear(), today.getMonth() + 1);
+            
+            // Set selected date visual untuk hari ini
+            const todayElement = document.querySelector(`[data-date="${selectedDate}"]`);
+            if (todayElement) {
+                selectDate(selectedDate, todayElement);
+                updateScheduleList(selectedDate);
+            }
+
+            // Add event listeners to all filter inputs
+            const filterInputs = [
+                document.getElementById('departemen-filter'),
+                document.getElementById('tahun-filter'),
+                document.getElementById('pembimbing-filter'),
+                document.querySelector('input[type="text"][placeholder="Cari"]')
+            ];
+
+            filterInputs.forEach(input => {
+                if (input) {
+                    input.addEventListener('change', updateTableFilters);
+                    if (input.tagName === 'INPUT') {
+                        input.addEventListener('keyup', updateTableFilters);
+                    }
+                }
+            });
         });
+
     </script>
 @endsection
 

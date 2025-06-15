@@ -43,8 +43,8 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::resource('/users/students', AdminStudentController::class)->names('admin.students');
     Route::get('/students/filter', [AdminStudentController::class, 'filter'])->name('students.filter');
     Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
+    Route::get('/students/download-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.downloadTemplate');
     Route::put('/students/{student}/change-status', [AdminStudentController::class, 'changeStatus'])->name('students.change_status');
-    Route::get('/download-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.downloadTemplate');
 
     Route::resource('/users/admins', AdminUserAdminController::class)->names('admin.admins');
     Route::get('/admins/filter', [AdminUserAdminController::class, 'filter'])->name('admins.filter');
@@ -68,6 +68,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
+
+    Route::get('/home/profile', [StudentProfileController::class, 'index']);
+
     Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
     Route::get('/departements/filter', [AdminDepartementController::class, 'filter'])->name('departements.filter');
 
@@ -80,13 +83,13 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::post('/internshipClasses/insertStudent', [AdminInternshipClassController::class, 'insertStudentStore'])->name('admin.internshipClasses.insertStudent.store');
 
     Route::middleware(['auth', 'menu'])->group(function () {
-        // Pastikan route filter-by-date didefinisikan sebelum resource route
+        // Pastikan route filter-by-date didefinikan sebelum resource route
         Route::get('/presences/schedules/filter-by-date', [AdminScheduleController::class, 'filterByDate'])
             ->name('presences.schedules.filter-by-date');
-        
+            
         Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
             ->name('presences.schedules.filter');
-
+        
         Route::resource('/presences/schedules', AdminScheduleController::class)
             ->names('presences.schedules');
     });
@@ -97,18 +100,23 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
         ->name('presences.schedules.filter');
   
+        Route::get('/presences/studentPresences/{student}', [AdminPresenceController::class, 'show'])->name('admin.studentPresencesDetail.show');
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
+    Route::get('admin/student-presences/export', [AdminPresenceController::class, 'export'])->name('admin.studentPresences.export');
 
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
+    Route::get('/admin/student-grades/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
     
 
     Route::resource('/presences/certificates', AdminCertificateController::class)->names('admin.certificates');
     Route::get('/presences/generate-certificates/{id}', [AdminCertificateController::class, 'generateCertificate'])->name('admin.certificate.generate');
     Route::get('/presences/certificate/download/{id}', [AdminCertificateController::class, 'downloadCertificate'])
     ->name('certificate.download');
+    Route::post('/admin/certificates/generate-all', [AdminCertificateController::class, 'generateAllCertificates'])->name('admin.certificate.generateAll');
 
     Route::resource('/presences/reportAndMonitorings', AdminReportAndMonitoringController::class)->names('admin.reportAndMonitorings');
+    Route::get('admin/presences/reportAndMonitorings/export', [AdminReportAndMonitoringController::class, 'export'])->name('admin.reportAndMonitorings.export');
 
     Route::resource('/notification', NotificationController::class)->names('notification');
 
@@ -185,8 +193,12 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     Route::get('/attendance/class-years', [App\Http\Controllers\Responsible\ResponsibleAttendanceController::class, 'getClassYears'])
     ->name('attendance.class-years');
     
-    // Profile
+    // Profile Routes
     Route::get('/profile', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/edit', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/password', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/password', [App\Http\Controllers\Responsible\ResponsibleProfileController::class, 'updatePassword'])->name('profile.update-password');
     
     // Nilai - PERBAIKAN: Pastikan route ini terdefinisi dengan benar
     Route::get('/grades', [App\Http\Controllers\Responsible\ResponsibleGradeController::class, 'index'])->name('grades.index');

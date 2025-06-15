@@ -10,10 +10,8 @@ class Stase extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'description',
-        // ... other fields
+    protected $guarded = [
+        'id',
     ];
 
     /**
