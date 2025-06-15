@@ -1,10 +1,10 @@
 @extends('layouts.auth')
 
 @section('content')
-<div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md border p-8 space-y-8">
+<div class="p-6">
     <!-- Back Link -->
     <div class="flex items-center mb-6">
-        <a href="{{ route('student.notifications') }}" 
+        <a href="{{ route('responsible.notifications') }}" 
            class="text-gray-600 hover:text-gray-800 flex items-center">
             <i class="bi bi-chevron-left mr-2"></i>
             Kembali
@@ -35,13 +35,7 @@
                     {!! nl2br(e($notification->message)) !!}
                 </div>
             </div>
-        
         </div>
     </div>
 </div>
-<!-- Footer -->
-    <div class="mt-8 text-center text-sm text-gray-500">
-        @2025 IK Polines
-    </div>
-</>
 @endsection
