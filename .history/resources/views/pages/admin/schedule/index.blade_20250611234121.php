@@ -890,7 +890,7 @@
                 }
             });
 
-            // Add immediate search after a delay
+             // Add immediate search after a delay
             // searchInput.addEventListener('input', debounce(() => {
             //     applyFilters();
             // }, 500));

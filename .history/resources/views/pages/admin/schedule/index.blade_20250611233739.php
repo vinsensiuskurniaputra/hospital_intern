@@ -883,17 +883,17 @@
                 filter.addEventListener('change', debouncedFilter);
             });
 
-            searchInput.addEventListener('keyup', function(e) {
+            searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     applyFilters();
                 }
             });
 
-            // Add immediate search after a delay
-            // searchInput.addEventListener('input', debounce(() => {
-            //     applyFilters();
-            // }, 500));
+        // Add immediate search after a delay
+            searchInput.addEventListener('input', debounce(() => {
+                applyFilters();
+            }, 500));
 
             // Attach pagination handlers on initial load
             if (paginationContainer) {
@@ -906,7 +906,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('departemen')) departemenFilter.value = urlParams.get('departemen');
             if (urlParams.has('tahun')) tahunFilter.value = urlParams.get('tahun');
-            if (urlParams.has('pembimbing')) pembimbingFilter.value = urlParams.get('pembimbing');
+            if (urlParams.has('pembimbing'))
+             pembimbingFilter.value = urlParams.get('pembimbing');
             if (urlParams.has('search')) searchInput.value = urlParams.get('search');
 
             if (urlParams.toString()) {

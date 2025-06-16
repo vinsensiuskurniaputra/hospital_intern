@@ -883,7 +883,7 @@
                 filter.addEventListener('change', debouncedFilter);
             });
 
-            searchInput.addEventListener('keyup', function(e) {
+            searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     applyFilters();
@@ -891,9 +891,9 @@
             });
 
             // Add immediate search after a delay
-            // searchInput.addEventListener('input', debounce(() => {
-            //     applyFilters();
-            // }, 500));
+            searchInput.addEventListener('input', debounce(() => {
+                applyFilters();
+            }, 500));
 
             // Attach pagination handlers on initial load
             if (paginationContainer) {

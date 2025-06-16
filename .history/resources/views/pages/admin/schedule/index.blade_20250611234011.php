@@ -890,10 +890,10 @@
                 }
             });
 
-            // Add immediate search after a delay
-            // searchInput.addEventListener('input', debounce(() => {
-            //     applyFilters();
-            // }, 500));
+        // Add immediate search after a delay
+            searchInput.addEventListener('input', debounce(() => {
+                applyFilters();
+            }, 500));
 
             // Attach pagination handlers on initial load
             if (paginationContainer) {

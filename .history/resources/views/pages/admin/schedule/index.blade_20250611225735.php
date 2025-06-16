@@ -359,7 +359,7 @@
                             <td class="py-3 px-4">
                                 <div class="flex gap-2">
                                     <a href="/presences/schedules/${schedule.id}/edit" class="text-blue-500">
-                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
@@ -367,7 +367,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-500">
-                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>
                                         </button>
@@ -810,31 +810,9 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update table body
                         tbody.innerHTML = data.html;
-
-                        // Update pagination and results count
-                        if (paginationContainer) {
-                            if (data.total > 0) {
-                                // Show pagination if there are results
-                                paginationContainer.innerHTML = data.pagination;
-                                
-                                // Update results count text
-                                const resultsCount = document.querySelector('.text-sm.text-gray-700') || 
-                                    document.createElement('div');
-                                resultsCount.className = 'text-sm text-gray-700';
-                                resultsCount.innerHTML = `Showing ${data.from} to ${data.to} of ${data.total} results`;
-                                
-                                // Add results count if it doesn't exist
-                                if (!document.querySelector('.text-sm.text-gray-700')) {
-                                    paginationContainer.insertBefore(resultsCount, paginationContainer.firstChild);
-                                }
-                            } else {
-                                // Show "No results found" message
-                                paginationContainer.innerHTML = `
-                                    <div class="text-sm text-gray-700">No results found</div>
-                                `;
-                            }
+                        if (paginationContainer && data.pagination) {
+                            paginationContainer.innerHTML = data.pagination;
                             
                             // Reattach pagination click handlers
                             paginationContainer.querySelectorAll('a').forEach(link => {
@@ -846,8 +824,6 @@
                         document.querySelectorAll('.delete-form').forEach(form => {
                             form.addEventListener('submit', confirmDelete);
                         });
-                    } else {
-                        throw new Error(data.message || 'Error fetching data');
                     }
                 })
                 .catch(error => {
@@ -855,7 +831,7 @@
                     tbody.innerHTML = `
                         <tr>
                             <td colspan="7" class="text-center py-4 text-red-500">
-                                Terjadi kesalahan saat memuat data: ${error.message}
+                                Terjadi kesalahan saat memuat data
                             </td>
                         </tr>
                     `;
@@ -883,17 +859,12 @@
                 filter.addEventListener('change', debouncedFilter);
             });
 
-            searchInput.addEventListener('keyup', function(e) {
+            searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    e.preventDefault();
+                    e.preventDefault(); // Prevent form submission if within a form
                     applyFilters();
                 }
             });
-
-            // Add immediate search after a delay
-            // searchInput.addEventListener('input', debounce(() => {
-            //     applyFilters();
-            // }, 500));
 
             // Attach pagination handlers on initial load
             if (paginationContainer) {
