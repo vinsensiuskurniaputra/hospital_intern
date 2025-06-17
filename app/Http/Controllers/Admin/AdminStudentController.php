@@ -9,6 +9,7 @@ use App\Models\Student;
 use App\Models\ClassYear;
 use App\Models\StudyProgram;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -313,7 +314,7 @@ class AdminStudentController extends Controller
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (\Throwable $e) {
             Log::error("Gagal mengimport file: " . $e->getMessage());
-            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat memproses file.'])->withInput();
+            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat memproses file.' . $e->getMessage()])->withInput();
         }
     }
 

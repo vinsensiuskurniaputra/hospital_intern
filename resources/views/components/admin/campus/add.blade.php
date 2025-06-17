@@ -17,7 +17,7 @@
         'name' => 'detail',
         'type' => 'text',
         'value' => old('detail'),
-        'required' => true,
+        'required' => false,
         'placeholder' => 'Masukan keterangan...',
     ])
 @endsection

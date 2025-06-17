@@ -54,7 +54,7 @@ class AdminResponsibleUserController extends Controller
             'photo_profile_url' => $photoPath,
         ]);
 
-        $responsibleRole = Role::where('name', 'responsible')->first();
+        $responsibleRole = Role::where('name', 'pic')->first();
 
         $user->roles()->attach($responsibleRole);
 

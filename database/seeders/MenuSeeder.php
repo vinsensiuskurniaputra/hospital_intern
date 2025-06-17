@@ -127,6 +127,13 @@ class MenuSeeder extends Seeder
             'parent_id' => $academicManagement->id,
             'order' => 2,
         ]);
+        $classYearManagement = Menu::create([
+            'name' => 'Tahun Ajaran',
+            'url' => '/academics/classYears',
+            'icon' => 'bi bi-calendar3', // Lebih cocok untuk menu
+            'parent_id' => $academicManagement->id,
+            'order' => 3,
+        ]);
 
 
         $departementManagement = Menu::create([

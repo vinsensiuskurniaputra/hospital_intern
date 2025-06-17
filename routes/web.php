@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Student\StudentProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminClassYear;
 use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
 use App\Http\Controllers\Admin\AdminMenuController;
@@ -16,14 +16,15 @@ use App\Http\Controllers\Admin\AdminUserAdminController;
 use App\Http\Controllers\General\NotificationController;
 use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminDepartementController;
+use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Admin\AdminStudentGradeController;
 use App\Http\Controllers\Admin\AdminStudyProgramController;
 use App\Http\Controllers\Admin\AdminInternshipClassController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
-use App\Http\Controllers\Responsible\ResponsibleScheduleController;
 use App\Http\Controllers\Responsible\ResponsibleStudentController;
+use App\Http\Controllers\Responsible\ResponsibleScheduleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -68,7 +69,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
-
+    
+    Route::resource('/academics/classYears', AdminClassYear::class)->names('admin.classYears');
+    
     Route::get('/home/profile', [StudentProfileController::class, 'index']);
 
     Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
