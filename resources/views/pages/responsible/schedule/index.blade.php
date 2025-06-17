@@ -681,79 +681,256 @@ function applyFilter() {
         });
 }
 
-// Update filter pill buttons to trigger date range updates
-document.addEventListener('DOMContentLoaded', function() {
-    const today = new Date();
-    
-    // Add click handlers for filter pills
-    document.querySelectorAll('.flex.gap-2.mb-4 button').forEach(button => {
-        button.addEventListener('click', function() {
-            // Remove active state from all pills
-            document.querySelectorAll('.flex.gap-2.mb-4 button').forEach(btn => {
-                btn.classList.remove('bg-[#637F26]', 'text-white');
-                btn.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            
-            // Add active state to clicked pill
-            this.classList.remove('bg-gray-100', 'text-gray-600');
-            this.classList.add('bg-[#637F26]', 'text-white');
+// Update loadClassDetails function untuk membuat tabel responsive
+function loadClassDetails(staseId, classId) {
+    if (!staseId || !classId) return;
 
-            const startDate = document.getElementById('start-date');
-            const endDate = document.getElementById('end-date');
-            
-            switch(this.textContent.trim()) {
-                case 'Bulan Ini':
-                    startDate.value = new Date(today.getFullYear(), today.getMonth(), 1)
-                        .toISOString().split('T')[0];
-                    endDate.value = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-                        .toISOString().split('T')[0];
-                    break;
-                case 'Minggu Ini':
-                    const thisWeekStart = new Date(today);
-                    thisWeekStart.setDate(today.getDate() - today.getDay());
-                    const thisWeekEnd = new Date(thisWeekStart);
-                    thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
-                    
-                    startDate.value = thisWeekStart.toISOString().split('T')[0];
-                    endDate.value = thisWeekEnd.toISOString().split('T')[0];
-                    break;
-                case 'Minggu Depan':
-                    const nextWeekStart = new Date(today);
-                    nextWeekStart.setDate(today.getDate() - today.getDay() + 7);
-                    const nextWeekEnd = new Date(nextWeekStart);
-                    nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
-                    
-                    startDate.value = nextWeekStart.toISOString().split('T')[0];
-                    endDate.value = nextWeekEnd.toISOString().split('T')[0];
-                    break;
-                case 'Bulan Depan':
-                    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-                    const lastDayOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-                    
-                    startDate.value = nextMonth.toISOString().split('T')[0];
-                    endDate.value = lastDayOfNextMonth.toISOString().split('T')[0];
-                    break;
+    const container = document.getElementById('class-container');
+    container.innerHTML = `
+        <div class="flex items-center justify-center p-6">
+            <svg class="animate-spin h-5 w-5 mr-3 text-gray-500" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Memuat data...</span>
+        </div>
+    `;
+
+    fetch(`/responsible/schedule/class-details?stase_id=${staseId}&class_id=${classId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Terjadi kesalahan');
             }
-            
-            // Trigger filter after setting dates
-            applyFilter();
-        });
-    });
-});
 
-function toggleStudentList() {
-    const studentList = document.getElementById('student-list');
-    const toggleBtn = document.getElementById('toggle-students-btn');
-    
-    if (studentList.classList.contains('hidden')) {
-        // Show student list
-        studentList.classList.remove('hidden');
-        toggleBtn.textContent = 'Tutup';
-    } else {
-        // Hide student list
-        studentList.classList.add('hidden');
-        toggleBtn.textContent = 'Lihat Mahasiswa';
-    }
+            // Add fixed row numbers to each student data
+            data.students.forEach((student, index) => {
+                student.row_number = index + 1;
+            });
+
+            // Create responsive DataTable structure with updated column headers
+            container.innerHTML = `
+                <div class="p-6 bg-white rounded-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h6 class="text-base font-medium">Daftar Mahasiswa</h6>
+                        <span class="text-sm text-gray-500">${data.students.length} mahasiswa</span>
+                    </div>
+                    
+                    <!-- Responsive table container -->
+                    <div class="w-full">
+                        <table id="students-table" class="w-full table-auto">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[5%]">No</th>
+                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[20%]">NIM</th>
+                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[35%]">Nama</th>
+                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[20%]">Program Studi</th>
+                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[20%]">Kampus</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            // Destroy existing DataTable if it exists
+            if (studentsTable) {
+                studentsTable.destroy();
+            }
+
+            // Initialize responsive DataTable for students with updated columns
+            studentsTable = $('#students-table').DataTable({
+                processing: true,
+                serverSide: false,
+                dom: 'lfrtip',
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json',
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir", 
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    },
+                    emptyTable: "Tidak ada data mahasiswa",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ mahasiswa",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 mahasiswa",
+                    infoFiltered: "(disaring dari _MAX_ total mahasiswa)",
+                    zeroRecords: "Tidak ditemukan mahasiswa yang sesuai"
+                },
+                columnDefs: [
+                    { 
+                        className: "text-center px-1", 
+                        targets: 0, // Kolom No
+                        orderable: false,
+                        searchable: false,
+                        width: "5%"
+                    },
+                    { 
+                        className: "text-center px-2", 
+                        targets: 1, // Kolom NIM
+                        orderable: true,
+                        width: "20%"
+                    },
+                    { 
+                        className: "text-left px-2", 
+                        targets: 2, // Nama
+                        orderable: true,
+                        width: "35%",
+                        type: "string"
+                    },
+                    { 
+                        className: "text-center px-2", 
+                        targets: [3, 4], // Program Studi dan Kampus
+                        orderable: true,
+                        width: "20%"
+                    }
+                ],
+                lengthMenu: [
+                    [5, 10, 25, 50, 100, -1],
+                    [5, 10, 25, 50, 100, "Semua"]
+                ],
+                pageLength: 10,
+                responsive: {
+                    details: {
+                        type: 'column',
+                        target: 0
+                    }
+                },
+                ordering: true,
+                order: [[1, 'asc']], // Urutkan berdasarkan kolom NIM, bukan nomor
+                autoWidth: false,
+                scrollX: false,
+                data: [],
+                columns: [
+                    {
+                        // Kolom No (nomor urut) - menggunakan row_number yang fixed
+                        data: 'row_number',
+                        className: 'text-center px-1',
+                        orderable: false,
+                        searchable: false,
+                        width: '5%',
+                        render: function(data, type, row) {
+                            return data; // Menggunakan row_number yang sudah ditetapkan
+                        }
+                    },
+                    {
+                        // Kolom NIM
+                        data: 'nim',
+                        className: 'text-center px-2',
+                        width: '20%',
+                        render: function(data, type, row) {
+                            return `<span class="truncate">${data || 'N/A'}</span>`;
+                        }
+                    },
+                    {
+                        // Kolom Nama
+                        data: null,
+                        className: 'text-left px-2',
+                        width: '35%',
+                        render: function(data, type, row) {
+                            // Untuk keperluan sorting dan searching, kembalikan nama saja TANPA format angka
+                            if (type === 'sort' || type === 'type') {
+                                const name = row.user?.name || 'N/A';
+                                // Ekstrak nama tanpa angka untuk sorting yang benar
+                                // Contoh: "Mahasiswa Stase Neurologi 1" -> "Mahasiswa Stase Neurologi"
+                                return name.replace(/\s+\d+$/, '').trim() + ' ' + (name.match(/\d+$/) || ['0'])[0].padStart(3, '0');
+                            }
+                            
+                            // Untuk display, kembalikan HTML dengan foto
+                            const photoUrl = row.user?.photo_profile_url || '/images/default-avatar.png';
+                            const name = row.user?.name || 'N/A';
+                            return `
+                                <div class="flex items-center min-w-0">
+                                    <img 
+                                        src="${photoUrl}" 
+                                        alt="Profile" 
+                                        class="w-8 h-8 rounded-full object-cover border border-gray-200 mr-2 flex-shrink-0"
+                                    >
+                                    <span class="truncate">${name}</span>
+                                </div>
+                            `;
+                        },
+                        // Tambahkan untuk memastikan pengurutan berdasarkan nama
+                        type: "string"
+                    },
+                    {
+                        // Kolom Program Studi
+                        data: null,
+                        className: 'text-center px-2',
+                        width: '20%',
+                        render: function(data, type, row) {
+                            // Untuk sorting, kembalikan nama program studi saja
+                            if (type === 'sort' || type === 'type') {
+                                return row.study_program?.name || 'N/A';
+                            }
+                            return `<span class="truncate">${row.study_program?.name || 'N/A'}</span>`;
+                        }
+                    },
+                    {
+                        // Kolom Kampus
+                        data: null,
+                        className: 'text-center px-2',
+                        width: '20%',
+                        render: function(data, type, row) {
+                            let campusName = 'N/A';
+                            
+                            if (row.study_program && row.study_program.campus) {
+                                campusName = row.study_program.campus.name;
+                            } else if (row.study_program && row.study_program.campus_id) {
+                                const campusMap = {
+                                    1: 'Politeknik Negeri Semarang',
+                                    2: 'Universitas Diponegoro',
+                                    3: 'Universitas Negeri Semarang',
+                                };
+                                campusName = campusMap[row.study_program.campus_id] || 'N/A';
+                            }
+                            
+                            // Untuk sorting, kembalikan nama kampus saja
+                            if (type === 'sort' || type === 'type') {
+                                return campusName;
+                            }
+                            
+                            return `<span class="truncate">${campusName}</span>`;
+                        }
+                    }
+                ],
+                drawCallback: function(settings) {
+                    // Add click handlers to rows after each draw
+                    $('#students-table tbody tr').off('click').on('click', function() {
+                        const data = studentsTable.row(this).data();
+                        if (data && data.id) {
+                            showStudentDetail(data.id);
+                        }
+                    });
+                    
+                    // Add hover effect
+                    $('#students-table tbody tr').hover(
+                        function() {
+                            $(this).addClass('bg-gray-50 cursor-pointer');
+                        },
+                        function() {
+                            $(this).removeClass('bg-gray-50');
+                        }
+                    );
+                }
+            });
+
+            // Add data to DataTable
+            studentsTable.clear();
+            studentsTable.rows.add(data.students);
+            studentsTable.draw();
+
+        })
+        .catch(error => {
+            container.innerHTML = `
+                <div class="p-6 text-center text-red-500">
+                    ${error.message || 'Terjadi kesalahan saat memuat data'}
+                </div>
+            `;
+        });
 }
 
 function showStudentDetail(studentId) {
@@ -846,6 +1023,321 @@ function closeStudentModal() {
     document.getElementById('student-modal').classList.add('hidden');
 }
 
+// Update filter pill buttons to trigger date range updates
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    
+    // Add click handlers for filter pills
+    document.querySelectorAll('.flex.gap-2.mb-4 button').forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active state from all pills
+            document.querySelectorAll('.flex.gap-2.mb-4 button').forEach(btn => {
+                btn.classList.remove('bg-[#637F26]', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            
+            // Add active state to clicked pill
+            this.classList.remove('bg-gray-100', 'text-gray-600');
+            this.classList.add('bg-[#637F26]', 'text-white');
+
+            const startDate = document.getElementById('start-date');
+            const endDate = document.getElementById('end-date');
+            
+            switch(this.textContent.trim()) {
+                case 'Bulan Ini':
+                    startDate.value = new Date(today.getFullYear(), today.getMonth(), 1)
+                        .toISOString().split('T')[0];
+                    endDate.value = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+                        .toISOString().split('T')[0];
+                    break;
+                case 'Minggu Ini':
+                    const thisWeekStart = new Date(today);
+                    thisWeekStart.setDate(today.getDate() - today.getDay());
+                    const thisWeekEnd = new Date(thisWeekStart);
+                    thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
+                    
+                    startDate.value = thisWeekStart.toISOString().split('T')[0];
+                    endDate.value = thisWeekEnd.toISOString().split('T')[0];
+                    break;
+                case 'Minggu Depan':
+                    const nextWeekStart = new Date(today);
+                    nextWeekStart.setDate(today.getDate() - today.getDay() + 7);
+                    const nextWeekEnd = new Date(nextWeekStart);
+                    nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
+                    
+                    startDate.value = nextWeekStart.toISOString().split('T')[0];
+                    endDate.value = nextWeekEnd.toISOString().split('T')[0];
+                    break;
+                case 'Bulan Depan':
+                    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+                    const lastDayOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+                    
+                    startDate.value = nextMonth.toISOString().split('T')[0];
+                    endDate.value = lastDayOfNextMonth.toISOString().split('T')[0];
+                    break;
+            }
+            
+            // Trigger filter after setting dates
+            applyFilter();
+        });
+    });
+});
+
+function toggleStudentList() {
+    const studentList = document.getElementById('student-list');
+    const toggleBtn = document.getElementById('toggle-students-btn');
+    
+    if (studentList.classList.contains('hidden')) {
+        // Show student list
+        studentList.classList.remove('hidden');
+        toggleBtn.textContent = 'Tutup';
+    } else {
+        // Hide student list
+        studentList.classList.add('hidden');
+        toggleBtn.textContent = 'Lihat Mahasiswa';
+    }
+}
+
+function printSchedule() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    
+    if (!startDate || !endDate) {
+        alert('Pilih rentang tanggal terlebih dahulu');
+        return;
+    }
+
+    // Create print content
+    let printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Jadwal Magang - RSUD dr. Adhyatma, MPH</title>
+            <style>
+                @page {
+                    margin: 20px;
+                    size: A4 portrait;
+                }
+                body { 
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .page-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: top;
+                    margin-bottom: 10px;
+                }
+                .page-title {
+                    font-size: 12px;
+                    color: #666;
+                    text-align: right;
+                }
+                .main-header {
+                    text-align: center;
+                    margin: 20px 0 30px;
+                }
+                .main-header h2 {
+                    margin: 0;
+                    font-size: 18px;
+                }
+                .date-range {
+                    text-align: center;
+                    margin-bottom: 20px;
+                    color: #666;
+                    font-size: 14px.
+                }
+                table { 
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }
+                th, td { 
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: center;
+                    font-size: 12px;
+                }
+                th { 
+                    background-color: #f8f9fa;
+                    font-weight: bold;
+                }
+                .page-footer {
+                    position: fixed;
+                    bottom: 20px;
+                    left: 20px;
+                    font-size: 12px;
+                    color: #666;
+                }
+                .page-number {
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    font-size: 12px;
+                    color: #666.
+                }
+            </style>
+        </head>
+        <body>
+            <div class="page-header">
+                <div style="width: 50%;">
+                    <img src="/images/logo.png" height="50" style="visibility: hidden;">
+                </div>
+                <div class="page-title">Jadwal Magang</div>
+            </div>
+
+            <div class="main-header">
+                <h2>Jadwal Magang</h2>
+            </div>
+
+            <div class="date-range">
+                Periode: ${formatDate(startDate)} - ${formatDate(endDate)}
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Stase</th>
+                        <th>Kelas</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    // Get DataTable data for printing
+    const tableData = schedulesTable.data().toArray();
+    tableData.forEach(row => {
+        printContent += `
+            <tr>
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                <td>${row[2]}</td>
+            </tr>
+        `;
+    });
+
+    printContent += `
+                </tbody>
+            </table>
+            <div class="page-footer">RSUD dr. Adhyatma, MPH</div>
+            <div class="page-number">1/1</div>
+        </body>
+        </html>
+    `;
+
+    // Create print window
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    // Print after content loads
+    printWindow.onload = function() {
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+    };
+}
+
+function applyFilter() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+
+    // Debug logging
+    console.log('Apply Filter - Start Date:', startDate, 'End Date:', endDate);
+
+    if (!startDate || !endDate) {
+        console.error('Date range not set properly');
+        // Set default dates if not available
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+        
+        document.getElementById('start-date').value = firstDay;
+        document.getElementById('end-date').value = lastDay;
+        
+        // Retry with new dates
+        setTimeout(() => applyFilter(), 100);
+        return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+        alert('Tanggal mulai tidak boleh lebih besar dari tanggal selesai');
+        return;
+    }
+
+    // Clear DataTable and show loading
+    schedulesTable.clear().draw();
+
+    console.log('Fetching data from:', `/responsible/schedule/filter?start_date=${startDate}&end_date=${endDate}`);
+
+    fetch(`/responsible/schedule/filter?start_date=${startDate}&end_date=${endDate}`)
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            
+            if (!data.success) {
+                throw new Error(data.message || 'Terjadi kesalahan');
+            }
+
+            // Clear previous data
+            schedulesTable.clear();
+
+            if (data.schedules && data.schedules.length > 0) {
+                console.log('Adding schedules to table:', data.schedules.length);
+                // Add new data to DataTable
+                data.schedules.forEach(schedule => {
+                    const dateRange = `${formatDate(schedule.start_date)} - ${formatDate(schedule.end_date)}`;
+                    const staseName = schedule.stase?.name || 'N/A';
+                    
+                    // Format class name with academic year - PERBAIKAN DI SINI
+                    let className = schedule.internship_class?.name || 'N/A';
+                    if (schedule.internship_class?.class_year) {
+                        className += ` (${schedule.internship_class.class_year})`;
+                    }
+                    
+                    schedulesTable.row.add([
+                        dateRange,
+                        staseName,
+                        className
+                    ]);
+                });
+            } else {
+                console.log('No schedules found for the date range');
+                // Add a "no data" row
+                schedulesTable.row.add([
+                    'Tidak ada data',
+                    'untuk rentang tanggal ini',
+                    ''
+                ]);
+            }
+
+            // Redraw table
+            schedulesTable.draw();
+        })
+        .catch(error => {
+            console.error('Error fetching schedules:', error);
+            // Show error in DataTable
+            schedulesTable.clear();
+            schedulesTable.row.add([
+                'Error loading data',
+                error.message || 'Terjadi kesalahan saat memuat data',
+                ''
+            ]);
+            schedulesTable.draw();
+        });
+}
+
 // Update loadClassDetails function untuk membuat tabel responsive
 function loadClassDetails(staseId, classId) {
     if (!staseId || !classId) return;
@@ -868,7 +1360,12 @@ function loadClassDetails(staseId, classId) {
                 throw new Error(data.message || 'Terjadi kesalahan');
             }
 
-            // Create responsive DataTable structure
+            // Add fixed row numbers to each student data
+            data.students.forEach((student, index) => {
+                student.row_number = index + 1;
+            });
+
+            // Create responsive DataTable structure with updated column headers
             container.innerHTML = `
                 <div class="p-6 bg-white rounded-lg">
                     <div class="flex justify-between items-center mb-4">
@@ -881,10 +1378,11 @@ function loadClassDetails(staseId, classId) {
                         <table id="students-table" class="w-full table-auto">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-1/4">Nama</th>
-                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-1/4">NIM</th>
-                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-1/4">Program Studi</th>
-                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-1/4">Kampus</th>
+                                    <th class="px-2 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[5%]">No</th>
+                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[20%]">NIM</th>
+                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[35%]">Nama</th>
+                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[20%]">Program Studi</th>
+                                    <th class="px-4 py-4 text-center text-base font-bold text-gray-700 border border-gray-200 w-[20%]">Kampus</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -898,7 +1396,7 @@ function loadClassDetails(staseId, classId) {
                 studentsTable.destroy();
             }
 
-            // Initialize responsive DataTable for students
+            // Initialize responsive DataTable for students with updated columns
             studentsTable = $('#students-table').DataTable({
                 processing: true,
                 serverSide: false,
@@ -921,18 +1419,30 @@ function loadClassDetails(staseId, classId) {
                 },
                 columnDefs: [
                     { 
-                        className: "text-left px-2", 
-                        targets: 0,
+                        className: "text-center px-1", 
+                        targets: 0, // Kolom No
+                        orderable: false,
+                        searchable: false,
+                        width: "5%"
+                    },
+                    { 
+                        className: "text-center px-2", 
+                        targets: 1, // Kolom NIM
                         orderable: true,
-                        width: "25%",
-                        // Tambahkan type untuk memastikan pengurutan string yang benar
+                        width: "20%"
+                    },
+                    { 
+                        className: "text-left px-2", 
+                        targets: 2, // Nama
+                        orderable: true,
+                        width: "35%",
                         type: "string"
                     },
                     { 
                         className: "text-center px-2", 
-                        targets: [1, 2, 3],
+                        targets: [3, 4], // Program Studi dan Kampus
                         orderable: true,
-                        width: "25%"
+                        width: "20%"
                     }
                 ],
                 lengthMenu: [
@@ -947,14 +1457,36 @@ function loadClassDetails(staseId, classId) {
                     }
                 },
                 ordering: true,
-                order: [[0, 'asc']], // Urutkan berdasarkan kolom nama secara ascending
+                order: [[1, 'asc']], // Urutkan berdasarkan kolom NIM, bukan nomor
                 autoWidth: false,
                 scrollX: false,
                 data: [],
                 columns: [
                     {
+                        // Kolom No (nomor urut) - menggunakan row_number yang fixed
+                        data: 'row_number',
+                        className: 'text-center px-1',
+                        orderable: false,
+                        searchable: false,
+                        width: '5%',
+                        render: function(data, type, row) {
+                            return data; // Menggunakan row_number yang sudah ditetapkan
+                        }
+                    },
+                    {
+                        // Kolom NIM
+                        data: 'nim',
+                        className: 'text-center px-2',
+                        width: '20%',
+                        render: function(data, type, row) {
+                            return `<span class="truncate">${data || 'N/A'}</span>`;
+                        }
+                    },
+                    {
+                        // Kolom Nama
                         data: null,
-                        className: 'text-left',
+                        className: 'text-left px-2',
+                        width: '35%',
                         render: function(data, type, row) {
                             // Untuk keperluan sorting dan searching, kembalikan nama saja TANPA format angka
                             if (type === 'sort' || type === 'type') {
@@ -982,15 +1514,10 @@ function loadClassDetails(staseId, classId) {
                         type: "string"
                     },
                     {
-                        data: 'nim',
-                        className: 'text-center',
-                        render: function(data, type, row) {
-                            return `<span class="truncate">${data || 'N/A'}</span>`;
-                        }
-                    },
-                    {
+                        // Kolom Program Studi
                         data: null,
-                        className: 'text-center',
+                        className: 'text-center px-2',
+                        width: '20%',
                         render: function(data, type, row) {
                             // Untuk sorting, kembalikan nama program studi saja
                             if (type === 'sort' || type === 'type') {
@@ -1000,8 +1527,10 @@ function loadClassDetails(staseId, classId) {
                         }
                     },
                     {
+                        // Kolom Kampus
                         data: null,
-                        className: 'text-center',
+                        className: 'text-center px-2',
+                        width: '20%',
                         render: function(data, type, row) {
                             let campusName = 'N/A';
                             
