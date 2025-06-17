@@ -12,8 +12,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             // Academic structure
-            ClassYearSeeder::class,
-            CampusAndStudyProgramSeeder::class,
+            // ClassYearSeeder::class,
+            // CampusAndStudyProgramSeeder::class,
             
             // Base structure
             RoleSeeder::class,
@@ -22,46 +22,46 @@ class DatabaseSeeder extends Seeder
             
             
             // Hospital structure
-            DepartementSeeder::class,
-            ResponsibleUserSeeder::class,
-            StaseSeeder::class,
+            // DepartementSeeder::class,
+            // ResponsibleUserSeeder::class,
+            // StaseSeeder::class,
             
             // Classes and components
-            GradeComponentSeeder::class,
-            InternshipClassSeeder::class,
-            ScheduleSeeder::class,
+            // GradeComponentSeeder::class,
+            // InternshipClassSeeder::class,
+            // ScheduleSeeder::class,
             
-            // Notifications
-            NotificationSeeder::class,
+            // // Notifications
+            // NotificationSeeder::class,
         ]);
 
         // Create students
-        $students = Student::factory()->count(10)->create();
+        // $students = Student::factory()->count(10)->create();
 
-        $studentRole = Role::where('name', 'student')->first();
+        // $studentRole = Role::where('name', 'student')->first();
 
-        foreach ($students as $student) {
-            $student->user->roles()->attach($studentRole);
-        }
+        // foreach ($students as $student) {
+        //     $student->user->roles()->attach($studentRole);
+        // }
 
         // Seed data that depends on students
-        $this->call([
-            PresenceSessionSeeder::class,
-            PresenceSeeder::class,
-            AttendanceExcuseSeeder::class,
-            StudentGradeSeeder::class,
-            CertificateSeeder::class,
-        ]);
+        // $this->call([
+        //     PresenceSessionSeeder::class,
+        //     PresenceSeeder::class,
+        //     AttendanceExcuseSeeder::class,
+        //     StudentGradeSeeder::class,
+        //     CertificateSeeder::class,
+        // ]);
 
         // Tambahkan seeder custom untuk user_id = 2
-        $this->call(CustomUserPresenceSeeder::class);
+        // $this->call(CustomUserPresenceSeeder::class);
 
-        // Tambahkan seeder jadwal untuk user ID 2
-        $this->call(UserScheduleSeeder::class);
+        // // Tambahkan seeder jadwal untuk user ID 2
+        // $this->call(UserScheduleSeeder::class);
 
-        // Seeder untuk data dummy user responsible dengan ID 3
-        $this->call(ResponsibleDataSeeder::class);
+        // // Seeder untuk data dummy user responsible dengan ID 3
+        // $this->call(ResponsibleDataSeeder::class);
 
-        $this->call(StudentsForResponsibleSeeder::class);
+        // $this->call(StudentsForResponsibleSeeder::class);
     }
 }

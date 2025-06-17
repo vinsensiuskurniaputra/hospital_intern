@@ -25,26 +25,27 @@ class MenuSeeder extends Seeder
 
         // --- Menu Admin ---
         // Menu utama
+
+        $academicManagement = Menu::create([
+            'name' => 'Manajemen Akademik',
+            'url' => '/academics',
+            'icon' => 'bi bi-mortarboard',
+            'parent_id' => null,
+            'order' => 2,
+        ]);
+
         $userManagement = Menu::create([
             'name' => 'Manajemen Pengguna',
             'url' => '/users',
             'icon' => 'bi bi-people', // Bootstrap Icons
             'parent_id' => null,
-            'order' => 2,
+            'order' => 3,
         ]);
 
         $permissionManagement = Menu::create([
             'name' => 'Izin',
             'url' => '/permissions',
             'icon' => 'bi bi-shield-lock',
-            'parent_id' => null,
-            'order' => 3,
-        ]);
-
-        $academicManagement = Menu::create([
-            'name' => 'Manajemen Akademik',
-            'url' => '/academics',
-            'icon' => 'bi bi-mortarboard',
             'parent_id' => null,
             'order' => 4,
         ]);
