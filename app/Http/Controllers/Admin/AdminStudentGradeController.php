@@ -24,6 +24,7 @@ class AdminStudentGradeController extends Controller
         $perPage = $request->get('per_page', 10); // Default to 10 students per page
 
         $query = Student::with(['user', 'grades.stase.departement']);
+        @dd($query);
 
         if ($request->has('study_program') && $request->study_program != '') {
             $query->whereHas('studyProgram', function ($q) use ($request) {
