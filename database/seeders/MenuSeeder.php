@@ -25,26 +25,27 @@ class MenuSeeder extends Seeder
 
         // --- Menu Admin ---
         // Menu utama
+
+        $academicManagement = Menu::create([
+            'name' => 'Manajemen Akademik',
+            'url' => '/academics',
+            'icon' => 'bi bi-mortarboard',
+            'parent_id' => null,
+            'order' => 2,
+        ]);
+
         $userManagement = Menu::create([
             'name' => 'Manajemen Pengguna',
             'url' => '/users',
             'icon' => 'bi bi-people', // Bootstrap Icons
             'parent_id' => null,
-            'order' => 2,
+            'order' => 3,
         ]);
 
         $permissionManagement = Menu::create([
             'name' => 'Izin',
             'url' => '/permissions',
             'icon' => 'bi bi-shield-lock',
-            'parent_id' => null,
-            'order' => 3,
-        ]);
-
-        $academicManagement = Menu::create([
-            'name' => 'Manajemen Akademik',
-            'url' => '/academics',
-            'icon' => 'bi bi-mortarboard',
             'parent_id' => null,
             'order' => 4,
         ]);
@@ -126,6 +127,13 @@ class MenuSeeder extends Seeder
             'parent_id' => $academicManagement->id,
             'order' => 2,
         ]);
+        $classYearManagement = Menu::create([
+            'name' => 'Tahun Ajaran',
+            'url' => '/academics/classYears',
+            'icon' => 'bi bi-calendar3', // Lebih cocok untuk menu
+            'parent_id' => $academicManagement->id,
+            'order' => 3,
+        ]);
 
 
         $departementManagement = Menu::create([
@@ -172,19 +180,28 @@ class MenuSeeder extends Seeder
             'parent_id' => $presenceManagement->id,
             'order' => 3,
         ]);
+
+        $scoreComponentManagement = Menu::create([
+            'name' => 'Komponen Nilai',
+            'url' => '/presences/scoreComponents',
+            'icon' => 'bi bi-list-check', 
+            'parent_id' => $presenceManagement->id,
+            'order' => 4,
+        ]);
+        
         $certificateManagement = Menu::create([
             'name' => 'Sertifikat',
             'url' => '/presences/certificates',
             'icon' => 'bi bi-award', 
             'parent_id' => $presenceManagement->id,
-            'order' => 4,
+            'order' => 5,
         ]);
         $reportAndMonitoringManagement = Menu::create([
             'name' => 'Laporan & Monitoring',
             'url' => '/presences/reportAndMonitorings',
             'icon' => 'bi bi-bar-chart-line', 
             'parent_id' => $presenceManagement->id,
-            'order' => 5,
+            'order' => 6,
         ]);
 
         // gift role

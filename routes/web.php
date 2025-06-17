@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Student\StudentProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminClassYear;
 use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
 use App\Http\Controllers\Admin\AdminMenuController;
@@ -16,14 +16,16 @@ use App\Http\Controllers\Admin\AdminUserAdminController;
 use App\Http\Controllers\General\NotificationController;
 use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminDepartementController;
+use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Admin\AdminStudentGradeController;
 use App\Http\Controllers\Admin\AdminStudyProgramController;
 use App\Http\Controllers\Admin\AdminInternshipClassController;
 use App\Http\Controllers\Admin\AdminResponsibleUserController;
 use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
-use App\Http\Controllers\Responsible\ResponsibleScheduleController;
 use App\Http\Controllers\Responsible\ResponsibleStudentController;
+use App\Http\Controllers\Responsible\ResponsibleScheduleController;
+use App\Http\Controllers\Admin\AdminGradeComponent;
 
 Route::get('/', function () {
     return view('welcome');
@@ -68,7 +70,9 @@ Route::middleware(['auth', 'menu'])->group(function () {
     
     Route::resource('/academics/studyPrograms', AdminStudyProgramController::class)->names('admin.studyPrograms');
     Route::get('/studyPrograms/filter', [AdminStudyProgramController::class, 'filter'])->name('studyPrograms.filter');
-
+    
+    Route::resource('/academics/classYears', AdminClassYear::class)->names('admin.classYears');
+    
     Route::get('/home/profile', [StudentProfileController::class, 'index']);
 
     Route::resource('/internships/departements', AdminDepartementController::class)->names('admin.departements');
@@ -81,6 +85,7 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/internshipClasses/filter', [AdminInternshipClassController::class, 'filter'])->name('internshipClasses.filter');
     Route::get('/internshipClasses/insertStudent', [AdminInternshipClassController::class, 'insertStudent'])->name('admin.internshipClasses.insertStudent');
     Route::post('/internshipClasses/insertStudent', [AdminInternshipClassController::class, 'insertStudentStore'])->name('admin.internshipClasses.insertStudent.store');
+    Route::get('/internshipClasses/{id}/students', [AdminInternshipClassController::class, 'showStudents'])->name('admin.internshipClasses.students');
 
     Route::middleware(['auth', 'menu'])->group(function () {
         // Pastikan route filter-by-date didefinikan sebelum resource route
@@ -100,10 +105,12 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
         ->name('presences.schedules.filter');
   
-        Route::get('/presences/studentPresences/{student}', [AdminPresenceController::class, 'show'])->name('admin.studentPresencesDetail.show');
+    Route::get('/presences/studentPresences/{student}', [AdminPresenceController::class, 'show'])->name('admin.studentPresencesDetail.show');
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
     Route::get('admin/student-presences/export', [AdminPresenceController::class, 'export'])->name('admin.studentPresences.export');
-
+    
+    Route::resource('/presences/gradeComponent', AdminGradeComponent::class)->names('admin.gradeComponents');
+    
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
     Route::get('/admin/student-grades/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');

@@ -31,7 +31,7 @@
                             <div>
                                 <a href="{{ route('admin.internshipClasses.insertStudent') }}"
                                     class="px-4 py-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
-                                    <i class="bi bi-plus-lg mr-2"></i>Tambah Mahasiswa
+                                    <i class="bi bi-plus-lg mr-2"></i>Inputkan Mahasiswa
                                 </a>
                                 <button @click="addModal = true"
                                     class="px-4 py-2 ml-2 text-sm font-medium text-white bg-[#637F26] rounded-lg hover:bg-[#85A832]">
