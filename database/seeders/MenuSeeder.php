@@ -180,19 +180,28 @@ class MenuSeeder extends Seeder
             'parent_id' => $presenceManagement->id,
             'order' => 3,
         ]);
+
+        $scoreComponentManagement = Menu::create([
+            'name' => 'Komponen Nilai',
+            'url' => '/presences/scoreComponents',
+            'icon' => 'bi bi-list-check', 
+            'parent_id' => $presenceManagement->id,
+            'order' => 4,
+        ]);
+        
         $certificateManagement = Menu::create([
             'name' => 'Sertifikat',
             'url' => '/presences/certificates',
             'icon' => 'bi bi-award', 
             'parent_id' => $presenceManagement->id,
-            'order' => 4,
+            'order' => 5,
         ]);
         $reportAndMonitoringManagement = Menu::create([
             'name' => 'Laporan & Monitoring',
             'url' => '/presences/reportAndMonitorings',
             'icon' => 'bi bi-bar-chart-line', 
             'parent_id' => $presenceManagement->id,
-            'order' => 5,
+            'order' => 6,
         ]);
 
         // gift role

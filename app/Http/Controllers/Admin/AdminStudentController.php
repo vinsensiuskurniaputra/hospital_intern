@@ -168,7 +168,7 @@ class AdminStudentController extends Controller
     {
         $student->is_finished = !$student->is_finished;
         $student->save();
-        return redirect()->route('admin.students.index')->with('success', 'Student status updated successfully');
+        return redirect()->route('admin.studentScores.index')->with('success', 'Student status updated successfully');
     }
 
     public function filter(Request $request)

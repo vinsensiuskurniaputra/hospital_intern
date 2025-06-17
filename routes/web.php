@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
 use App\Http\Controllers\Responsible\ResponsibleStudentController;
 use App\Http\Controllers\Responsible\ResponsibleScheduleController;
+use App\Http\Controllers\Admin\AdminGradeComponent;
 
 Route::get('/', function () {
     return view('welcome');
@@ -104,10 +105,12 @@ Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/presences/schedules/filter', [AdminScheduleController::class, 'filter'])
         ->name('presences.schedules.filter');
   
-        Route::get('/presences/studentPresences/{student}', [AdminPresenceController::class, 'show'])->name('admin.studentPresencesDetail.show');
+    Route::get('/presences/studentPresences/{student}', [AdminPresenceController::class, 'show'])->name('admin.studentPresencesDetail.show');
     Route::resource('/presences/studentPresences', AdminPresenceController::class)->names('admin.studentPresences');
     Route::get('admin/student-presences/export', [AdminPresenceController::class, 'export'])->name('admin.studentPresences.export');
-
+    
+    Route::resource('/presences/gradeComponent', AdminGradeComponent::class)->names('admin.gradeComponents');
+    
     Route::resource('/presences/studentScores', AdminStudentGradeController::class)->names('admin.studentScores');
     Route::get('/studentScores/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');
     Route::get('/admin/student-grades/filter', [AdminStudentGradeController::class, 'filter'])->name('studentScores.filter');

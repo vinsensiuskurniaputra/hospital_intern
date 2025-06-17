@@ -41,14 +41,6 @@
                     <i class="bi bi-trash"></i>
                 </button>
             </form>
-            <form id="change-status-{{ $student->id }}" action="{{ route('students.change_status', $student->id) }}"
-                method="POST" onsubmit="return confirm('Apakah Anda yakin ingin Mengedit Status student ini?');">
-                @csrf
-                @method('PUT')
-                <button type="submit" class="text-green-500 hover:text-green-600">
-                    <i class="bi bi-check"></i>
-                </button>
-            </form>
         </td>
     </tr>
 @endforeach
