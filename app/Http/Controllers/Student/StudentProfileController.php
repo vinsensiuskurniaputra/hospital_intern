@@ -100,22 +100,29 @@ class StudentProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        $student = Student::where('user_id', $user->id)
-            ->with(['studyProgram.campus'])
-            ->first();
+        $student = Student::where('user_id', $user->id)->first();
 
         if (!$student) {
             return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan');
         }
+
+        // Get study program and campus info
+        $studyProgram = StudyProgram::find($student->study_program_id);
+        $campus = Campus::find($studyProgram->campus_id);
+        
+        // Get class year info
+        $internshipClass = InternshipClass::find($student->internship_class_id);
+        $classYear = $internshipClass ? ClassYear::find($internshipClass->class_year_id) : null;
 
         $results = [
             'namaLengkap' => $user->name,
             'email' => $user->email,
             'nim' => $student->nim,
             'telp' => $student->telp,
-            'prodi' => $student->studyProgram->name,
-            'campus' => $student->studyProgram->campus->name,
-            'angkatan' => $student->internshipClass ? $student->internshipClass->classYear->class_year : '-'
+            'prodi' => $studyProgram->name,
+            'campus' => $campus->name,
+            'angkatan' => $classYear ? $classYear->class_year : '-',
+            'photo' => $student->photo ?? null
         ];
 
         return view('pages.student.profile.edit', compact('results'));
