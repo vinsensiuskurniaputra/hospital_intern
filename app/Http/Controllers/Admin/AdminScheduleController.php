@@ -119,40 +119,38 @@ class AdminScheduleController extends Controller
     public function create()
     {
         $internshipClasses = InternshipClass::all();
-        $departments = Departement::all();
-        $stases = Stase::all();
-
-        return view('pages.admin.schedule.create', compact(
-            'internshipClasses',
-            'departments',
-            'stases'
-        ));
+        $departments = Departement::with('stases')->get();
+        
+        return view('pages.admin.schedule.create', compact('internshipClasses', 'departments'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'internship_class_id' => 'required|exists:internship_classes,id',
-            'stase_id' => 'required|exists:stases,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date'
-        ], [
-            'internship_class_id.required' => 'Kelas Magang harus dipilih',
-            'stase_id.required' => 'Stase harus dipilih', 
-            'start_date.required' => 'Tanggal Mulai harus diisi',
-            'end_date.required' => 'Tanggal Selesai harus diisi',
-            'end_date.after_or_equal' => 'Tanggal Selesai harus setelah atau sama dengan Tanggal Mulai'
+            'stases' => 'required|array|min:1',
+            'stases.*.stase_id' => 'required|exists:stases,id',
+            'stases.*.start_date' => 'required|date',
+            'stases.*.end_date' => 'required|date|after:stases.*.start_date',
         ]);
 
         try {
-            Schedule::create($validated);
+            foreach ($request->stases as $stase) {
+                Schedule::create([
+                    'internship_class_id' => $request->internship_class_id,
+                    'stase_id' => $stase['stase_id'],
+                    'start_date' => $stase['start_date'],
+                    'end_date' => $stase['end_date'],
+                ]);
+            }
+
             return redirect()
                 ->route('presences.schedules.index')
-                ->with('success', 'Jadwal berhasil dibuat');
+                ->with('success', 'Jadwal berhasil ditambahkan');
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan saat membuat jadwal: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan saat menambahkan jadwal');
         }
     }
 

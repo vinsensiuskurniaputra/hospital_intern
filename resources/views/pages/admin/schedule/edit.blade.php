@@ -81,13 +81,17 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs text-gray-500 mb-1">Tanggal Mulai</label>
-                        <input type="date" name="start_date" value="{{ $schedule->start_date }}" 
-                            class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
+                        <input type="date" 
+                               name="start_date" 
+                               value="{{ \Carbon\Carbon::parse($schedule->start_date)->format('Y-m-d') }}" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-500 mb-1">Tanggal Selesai</label>
-                        <input type="date" name="end_date" value="{{ $schedule->end_date }}" 
-                            class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
+                        <input type="date" 
+                               name="end_date" 
+                               value="{{ \Carbon\Carbon::parse($schedule->end_date)->format('Y-m-d') }}" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:ring-1 focus:ring-green-500 focus:border-green-500">
                     </div>
                 </div>
             </div>
