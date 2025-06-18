@@ -11,7 +11,10 @@ class ResponsibleNotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Notification::where('user_id', Auth::id())
+        $notifications = Notification::where(function($q) {
+                $q->where('user_id', Auth::id())
+                  ->orWhereNull('user_id'); // notifikasi global
+            })
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($notification) {
@@ -20,36 +23,17 @@ class ResponsibleNotificationController extends Controller
                     'title' => $notification->title,
                     'description' => $notification->message,
                     'date' => $notification->created_at->format('d F Y - H:i'),
-                    'type' => $this->getNotificationType($notification->type), // Konversi tipe notifikasi
-                    'isRead' => (bool) $notification->is_read
+                    'type' => $notification->type,
+                    'isRead' => $notification->is_read
                 ];
             });
 
         return view('pages.responsible.notifications.index', compact('notifications'));
     }
 
-    private function getNotificationType($type)
-    {
-        $types = [
-            'info' => 'Umum',
-            'warning' => 'Jadwal',
-            'error' => 'Evaluasi'
-        ];
-
-        return $types[$type] ?? 'Umum';
-    }
-
     public function show($id)
     {
-        $notification = Notification::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
-        if (!$notification->is_read) {
-            $notification->is_read = true;
-            $notification->save();
-        }
-
+        $notification = Notification::findOrFail($id);
         return view('pages.responsible.notifications.detail', compact('notification'));
     }
 

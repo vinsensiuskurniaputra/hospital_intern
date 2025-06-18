@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 
 @section('content')
-<div class="p-6">
+<div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md border p-8 space-y-8">
     <!-- Back Link -->
     <div class="flex items-center mb-6">
         <a href="{{ route('responsible.notifications') }}" 
@@ -35,7 +35,12 @@
                     {!! nl2br(e($notification->message)) !!}
                 </div>
             </div>
+        
         </div>
     </div>
 </div>
+<!-- Footer -->
+    <div class="mt-8 text-center text-sm text-gray-500">
+        @2025 IK Polines
+    </div>
 @endsection
