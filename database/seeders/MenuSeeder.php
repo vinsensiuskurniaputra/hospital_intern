@@ -183,7 +183,7 @@ class MenuSeeder extends Seeder
 
         $scoreComponentManagement = Menu::create([
             'name' => 'Komponen Nilai',
-            'url' => '/presences/scoreComponents',
+            'url' => '/presences/gradeComponent',
             'icon' => 'bi bi-list-check', 
             'parent_id' => $presenceManagement->id,
             'order' => 4,
