@@ -22,7 +22,7 @@
                 <div class="flex items-center">
                     @if (Route::has('login'))
                         @auth
-                            <a href="{{ url('/dashboard') }}"
+                            <a href="{{ url('/home') }}"
                                 class="bg-[#2D5A27] text-white px-6 py-2 rounded-lg hover:bg-[#4F9546] transition-colors">Dashboard</a>
                         @else
                             <a href="{{ route('login') }}"
