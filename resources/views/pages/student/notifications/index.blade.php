@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 
 @section('content')
-<div class="p-6" x-data="{ 
+<div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md border p-8 space-y-8" x-data="{
     open: false,
     selectedFilter: 'Semua',
     notifications: {{ Js::from($notifications) }},
@@ -106,9 +106,11 @@
         </template>
     </div>
 
+</div>
+
     <!-- Footer -->
     <div class="mt-8 text-center text-sm text-gray-500">
         @2025 IK Polines
     </div>
-</div>
+
 @endsection

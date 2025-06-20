@@ -12,7 +12,10 @@ class StudentNotificationController extends Controller
     public function index()
     {
         // Get notifications for logged in user
-        $notifications = Notification::where('user_id', Auth::id())
+        $notifications = Notification::where(function($q) {
+                $q->where('user_id', Auth::id())
+                  ->orWhereNull('user_id'); // notifikasi global
+            })
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($notification) {
