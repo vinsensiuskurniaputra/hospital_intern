@@ -12,7 +12,7 @@
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                     <input id="email" type="email" name="email" value="{{ old('email', $email ?? '') }}" required
-                        autofocus disabled
+                        autofocus hidden
                         class="mt-1 block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#637F26] focus:border-[#637F26] transition-all duration-200 hover:border-[#637F26]">
                     @error('email')
                         <span class="text-red-600 text-sm">{{ $message }}</span>
