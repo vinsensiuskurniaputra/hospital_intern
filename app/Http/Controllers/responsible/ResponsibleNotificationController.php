@@ -34,6 +34,10 @@ class ResponsibleNotificationController extends Controller
     public function show($id)
     {
         $notification = Notification::findOrFail($id);
+        if (!$notification->is_read) {
+            $notification->is_read = true;
+            $notification->save();
+        }
         return view('pages.responsible.notifications.detail', compact('notification'));
     }
 

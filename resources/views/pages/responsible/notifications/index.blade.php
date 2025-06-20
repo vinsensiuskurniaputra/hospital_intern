@@ -88,7 +88,9 @@
                     <div class="p-6">
                         <div class="flex justify-between items-start">
                             <div class="flex-1">
-                                <h2 class="text-xl font-semibold" :class="{ 'text-gray-900': !notification.isRead, 'text-gray-500': notification.isRead }" x-text="notification.title"></h2>
+                                <h2 class="text-xl font-semibold"
+                                    :class="{ 'text-gray-900': !notification.isRead, 'text-gray-500': notification.isRead }"
+                                    x-text="notification.title"></h2>
                                 <p class="mt-4 font-semibold" :class="{ 'text-gray-900': !notification.isRead, 'text-gray-500': notification.isRead }" x-text="notification.description"></p>
                             </div>
                             <div class="ml-4 flex flex-col items-end">
