@@ -20,12 +20,12 @@ class StudentProfileController extends Controller
         $userId = auth()->user()->id;
         $studentId = Student::where('user_id', $userId)->first('id');
 
-        $data1 = User::find($userId, ['name', 'email']);
+        $data1 = User::find($userId, ['name', 'email', 'photo_profile_url']);  // Tambahkan photo_profile_url 
         $data2 = Student::where('user_id', $userId)->first(['nim', 'telp']);
         
         $prodi_id = Student::where('user_id', $userId)->first('study_program_id');
         $prodiName = StudyProgram::find($prodi_id, 'name');
-
+        
         $campusId = StudyProgram::find($prodi_id, 'campus_id');
         $campusId = $campusId[0]->campus_id;
         $campusName = Campus::where('id', $campusId)->first('name');
@@ -36,15 +36,15 @@ class StudentProfileController extends Controller
         $classYear = ClassYear::where('id', $classYearId)->first('class_year');
         $classYear = $classYear->class_year;
         
-        // return ;
         $results = [
             'namaLengkap' => $data1->name,
             'email' => $data1->email,
             'nim' => $data2->nim,
             'telp' => $data2->telp,
-            'campus' => $campusName->name,
+            'campus' => $campusName->name,  
             'angkatan' => $classYear,
-            'prodi' => $prodiName[0]->name
+            'prodi' => $prodiName[0]->name,
+            'foto' => $data1->photo_profile_url  // Tambahkan foto ke results array
         ];
 
         return view("pages.student.profile.index", compact('results'));
@@ -53,17 +53,16 @@ class StudentProfileController extends Controller
     public function showChangePassword()
     {
         $userId = auth()->user()->id;
+        $user = User::find($userId, ['name', 'photo_profile_url']);
         $student = Student::where('user_id', $userId)->first();
         
         // Get study program name
         $prodi = StudyProgram::find($student->study_program_id);
 
-        $user = User::find($userId);
-        
         $results = [
             'namaLengkap' => $user->name,
-            'prodi' => $prodi->name, // Tambahkan ini
-            'photo' => $student->photo ?? null
+            'prodi' => $prodi->name,
+            'foto' => $user->photo_profile_url
         ];
 
         return view('pages.student.profile.gantipassword', compact('results'));
@@ -99,18 +98,17 @@ class StudentProfileController extends Controller
 
     public function edit()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        $userId = auth()->user()->id;
+        $user = User::find($userId, ['id', 'name', 'email', 'photo_profile_url']);
+        $student = Student::where('user_id', $userId)->first();
 
         if (!$student) {
             return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan');
         }
 
-        // Get study program and campus info
         $studyProgram = StudyProgram::find($student->study_program_id);
         $campus = Campus::find($studyProgram->campus_id);
         
-        // Get class year info
         $internshipClass = InternshipClass::find($student->internship_class_id);
         $classYear = $internshipClass ? ClassYear::find($internshipClass->class_year_id) : null;
 
@@ -122,7 +120,7 @@ class StudentProfileController extends Controller
             'prodi' => $studyProgram->name,
             'campus' => $campus->name,
             'angkatan' => $classYear ? $classYear->class_year : '-',
-            'photo' => $student->photo ?? null
+            'foto' => $user->photo_profile_url
         ];
 
         return view('pages.student.profile.edit', compact('results'));

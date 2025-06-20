@@ -8,8 +8,8 @@
             <div class="flex items-start gap-4">
                 <div class="relative">
                     <div class="w-24 h-24 bg-gray-200 rounded-full overflow-hidden">
-                        @if(isset($results['photo']))
-                            <img src="{{ asset('storage/' . $results['photo']) }}" 
+                        @if($results['foto'])
+                            <img src="{{ asset('storage/' . $results['foto']) }}" 
                                  alt="Profile Picture"
                                  class="w-full h-full object-cover rounded-full">
                         @else
