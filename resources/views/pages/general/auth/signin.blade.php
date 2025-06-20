@@ -72,7 +72,8 @@
                                     class="h-4 w-4 rounded border-gray-300 text-[#637F26] focus:ring-[#637F26]">
                                 <label for="remember" class="ml-2 block text-sm text-gray-700">Ingat saya</label>
                             </div> --}}
-                            <a href="#" class="text-sm ml-auto text-[#637F26] hover:text-[#85A832] font-medium">Lupa kata sandi?</a>
+                            <a href="{{ route('password.request') }}"
+                                class="text-sm ml-auto text-[#637F26] hover:text-[#85A832] font-medium">Lupa kata sandi?</a>
                         </div>
 
                         <button type="submit"
