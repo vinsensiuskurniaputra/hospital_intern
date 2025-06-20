@@ -1,9 +1,11 @@
 <?php
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminClassYear;
 use App\Http\Controllers\General\AuthController;
 use App\Http\Controllers\General\HomeController;
+use App\Http\Controllers\Admin\AdminGradeComponent;
 use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminStaseController;
@@ -25,7 +27,6 @@ use App\Http\Controllers\Admin\AdminUserAuthorizationController;
 use App\Http\Controllers\Admin\AdminReportAndMonitoringController;
 use App\Http\Controllers\Responsible\ResponsibleStudentController;
 use App\Http\Controllers\Responsible\ResponsibleScheduleController;
-use App\Http\Controllers\Admin\AdminGradeComponent;
 
 Route::get('/', function () {
     return view('welcome');
@@ -34,6 +35,12 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+    // Forgot password routes
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

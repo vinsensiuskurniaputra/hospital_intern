@@ -67,12 +67,13 @@
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
-                            <div class="flex items-center">
+                            {{-- <div class="flex items-center">
                                 <input type="checkbox" id="remember" name="remember"
                                     class="h-4 w-4 rounded border-gray-300 text-[#637F26] focus:ring-[#637F26]">
                                 <label for="remember" class="ml-2 block text-sm text-gray-700">Ingat saya</label>
-                            </div>
-                            <a href="#" class="text-sm text-[#637F26] hover:text-[#85A832] font-medium">Lupa kata sandi?</a>
+                            </div> --}}
+                            <a href="{{ route('password.request') }}"
+                                class="text-sm ml-auto text-[#637F26] hover:text-[#85A832] font-medium">Lupa kata sandi?</a>
                         </div>
 
                         <button type="submit"
