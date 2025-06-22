@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Exports\ResponsibleReportExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ResponsibleReportController extends Controller
 {
@@ -197,7 +199,7 @@ class ResponsibleReportController extends Controller
         ));
     }
 
-    public function downloadCsv(Request $request)
+    public function downloadExcel(Request $request)
     {
         $responsibleUser = ResponsibleUser::where('user_id', Auth::id())->first();
         if (!$responsibleUser) {
@@ -221,17 +223,14 @@ class ResponsibleReportController extends Controller
 
         $studentIds = $students->pluck('id')->toArray();
 
-        // Komponen nilai yang wajib ada di kolom
         $wantedComponents = [
             'Keahlian', 'Profesionalisme', 'Komunikasi', 'Kemampuan Menangani Pasien'
         ];
 
-        // Ambil semua komponen nilai untuk stase ini (id => name)
         $gradeComponents = DB::table('grade_components')
             ->where('stase_id', $stase->id)
-            ->pluck('name', 'id'); // hasil: [1 => 'Keahlian', 2 => 'Profesionalisme', ...]
+            ->pluck('name', 'id');
 
-        // Ambil nilai per komponen untuk semua mahasiswa (group by student_id)
         $componentGrades = DB::table('student_component_grades')
             ->where('stase_id', $stase->id)
             ->whereIn('student_id', $studentIds)
@@ -239,7 +238,6 @@ class ResponsibleReportController extends Controller
             ->get()
             ->groupBy('student_id');
 
-        // Ambil absensi lengkap (hadir, izin, sakit, alpa, persentase hadir)
         $absensiData = DB::table('presences')
             ->select(
                 'students.id as student_id',
@@ -247,7 +245,6 @@ class ResponsibleReportController extends Controller
                 DB::raw('SUM(CASE WHEN presences.status = "present" THEN 1 ELSE 0 END) as hadir'),
                 DB::raw('SUM(CASE WHEN presences.status = "sick" THEN 1 ELSE 0 END) as sakit'),
                 DB::raw('SUM(CASE WHEN presences.status = "absent" THEN 1 ELSE 0 END) as alpa'),
-                // Gabungkan status izin dan excused
                 DB::raw('SUM(CASE WHEN presences.status = "izin" OR presences.status = "excused" THEN 1 ELSE 0 END) as izin'),
                 DB::raw('ROUND(SUM(CASE WHEN presences.status = "present" THEN 1 ELSE 0 END) / COUNT(*) * 100, 0) as persentase_present')
             )
@@ -256,19 +253,6 @@ class ResponsibleReportController extends Controller
             ->groupBy('students.id')
             ->get()
             ->keyBy('student_id');
-
-        // Susun header kolom
-        $columns = [
-            'NIM', 'Nama', 'Kelas Magang', 'Stase', 'Jurusan', 'Kampus', 'Tahun Angkatan',
-            'Total Pertemuan', 'Hadir', 'Izin', 'Sakit', 'Alpa', 'Persentase Kehadiran (%)',
-            'Keahlian', 'Profesionalisme', 'Komunikasi', 'Kemampuan Menangani Pasien','Nilai Rata-Rata'
-        ];
-
-        $filename = 'rekapitulasi_stase_' . ($stase->name ?? 'all') . '_' . now()->format('Ymd_His') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
 
         $gradesData = DB::table('student_grades')
             ->select(
@@ -281,56 +265,11 @@ class ResponsibleReportController extends Controller
             ->get()
             ->keyBy('student_id');
 
-        return new \Symfony\Component\HttpFoundation\StreamedResponse(function() use ($students, $columns, $stase, $absensiData, $gradesData, $gradeComponents, $componentGrades, $wantedComponents) {
-            $handle = fopen('php://output', 'w');
-            $delimiter = ';';
+        $filename = 'rekapitulasi_stase_' . ($stase->name ?? 'all') . '_' . now()->format('Ymd_His') . '.xlsx';
 
-            // Header
-            fputcsv($handle, $columns, $delimiter);
-
-            foreach ($students as $student) {
-                $absensi = $absensiData->get($student->id);
-                $grade = $gradesData->get($student->id);
-
-                // Mapping komponen: nama => value
-                $studentComponentGrades = $componentGrades->get($student->id, collect());
-                $componentMap = [];
-                foreach ($studentComponentGrades as $comp) {
-                    $compName = $gradeComponents[$comp->grade_component_id] ?? null;
-                    if ($compName) {
-                        $componentMap[$compName] = $comp->value;
-                    }
-                }
-
-                $row = [
-                    $student->nim,
-                    $student->user->name,
-                    $student->internshipClass->name,
-                    $stase->name,
-                    $student->studyProgram->name,
-                    $student->studyProgram->campus->name,
-                    $student->internshipClass->classYear->class_year,
-                    $absensi ? $absensi->total_presensi : 0,
-                    $absensi ? $absensi->hadir : 0,
-                    $absensi ? $absensi->izin ?? 0 : 0,   // Jika tidak ada status izin, tetap 0
-                    $absensi ? $absensi->sakit : 0,
-                    $absensi ? $absensi->alpa : 0,
-                    $absensi ? $absensi->persentase_present : 0,
-                ];
-
-                // Tambahkan nilai per komponen
-                foreach ($wantedComponents as $compName) {
-                    $row[] = isset($componentMap[$compName])
-                        ? number_format($componentMap[$compName], 2, ',', '')
-                        : '0';
-                }
-
-                // Nilai rata-rata di paling akhir
-                $row[] = $grade ? number_format($grade->average_grade, 2, ',', '') : 0;
-
-                fputcsv($handle, $row, $delimiter);
-            }
-            fclose($handle);
-        }, 200, $headers);
+        return Excel::download(
+            new ResponsibleReportExport($students, $stase, $absensiData, $gradesData, $gradeComponents, $componentGrades, $wantedComponents),
+            $filename
+        );
     }
 }
