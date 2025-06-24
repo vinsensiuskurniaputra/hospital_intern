@@ -222,12 +222,11 @@ Route::middleware(['auth', 'menu'])->prefix('responsible')->name('responsible.')
     Route::get('/reports', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'index'])->name('reports');
     Route::resource('schedules', AdminScheduleController::class);
     Route::get('stases/{stase}/responsible', [AdminScheduleController::class, 'getResponsible']);
-    Route::get('/reports/download-csv', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'downloadCsv'])->name('reports.download-csv');
+    Route::get('/reports/download-excel', [App\Http\Controllers\Responsible\ResponsibleReportController::class, 'downloadExcel'])->name('reports.download-excel');
 
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'index'])->name('notifications');
-    Route::get('/schedule/get-classes', [ResponsibleScheduleController::class, 'getClassesForStase'])->name('schedule.getClasses');
-    Route::get('/students', [App\Http\Controllers\Responsible\ResponsibleStudentController::class, 'index'])->name('students.index');
+    Route::get('/notifications/{id}', [App\Http\Controllers\Responsible\ResponsibleNotificationController::class, 'show'])->name('notifications.show');
 });
 
 // API Routes for presence (PIC/Responsible)
