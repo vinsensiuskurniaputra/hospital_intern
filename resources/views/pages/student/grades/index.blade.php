@@ -3,588 +3,360 @@
 @section('title', 'Nilai Mahasiswa')
 
 @section('content')
-<div class="page-container">
-    <div class="main-content">
-        <div class="header-section">
-            <h1>Nilai Mahasiswa</h1>
-            <p>Menampilkan rekap nilai akhir mahasiswa selama periode rotasi klinik.</p>
-        </div>
-        
-        <div class="student-info-section">
-            <div class="section-title">Informasi Mahasiswa</div>
-            
-            <div class="info-row">
-                <div class="info-column">
-                    <div class="info-label">Nama Lengkap</div>
-                    <div class="info-input-wrapper">
-                        <input type="text" class="info-input" value="{{ auth()->user()->name }}" readonly>
-                    </div>
-                </div>
-                <div class="info-column">
-                    <div class="info-label">Nomor Induk Mahasiswa</div>
-                    <div class="info-input-wrapper">
-                        <input type="text" class="info-input" value="{{ auth()->user()->student->nim ?? '-' }}" readonly>
-                    </div>
-                </div>
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header Section -->
+        <div class="bg-white rounded-lg shadow-sm mb-8 p-6">
+            <div class="border-b border-gray-200 pb-4 mb-6">
+                <h1 class="text-2xl font-semibold text-gray-900">Nilai Mahasiswa</h1>
+                <p class="text-sm text-gray-600 mt-1">Menampilkan rekap nilai akhir mahasiswa selama periode rotasi klinik.</p>
             </div>
             
-            <div class="info-row">
-                <div class="info-column">
-                    <div class="info-label">Asal Kampus</div>
-                    <div class="info-input-wrapper">
-                        <input type="text" class="info-input" value="{{ auth()->user()->student->studyProgram->campus->name ?? '-' }}" readonly>
-                    </div>
+            <!-- Student Info Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                    <input type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900" value="{{ auth()->user()->name }}" readonly>
                 </div>
-                <div class="info-column"></div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Induk Mahasiswa</label>
+                    <input type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900" value="{{ auth()->user()->student->nim ?? '-' }}" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Asal Kampus</label>
+                    <input type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900" value="{{ auth()->user()->student->studyProgram->campus->name ?? '-' }}" readonly>
+                </div>
             </div>
         </div>
         
-        <div class="grades-details-section">
-            <div class="section-header">
-                <h2>Detail Nilai Mahasiswa</h2>
+        <!-- Grades Section -->
+        <div class="space-y-6">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-1 h-6 bg-green-600 rounded-full"></div>
+                <h2 class="text-xl font-semibold text-green-700">Detail Nilai Mahasiswa</h2>
             </div>
             
-            <div class="grades-table-wrapper">
-                <table class="grades-table">
-                    <thead>
-                        <tr>
-                            <th class="column-stase">Stase</th>
-                            <th class="column-pj">Nama PJ</th>
-                            <th class="column-date">Tanggal</th>
-                            <th>Keahlian</th>
-                            <th>Komunikasi</th>
-                            <th>Profesionalisme</th>
-                            <th>Kemampuan Menangani Pasien</th>
-                            <th class="column-average">Rata-Rata</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($grades as $grade)
-                            <tr>
-                                <td>{{ $grade->stase->name ?? 'N/A' }}</td>
-                                <td>
+            @php
+                $totalOverallAverage = 0;
+                $staseCount = 0;
+                $hasGrades = false;
+            @endphp
+            
+            @forelse($grades->groupBy('stase_id') as $staseId => $staseGrades)
+                @php
+                    $stase = $staseGrades->first()->stase;
+                    $studentGrade = $staseGrades->first();
+                    
+                    // Get grade components for this stase
+                    $gradeComponents = \App\Models\GradeComponent::where('stase_id', $staseId)->get();
+                    
+                    // Get component grades for this student and stase
+                    $componentGrades = \App\Models\StudentComponentGrade::where('student_id', auth()->user()->student->id)
+                        ->where('stase_id', $staseId)
+                        ->get()
+                        ->keyBy('grade_component_id');
+                    
+                    $hasGrades = true;
+                @endphp
+                
+                <!-- Stase Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <!-- Stase Header -->
+                    <div class="bg-green-50 px-6 py-4 border-b border-green-100">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                            <h3 class="text-lg font-semibold text-green-800">{{ $stase->name ?? 'N/A' }}</h3>
+                            <div class="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-sm text-gray-600">
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    PJ: 
                                     @php
                                         $pjName = 'N/A';
-                                        if ($grade->stase && isset($grade->stase->responsibleUsers) && $grade->stase->responsibleUsers->isNotEmpty()) {
-                                            $responsibleUser = $grade->stase->responsibleUsers->first();
+                                        if ($stase && isset($stase->responsibleUsers) && $stase->responsibleUsers->isNotEmpty()) {
+                                            $responsibleUser = $stase->responsibleUsers->first();
                                             if ($responsibleUser && isset($responsibleUser->user)) {
                                                 $pjName = $responsibleUser->user->name;
                                             }
                                         }
                                     @endphp
                                     {{ $pjName }}
-                                </td>
-                                <td>{{ isset($grade->updated_at) ? \Carbon\Carbon::parse($grade->updated_at)->format('d M') : '-' }}</td>
-                                <td>{{ $grade->skill_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->communication_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->professional_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->patient_management_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td class="score-average">{{ $grade->avg_grades ?? '-' }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="no-data">Belum ada nilai yang tersedia</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                </span>
+                                @if(isset($studentGrade->updated_at))
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Diperbaharui: {{ \Carbon\Carbon::parse($studentGrade->updated_at)->format('d M Y, H:i') }}
+                                </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stase Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    @foreach($gradeComponents as $component)
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            {{ $component->name }}
+                                        </th>
+                                    @endforeach
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Rata-Rata Stase
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    @foreach($gradeComponents as $component)
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-medium text-gray-900">
+                                            @if(isset($componentGrades[$component->id]))
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                                    {{ number_format($componentGrades[$component->id]->value, 1) }}
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-500">
+                                                    -
+                                                </span>
+                                            @endif
+                                        </td>
+                                    @endforeach
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold">
+                                        @if($studentGrade->avg_grades && $studentGrade->avg_grades > 0)
+                                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800">
+                                                {{ number_format($studentGrade->avg_grades, 1) }}
+                                            </span>
+                                            @php
+                                                $totalOverallAverage += $studentGrade->avg_grades;
+                                                $staseCount++;
+                                            @endphp
+                                        @else
+                                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gray-100 text-gray-500">
+                                                -
+                                            </span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada nilai</h3>
+                    <p class="mt-1 text-sm text-gray-500">Belum ada nilai yang tersedia untuk ditampilkan.</p>
+                </div>
+            @endforelse
             
-            <div class="export-container">
-                <a href="{{ route('student.grades.export') }}" class="export-a">Ekspor ke PDF</button>
+            <!-- Simple Summary Card -->
+            @if($hasGrades && $staseCount > 0)
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mt-8">
+                    <!-- Header -->
+                    <div class="bg-green-600 px-6 py-4">
+                        <h3 class="text-lg font-semibold text-white">Ringkasan Nilai Keseluruhan</h3>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <!-- Total Average -->
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-green-600 mb-2">
+                                    {{ number_format($totalOverallAverage / $staseCount, 1) }}
+                                </div>
+                                <div class="text-sm text-gray-600">Rata-Rata Total</div>
+                            </div>
+                            
+                            <!-- Completed Stases -->
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-blue-600 mb-2">{{ $staseCount }}</div>
+                                <div class="text-sm text-gray-600">Stase Selesai</div>
+                            </div>
+                            
+                            <!-- Total Stases -->
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-purple-600 mb-2">{{ $grades->groupBy('stase_id')->count() }}</div>
+                                <div class="text-sm text-gray-600">Total Stase</div>
+                            </div>
+                            
+                            <!-- Performance -->
+                            <div class="text-center">
+                                @php
+                                    $avgScore = $totalOverallAverage / $staseCount;
+                                    $performance = '';
+                                    $performanceColor = '';
+                                    if ($avgScore >= 85) {
+                                        $performance = 'Sangat Baik';
+                                        $performanceColor = 'text-green-600';
+                                    } elseif ($avgScore >= 75) {
+                                        $performance = 'Baik';
+                                        $performanceColor = 'text-blue-600';
+                                    } elseif ($avgScore >= 65) {
+                                        $performance = 'Cukup';
+                                        $performanceColor = 'text-yellow-600';
+                                    } else {
+                                        $performance = 'Perlu Perbaikan';
+                                        $performanceColor = 'text-red-600';
+                                    }
+                                @endphp
+                                <div class="text-lg font-bold {{ $performanceColor }} mb-2">{{ $performance }}</div>
+                                <div class="text-sm text-gray-600">Kategori Nilai</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                <span>Progress Evaluasi</span>
+                                <span>{{ number_format(($staseCount / $grades->groupBy('stase_id')->count()) * 100, 0) }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full" style="width: {{ ($staseCount / $grades->groupBy('stase_id')->count()) * 100 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @elseif($hasGrades)
+                <!-- Jika ada grades tapi tidak ada yang punya avg_grades -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                    <svg class="mx-auto h-8 w-8 text-yellow-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.864-.833-2.634 0L3.098 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-yellow-800 mb-2">Evaluasi Dalam Proses</h3>
+                    <p class="text-yellow-700">Nilai rata-rata akan tersedia setelah semua komponen dinilai.</p>
+                </div>
+            @endif
+            
+            <!-- Export Button -->
+            @if($hasGrades)
+            <div class="flex justify-end pt-6">
+                <button onclick="printGrades()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Ekspor ke PDF
+                </button>
             </div>
+            @endif
+        </div>
 
-            <!-- Hidden print template -->
-            <div class="print-only-template">
-                <div class="print-header">
-                    <div class="print-date">5/22/25, 5:00 PM</div>
-                    <div class="print-title">Nilai Mahasiswa</div>
-                </div>
-                
-                <div class="hospital-info">
-                    <div class="hospital-logo">
-                        <span class="logo-icon">⚕️</span> Hospital Intern
-                    </div>
-                </div>
-                
-                <div class="report-title">Nilai Mahasiswa</div>
-                <div class="report-description">Menampilkan rekap nilai akhir mahasiswa selama periode rotasi klinik.</div>
-                
-                <div class="student-print-info">
-                    <div class="student-info-item">
-                        <span class="info-label">Nama Lengkap:</span> 
-                        <span class="info-value">{{ auth()->user()->name }}</span>
-                    </div>
-                    <div class="student-info-item">
-                        <span class="info-label">Nomor Induk Mahasiswa:</span> 
-                        <span class="info-value">{{ auth()->user()->student->nim ?? '-' }}</span>
-                    </div>
-                    <div class="student-info-item">
-                        <span class="info-label">Asal Kampus:</span> 
-                        <span class="info-value">{{ auth()->user()->student->studyProgram->campus->name ?? '-' }}</span>
-                    </div>
-                </div>
-                
-                <table class="print-grades-table">
-                    <thead>
-                        <tr>
-                            <th>Stase</th>
-                            <th>Nama PJ</th>
-                            <th>Tanggal</th>
-                            <th>Keahlian</th>
-                            <th>Komunikasi</th>
-                            <th>Profesionalisme</th>
-                            <th>Kemampuan Menangani Pasien</th>
-                            <th>Rata-Rata</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($grades as $grade)
-                            <tr>
-                                <td>{{ $grade->stase->name ?? 'N/A' }}</td>
-                                <td>
-                                    @php
-                                        $pjName = 'N/A';
-                                        if ($grade->stase && isset($grade->stase->responsibleUsers) && $grade->stase->responsibleUsers->isNotEmpty()) {
-                                            $responsibleUser = $grade->stase->responsibleUsers->first();
-                                            if ($responsibleUser && isset($responsibleUser->user)) {
-                                                $pjName = $responsibleUser->user->name;
-                                            }
-                                        }
-                                    @endphp
-                                    {{ $pjName }}
-                                </td>
-                                <td>{{ isset($grade->updated_at) ? \Carbon\Carbon::parse($grade->updated_at)->format('d M') : '-' }}</td>
-                                <td>{{ $grade->skill_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->communication_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->professional_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->patient_management_grade ?? $grade->avg_grades ?? '-' }}</td>
-                                <td>{{ $grade->avg_grades ?? '-' }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="no-data">Belum ada nilai yang tersedia</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        <!-- Hidden Print Template -->
+        <div class="print-only-template hidden">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                <div class="text-sm text-gray-500">{{ now()->format('d/m/Y, H:i') }}</div>
+                <div class="text-lg font-semibold">Nilai Mahasiswa</div>
             </div>
+            
+            <div class="text-center mb-8">
+                <div class="text-2xl font-bold text-green-700 mb-2">🏥 Hospital Intern</div>
+                <h1 class="text-xl font-bold mb-2">Detail Nilai Mahasiswa</h1>
+                <p class="text-gray-600">Menampilkan rekap nilai akhir mahasiswa selama periode rotasi klinik.</p>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded mb-6">
+                <div class="grid grid-cols-3 gap-4 text-sm">
+                    <div><strong>Nama:</strong> {{ auth()->user()->name }}</div>
+                    <div><strong>NIM:</strong> {{ auth()->user()->student->nim ?? '-' }}</div>
+                    <div><strong>Kampus:</strong> {{ auth()->user()->student->studyProgram->campus->name ?? '-' }}</div>
+                </div>
+            </div>
+            
+            @foreach($grades->groupBy('stase_id') as $staseId => $staseGrades)
+                @php
+                    $stase = $staseGrades->first()->stase;
+                    $studentGrade = $staseGrades->first();
+                    $gradeComponents = \App\Models\GradeComponent::where('stase_id', $staseId)->get();
+                    $componentGrades = \App\Models\StudentComponentGrade::where('student_id', auth()->user()->student->id)
+                        ->where('stase_id', $staseId)
+                        ->get()
+                        ->keyBy('grade_component_id');
+                @endphp
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-green-700 mb-3 bg-green-50 p-3 rounded">{{ $stase->name ?? 'N/A' }}</h3>
+                    
+                    <table class="w-full border-collapse border border-gray-300 mb-4">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                @foreach($gradeComponents as $component)
+                                    <th class="border border-gray-300 p-2 text-sm">{{ $component->name }}</th>
+                                @endforeach
+                                <th class="border border-gray-300 p-2 text-sm font-bold">Rata-Rata Stase</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                @foreach($gradeComponents as $component)
+                                    <td class="border border-gray-300 p-2 text-center">
+                                        {{ isset($componentGrades[$component->id]) ? number_format($componentGrades[$component->id]->value, 1) : '-' }}
+                                    </td>
+                                @endforeach
+                                <td class="border border-gray-300 p-2 text-center font-bold bg-green-50">
+                                    {{ $studentGrade->avg_grades ? number_format($studentGrade->avg_grades, 1) : '-' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            @endforeach
+            
+            @if($staseCount > 0)
+                <div class="text-center text-lg font-bold bg-green-100 p-4 rounded mt-6">
+                    Total Rata-Rata Keseluruhan: {{ number_format($totalOverallAverage / $staseCount, 1) }}
+                </div>
+            @endif
         </div>
     </div>
 </div>
 
-<style>
-    /* Modern Color Palette */
-    :root {
-        --primary-color: #658E36;
-        --primary-light: #f4f7f0;
-        --light-gray: #f5f5f5;
-        --medium-gray: #e0e0e0;
-        --dark-gray: #6c757d;
-        --header-color: #333;
-        --text-color: #444;
-        --border-color: #eaeaea;
-        --white: #ffffff;
-    }
-    
-    /* Main layout */
-    .page-container {
-        max-width: 100%;
-        padding: 30px;
-        background-color: #f8f9fa;
-        min-height: calc(100vh - 60px);
-    }
-    
-    .main-content {
-        max-width: 1200px;
-        margin: 0 auto;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        padding: 30px;
-    }
-    
-    /* Header section */
-    .header-section {
-        margin-bottom: 35px;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 20px;
-    }
-    
-    .header-section h1 {
-        font-size: 24px;
-        color: var(--header-color);
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-    
-    .header-section p {
-        color: var(--dark-gray);
-        font-size: 14px;
-        margin-bottom: 0;
-    }
-    
-    /* Section title styling - UPDATED: removed bottom border */
-    .section-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--header-color);
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-    }
-    
-    /* Student info section - UPDATED WITH CARD-LIKE SHADOWS */
-    .student-info-section {
-        margin-bottom: 40px;
-    }
-    
-    .info-row {
-        display: flex;
-        margin-bottom: 25px;
-        gap: 24px;
-        width: 100%;
-    }
-    
-    .info-column {
-        flex: 1;
-    }
-    
-    .info-label {
-        color: var(--dark-gray);
-        font-size: 16px;
-        margin-bottom: 8px;
-        font-weight: 400;
-    }
-    
-    .info-input-wrapper {
-        position: relative;
-    }
-    
-    .info-input {
-        width: 100%;
-        background-color: var(--white);
-        padding: 14px 16px;
-        border-radius: 8px;
-        border: none;
-        font-size: 16px;
-        color: var(--text-color);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        box-sizing: border-box;
-        height: 50px;
-        transition: all 0.3s ease;
-        cursor: default;
-    }
-    
-    /* UPDATED: Hover effect with enhanced shadow */
-    .info-input:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .info-input:focus {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        outline: none;
-    }
-    
-    /* Remove the text selection cursor */
-    .info-input::selection {
-        background: transparent;
-    }
-    
-    /* Grades details section */
-    .grades-details-section {
-        margin-top: 20px;
-    }
-    
-    .section-header {
-        margin-bottom: 20px;
-        position: relative;
-        padding-left: 15px;
-        border-left: 5px solid var(--primary-color);
-    }
-    
-    .section-header h2 {
-        font-size: 18px;
-        color: var(--primary-color);
-        font-weight: 600;
-        margin: 0;
-    }
-    
-    /* Table styling */
-    .grades-table-wrapper {
-        overflow-x: auto;
-        margin-bottom: 30px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-    }
-    
-    .grades-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .grades-table thead {
-        background-color: var(--primary-light);
-    }
-    
-    .grades-table th {
-        padding: 14px 16px;
-        font-size: 13px;
-        color: var(--primary-color);
-        font-weight: 600;
-        text-align: center;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .grades-table .column-stase,
-    .grades-table .column-pj {
-        text-align: center;
-    }
-    
-    .grades-table tbody tr:nth-child(odd) {
-        background-color: white;
-    }
-    
-    .grades-table tbody tr:nth-child(even) {
-        background-color: var(--light-gray);
-    }
-    
-    .grades-table td {
-        padding: 14px 16px;
-        font-size: 14px;
-        color: var(--text-color);
-        text-align: center;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .grades-table td:first-child,
-    .grades-table td:nth-child(2) {
-        text-align: center;
-    }
-    
-    .score-average {
-        font-weight: 600;
-    }
-    
-    .no-data {
-        text-align: center !important;
-        padding: 20px !important;
-        color: var(--dark-gray);
-    }
-    
-    /* Table row hover effect */
-    .grades-table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-    
-    .grades-table tbody tr:hover {
-        background-color: #f0f5e8;
-    }
-    
-    /* Export button */
-    .export-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 20px;
-    }
-    
-    .export-button {
-        background-color: var(--primary-color);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 4px;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    }
-    
-    .export-button:hover {
-        background-color: #557a2f;
-        text-decoration: none;
-        color: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    
-    /* Responsive tweaks */
-    @media (max-width: 768px) {
-        .page-container {
-            padding: 15px;
-        }
-        
-        .main-content {
-            padding: 20px;
-        }
-        
-        .info-row {
-            flex-direction: column;
-            gap: 20px;
-        }
-    }
-
-    @media print {
-        /* Hide everything except the grades details section */
-        nav, header, footer, .export-container, .sidebar, .header-section, .student-info-section {
-            display: none !important;
-        }
-        
-        /* Reset page layout for printing */
-        .page-container {
-            padding: 0 !important;
-            background-color: white !important;
-            min-height: auto !important;
-        }
-        
-        .main-content {
-            box-shadow: none !important;
-            padding: 20px !important;
-            max-width: 100% !important;
-        }
-        
-        /* Make sure tables fit on page */
-        .grades-table {
-            width: 100% !important;
-            page-break-inside: avoid;
-        }
-        
-        /* Add a title for the printed page */
-        .grades-details-section::before {
-            content: "Nilai Mahasiswa";
-            display: block;
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        body {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-        
-        /* Ensure the grades section appears at the top of the page */
-        .grades-details-section {
-            margin-top: 0 !important;
-        }
-    }
-
-    /* Print-only template styling */
-    .print-only-template {
-        display: none;
-    }
-
-    @media print {
-        /* Hide regular page content */
-        body > *:not(script),
-        .page-container, 
-        .main-content > *:not(.print-only-template),
-        nav, header, footer, .sidebar {
-            display: none !important;
-        }
-        
-        /* Show only the print template */
-        .print-only-template {
-            display: block !important;
-            padding: 20px;
-            max-width: 100%;
-            margin: 0 auto;
-        }
-        
-        /* Ensure print template takes the whole page */
-        body {
-            margin: 0;
-            padding: 0;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-        
-        /* Remove any page margins */
-        @page {
-            size: auto;
-            margin: 10mm;
-        }
-        
-        /* Rest of your print styles remain the same */
-        .print-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        
-        /* Other print styles stay the same... */
-        
-    }
-</style>
 <script>
     function printGrades() {
-    // Pastikan template cetak terlihat
-    const printTemplate = document.querySelector('.print-only-template');
+        const printTemplate = document.querySelector('.print-only-template');
         if (printTemplate) {
-            printTemplate.style.display = 'block';
+            printTemplate.classList.remove('hidden');
         }
         
-        // Update tanggal di template cetak
-        const now = new Date();
-        const formattedDate = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}, ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-        
-        if (document.querySelector('.print-date')) {
-            document.querySelector('.print-date').textContent = formattedDate;
-        }
-        
-        // Ubah judul yang ditampilkan di template cetak
-        if (document.querySelector('.print-title')) {
-            document.querySelector('.print-title').textContent = "Nilai Mahasiswa";
-        }
-        
-        if (document.querySelector('.report-title')) {
-            document.querySelector('.report-title').textContent = "Detail Nilai Mahasiswa";
-        }
-        
-        // Pastikan tabel nilai terlihat dengan menambahkan styling khusus
-        const printTable = document.querySelector('.print-grades-table');
-        if (printTable) {
-            printTable.style.display = 'table';
-            printTable.style.width = '100%';
-            printTable.style.borderCollapse = 'collapse';
-            printTable.style.marginTop = '20px';
-            printTable.style.marginBottom = '30px';
-            printTable.style.border = '1px solid #ddd';
-        }
-        
-        // Tambahkan styling tambahan untuk header dan sel tabel
-        const tableHeaders = document.querySelectorAll('.print-grades-table th');
-        tableHeaders.forEach(th => {
-            th.style.backgroundColor = '#f4f7f0';
-            th.style.color = '#658E36';
-            th.style.fontWeight = '600';
-            th.style.padding = '10px';
-            th.style.textAlign = 'center';
-            th.style.border = '1px solid #ddd';
-        });
-        
-        const tableCells = document.querySelectorAll('.print-grades-table td');
-        tableCells.forEach(td => {
-            td.style.padding = '10px';
-            td.style.border = '1px solid #ddd';
-            td.style.textAlign = 'center';
-        });
-        
-        // Ubah judul dokumen untuk mencetak
         let originalTitle = document.title;
         document.title = "Detail Nilai Mahasiswa";
         
-        // Beri waktu untuk browser memproses tampilan
         setTimeout(function() {
-            // Cetak halaman
             window.print();
             
-            // Kembalikan judul asli dan sembunyikan template setelah mencetak
             setTimeout(function() {
                 document.title = originalTitle;
                 if (printTemplate) {
-                    printTemplate.style.display = 'none';
+                    printTemplate.classList.add('hidden');
                 }
             }, 500);
         }, 300);
     }
 </script>
+
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .print-only-template, .print-only-template * {
+        visibility: visible;
+    }
+    .print-only-template {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+        background: white;
+    }
+    @page {
+        margin: 10mm;
+    }
+}
+</style>
 @endsection
