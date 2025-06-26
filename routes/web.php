@@ -146,6 +146,8 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     // Route untuk view sertifikat (buka di tab baru)
     Route::get('/certificate/view/{id}', [App\Http\Controllers\Student\StudentAttendanceController::class, 'viewCertificate'])
         ->name('certificate.view');
+    Route::get('/certificate/download/{id}', [App\Http\Controllers\Student\StudentAttendanceController::class, 'downloadCertificate'])
+        ->name('certificate.download');
     
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Student\StudentGradeController::class, 'index'])->name('grades');

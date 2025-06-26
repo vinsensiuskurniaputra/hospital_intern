@@ -207,22 +207,6 @@
             </div>
         @endif
     </div>
-
-    <!-- Certificate Simulation Section -->
-    <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h5 class="text-lg font-medium">Demo Sertifikasi</h5>
-            <span class="text-xs bg-[#E8F5E9] text-[#637F26] px-2 py-1 rounded">Contoh jika semua stase selesai</span>
-        </div>
-        <p class="text-gray-600 text-sm mb-4">
-            Tombol ini hanya untuk demonstrasi. Klik untuk melihat notifikasi bagaimana tampilannya ketika semua stase telah selesai.
-        </p>
-        <div class="flex justify-end">
-            <a href="{{ route('student.certificate.view', [auth()->user()->student->id]) }}" target="_blank" class="bg-[#96D67F] hover:bg-[#85c070] px-6 py-2 rounded-lg text-sm text-gray-700">
-                Simulasi Unduh
-            </a>
-        </div>
-    </div>
 </div>
 
 <!-- Notification Popup -->
