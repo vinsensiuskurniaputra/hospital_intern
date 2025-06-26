@@ -48,6 +48,7 @@
                         <thead class="bg-gray-50 border-y border-gray-100">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">id</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kampus</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tindakan</th>

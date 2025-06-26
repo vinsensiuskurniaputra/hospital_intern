@@ -180,4 +180,10 @@ class AdminInternshipClassController extends Controller
                 ->withInput();
         }
     }
+
+    public function showStudents($id)
+    {
+        $internshipClass = InternshipClass::with('students.user')->findOrFail($id);
+        return view('pages.admin.internship_class.detail', compact('internshipClass'));
+    }
 }

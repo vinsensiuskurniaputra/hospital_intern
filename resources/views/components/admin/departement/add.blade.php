@@ -4,19 +4,19 @@
 @section('is_has_photo', 'false')
 @section('input_contents')
     @include('components.general.input_field', [
-        'label' => 'Name',
+        'label' => 'Nama Departemen',
         'name' => 'name',
         'type' => 'text',
         'value' => old('name'),
         'required' => true,
-        'placeholder' => 'Enter name...',
+        'placeholder' => 'Masukan nama...',
     ])
     @include('components.general.input_field', [
-        'label' => 'Description',
+        'label' => 'Keterangan',
         'name' => 'description',
         'type' => 'text',
         'value' => old('description'),
-        'required' => true,
-        'placeholder' => 'Enter description...',
+        'required' => false,
+        'placeholder' => 'Masukan Keterangan...',
     ])
 @endsection

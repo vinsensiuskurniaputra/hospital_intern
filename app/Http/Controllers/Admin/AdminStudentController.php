@@ -9,6 +9,8 @@ use App\Models\Student;
 use App\Models\ClassYear;
 use App\Models\StudyProgram;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
@@ -166,7 +168,7 @@ class AdminStudentController extends Controller
     {
         $student->is_finished = !$student->is_finished;
         $student->save();
-        return redirect()->route('admin.students.index')->with('success', 'Student status updated successfully');
+        return redirect()->route('admin.studentScores.index')->with('success', 'Student status updated successfully');
     }
 
     public function filter(Request $request)
@@ -214,54 +216,106 @@ class AdminStudentController extends Controller
 
     public function import(Request $request)
     {
-        $validated = $request->validate([
-            'file' => 'required|mimes:csv,txt',
-        ]);
+        try {
+            $validated = $request->validate([
+                'file' => 'required|mimes:csv,txt',
+            ]);
 
+            $file = $request->file('file');
 
-        $file = $request->file('file');
-        $rows = array_map('str_getcsv', file($file));
-        $headers = array_map('strtolower', array_map('trim', $rows[0]));
-        unset($rows[0]); // Hapus header
+            // Baca file
+            $rows = array_map('str_getcsv', file($file));
 
-        $inserted = 0;
-        $skipped = 0;
-
-        foreach ($rows as $row) {
-            $row = array_combine($headers, $row);
-
-            // Skip jika username atau nim sudah ada
-            if (User::where('username', $row['username'])->exists() || Student::where('nim', $row['nim'])->exists() || User::where('email', $row['email'])->exists()) {
-                $skipped++;
-                continue;
+            if (empty($rows) || count($rows[0]) < 1) {
+                return redirect()->back()->withErrors(['file' => 'File kosong atau tidak valid.']);
             }
 
-            // Buat user
-            $user = User::addUser([
-                'username' => $row['username'],
-                'name' => $row['name'],
-                'email' => $row['email'] ?? null,
-                'password' => 'password',
-                'photo_profile_url' => null,
-            ]);
+            $headers = array_map('strtolower', array_map('trim', $rows[0]));
+            unset($rows[0]); // Hapus header
 
-            // Tambahkan role student
-            $studentRole = Role::where('name', 'student')->first();
-            $user->roles()->attach($studentRole);
+            $inserted = 0;
+            $skipped = 0;
+            $errorMessages = [];
 
-            // Buat student
-            Student::createStudent([
-                'user_id' => $user->id,
-                'internship_class_id' => !empty($row['internship_class_id']) ? intval($row['internship_class_id']) : null,
-                'study_program_id' => $row['study_program_id'],
-                'nim' => $row['nim'],
-                'telp' => $row['telp'],
-            ]);
+            DB::beginTransaction();
 
-            $inserted++;
+            foreach ($rows as $index => $row) {
+                try {
+                    if (count($row) != count($headers)) {
+                        $skipped++;
+                        $errorMessages[] = "Baris ke-" . ($index + 2) . ": Jumlah kolom tidak cocok.";
+                        continue; // Skip jika jumlah kolom tidak cocok
+                    }
+
+                    $row = array_combine($headers, $row);
+
+                    if (!$row || empty($row['username']) || empty($row['nim']) || empty($row['email'])) {
+                        $skipped++;
+                        $errorMessages[] = "Baris ke-" . ($index + 2) . ": Data tidak lengkap (username, nim, atau email kosong).";
+                        continue;
+                    }
+
+                    // Skip jika username, nim, atau email sudah ada
+                    if (User::where('username', $row['username'])->exists()) {
+                        $skipped++;
+                        $errorMessages[] = "Baris ke-" . ($index + 2) . ": Username '{$row['username']}' sudah ada.";
+                        continue;
+                    }
+
+                    if (Student::where('nim', $row['nim'])->exists()) {
+                        $skipped++;
+                        $errorMessages[] = "Baris ke-" . ($index + 2) . ": NIM '{$row['nim']}' sudah ada.";
+                        continue;
+                    }
+
+                    if (User::where('email', $row['email'])->exists()) {
+                        $skipped++;
+                        $errorMessages[] = "Baris ke-" . ($index + 2) . ": Email '{$row['email']}' sudah ada.";
+                        continue;
+                    }
+
+                    // Buat user
+                    $user = User::addUser([
+                        'username' => $row['username'],
+                        'name' => $row['name'],
+                        'email' => $row['email'] ?? null,
+                        'password' => 'password',
+                        'photo_profile_url' => null,
+                    ]);
+
+                    // Tambahkan role student
+                    $studentRole = Role::where('name', 'student')->first();
+                    if ($studentRole) {
+                        $user->roles()->attach($studentRole);
+                    }
+
+                    // Buat student
+                    Student::createStudent([
+                        'user_id' => $user->id,
+                        'internship_class_id' => !empty($row['internship_class_id']) ? intval($row['internship_class_id']) : null,
+                        'study_program_id' => $row['study_program_id'],
+                        'nim' => $row['nim'],
+                        'telp' => $row['telp'],
+                    ]);
+
+                    $inserted++;
+                } catch (\Throwable $e) {
+                    $errorMessages[] = "Baris ke-" . ($index + 2) . ": Gagal diimport - " . $e->getMessage();
+                    $skipped++;
+                }
+            }
+
+            DB::commit();
+
+            $errorMessageString = implode('<br>', $errorMessages);
+
+            return redirect()->route('admin.students.index')->with('success', "Import selesai: {$inserted} data ditambahkan, {$skipped} dilewati karena duplikat atau error.<br>{$errorMessageString}");
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator)->withInput();
+        } catch (\Throwable $e) {
+            Log::error("Gagal mengimport file: " . $e->getMessage());
+            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat memproses file.' . $e->getMessage()])->withInput();
         }
-
-        return redirect()->route('admin.students.index')->with('success', "Import selesai: {$inserted} data ditambahkan, {$skipped} dilewati karena duplikat.");
     }
 
     public function downloadTemplate()
