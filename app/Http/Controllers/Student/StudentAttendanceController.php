@@ -324,15 +324,11 @@ class StudentAttendanceController extends Controller
     
     public function downloadCertificate($id)
     {
-        // Cari student berdasarkan id
         $student = \App\Models\Student::findOrFail($id);
-        
-        // Cari certificate yang terhubung dengan student_id tersebut
         $certificate = Certificate::where('student_id', $student->id)->first();
 
-        // Cek apakah semua stase sudah selesai
-        $allStaseCompleted = $student->stases()->where('status', '!=', 'completed')->count() === 0;
-        if (!$allStaseCompleted) {
+        // Ganti sesuai field kelulusan yang benar
+        if ($student->status_magang !== 'completed') {
             return response()->json(['message' => 'Belum menyelesaikan magang'], 403);
         }
 
@@ -346,7 +342,7 @@ class StudentAttendanceController extends Controller
             'periode' => $certificate->periode ?? null,
         ];
 
-        $pdf = PDF::loadView('components.admin.certificate.template', $data);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('components.admin.certificate.template', $data);
         $pdf->setPaper('A4', 'portrait');
         $filename = "{$certificate->kode}.pdf";
 
