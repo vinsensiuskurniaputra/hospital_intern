@@ -14,6 +14,10 @@
             {{ $internshipClass->students->count() }}</td>
 
         <td class="px-6 py-4 flex space-x-2 text-center whitespace-nowrap text-sm font-medium">
+            <a href="{{ route('admin.internshipClasses.students', $internshipClass->id) }}"
+                class="text-blue-500 hover:text-blue-600">
+                <i class="bi bi-eye"></i>
+            </a>
             <a href="{{ route('admin.internshipClasses.edit', $internshipClass->id) }}"
                 class="text-[#637F26] hover:text-[#85A832] ml-auto">
                 <i class="bi bi-pencil"></i>

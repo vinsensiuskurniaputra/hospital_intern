@@ -32,7 +32,7 @@ class AdminDepartementController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255',
         ]);
 
 
@@ -67,7 +67,7 @@ class AdminDepartementController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255',
         ]);
 
 
