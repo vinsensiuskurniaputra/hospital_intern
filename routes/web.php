@@ -45,6 +45,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+
 Route::middleware(['auth', 'menu'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('/profile', AdminProfileController::class)->names('admin.profile');
@@ -156,11 +157,11 @@ Route::middleware(['auth', 'menu'])->prefix('student')->name('student.')->group(
     // Presensi & Sertifikasi
     Route::get('/attendance', [App\Http\Controllers\Student\StudentAttendanceController::class, 'index'])->name('attendance');
     Route::post('/attendance/checkout', [App\Http\Controllers\Student\StudentAttendanceController::class, 'checkOut'])->name('attendance.checkout');
-    // Route untuk view sertifikat (buka di tab baru)
-    Route::get('/certificate/download/{id}', [App\Http\Controllers\Student\StudentAttendanceController::class, 'downloadCertificate'])
-        ->name('certificate.download');
+    // Route untuk vunduh sertfikat
     Route::get('/certificate/view/{id}', [App\Http\Controllers\Student\StudentAttendanceController::class, 'viewCertificate'])
         ->name('certificate.view');
+    Route::get('/certificate/download/{id}', [App\Http\Controllers\Student\StudentAttendanceController::class, 'downloadCertificate'])
+        ->name('certificate.download');
     
     // Nilai
     Route::get('/grades', [App\Http\Controllers\Student\StudentGradeController::class, 'index'])->name('grades');
@@ -241,4 +242,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/check-today', [HomeController::class, 'checkTodayAttendance'])->name('attendance.check-today');
     Route::post('/attendance/checkout', [HomeController::class, 'checkoutAttendance'])->name('attendance.checkout');
 });
+
 
