@@ -169,8 +169,8 @@
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open"
                                     class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-                                    <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt="Profile"
-                                        class="w-8 h-8 rounded-full">
+                                    <img src="{{ Auth::user()->photo_profile_url ? asset('storage/' . Auth::user()->photo_profile_url) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
+                                        alt="Profile" class="w-8 h-8 rounded-full">
                                     <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
                                 </button>
 
