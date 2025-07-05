@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
         //     $student->user->roles()->attach($studentRole);
         // }
 
-        // Seed data that depends on students
+        // // Seed data that depends on students
         // $this->call([
         //     PresenceSessionSeeder::class,
         //     PresenceSeeder::class,
@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
         //     CertificateSeeder::class,
         // ]);
 
-        // Tambahkan seeder custom untuk user_id = 2
+        // // Tambahkan seeder custom untuk user_id = 2
         // $this->call(CustomUserPresenceSeeder::class);
 
         // // Tambahkan seeder jadwal untuk user ID 2
