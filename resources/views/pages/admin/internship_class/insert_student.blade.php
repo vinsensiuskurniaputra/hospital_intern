@@ -24,7 +24,7 @@
                                 'id' => $student->id,
                                 'name' => $student->user->name,
                                 'nim' => $student->nim,
-                                'selected' => !is_null($student->internship_class_id),
+                                'selected' => false,
                                 'current_class_id' => $student->internship_class_id,
                             ],
                         );
@@ -36,6 +36,14 @@
         step: 1,
         get progress() {
             return (this.step / 3) * 100;
+        },
+        get filteredStudents() {
+            if (!this.selectedClassId) return [];
+    
+            return this.students.filter(student =>
+                student.current_class_id === null ||
+                student.current_class_id == this.selectedClassId
+            );
         }
     }" class="space-y-6">
         <!-- Bilah Progres -->
@@ -102,7 +110,7 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-medium text-gray-800">Pilih Mahasiswa</h3>
                 <span class="text-sm bg-[#F5F7F0] text-[#637F26] px-3 py-1 rounded-full"
-                    x-text="`${students.filter(s => s.selected).length} dipilih`"></span>
+                    x-text="`${filteredStudents.filter(s => s.selected).length} dipilih`"></span>
             </div>
 
             <!-- Pencarian dan Pilih Semua -->
@@ -114,7 +122,7 @@
                     <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
                 </div>
                 <label class="flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox" @click="students.forEach(s => s.selected = $event.target.checked)"
+                    <input type="checkbox" @click="filteredStudents.forEach(s => s.selected = $event.target.checked)"
                         class="rounded border-gray-300 text-[#637F26] focus:ring-[#637F26]">
                     <span>Pilih semua</span>
                 </label>
@@ -123,15 +131,20 @@
             <!-- Daftar Mahasiswa -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto p-1">
                 <template
-                    x-for="student in students.filter(s => !searchTerm || s.name.toLowerCase().includes(searchTerm.toLowerCase()))"
+                    x-for="student in filteredStudents.filter(s => !searchTerm || s.name.toLowerCase().includes(searchTerm.toLowerCase()))"
                     :key="student.id">
                     <label
-                        class="flex items-center p-3 rounded-lg border border-gray-100 hover:bg-[#F5F7F0] cursor-pointer transition-colors">
+                        class="flex items-center p-3 rounded-lg border border-gray-100 hover:bg-[#F5F7F0] cursor-pointer transition-colors"
+                        :class="student.current_class_id == selectedClassId ? 'bg-blue-50 border-blue-200' : ''">
                         <input type="checkbox" name="students[]" :value="student.id" x-model="student.selected"
                             class="rounded border-gray-300 text-[#637F26] focus:ring-[#637F26]">
                         <div class="ml-3 flex-1">
                             <p class="text-sm font-medium text-gray-800" x-text="student.name"></p>
                             <p class="text-xs text-gray-500" x-text="student.nim"></p>
+                            <p class="text-xs"
+                                :class="student.current_class_id == selectedClassId ? 'text-blue-600' : 'text-green-600'"
+                                x-text="student.current_class_id == selectedClassId ? 'Sudah di kelas ini' : 'Belum ada kelas'">
+                            </p>
                         </div>
                         <div class="w-2 h-2 rounded-full" :class="student.selected ? 'bg-[#637F26]' : 'bg-gray-200'"></div>
                     </label>

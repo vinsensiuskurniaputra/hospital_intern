@@ -27,7 +27,7 @@
                 </td>
                 @foreach ($stases as $stase)
                     <td class="border text-center border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                        {{ $student->grades->where('stase.name', $stase->name)->first()?->avg_grades ?? '' }}
+                        {{ $student->grades->where('stase.name', $stase->name)->first()?->avg_grades ?? '-' }}
                     </td>
                 @endforeach
                 <td class="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-900">
