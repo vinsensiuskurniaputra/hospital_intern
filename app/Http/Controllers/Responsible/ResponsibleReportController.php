@@ -223,9 +223,11 @@ class ResponsibleReportController extends Controller
 
         $studentIds = $students->pluck('id')->toArray();
 
-        $wantedComponents = [
-            'Keahlian', 'Profesionalisme', 'Komunikasi', 'Kemampuan Menangani Pasien'
-        ];
+        // Ambil komponen nilai dinamis sesuai stase
+        $wantedComponents = DB::table('grade_components')
+            ->where('stase_id', $stase->id)
+            ->pluck('name')
+            ->toArray();
 
         $gradeComponents = DB::table('grade_components')
             ->where('stase_id', $stase->id)
