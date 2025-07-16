@@ -9,7 +9,7 @@ class ResponsibleReportExport implements FromView
 {
     public $students, $stase, $absensiData, $gradesData, $gradeComponents, $componentGrades, $wantedComponents;
 
-    public function __construct($students, $stase, $absensiData, $gradesData, $gradeComponents, $componentGrades, $wantedComponents)
+    public function __construct($students, $stase, $absensiData, $gradesData, $gradeComponents, $componentGrades, $wantedComponents = null)
     {
         $this->students = $students;
         $this->stase = $stase;

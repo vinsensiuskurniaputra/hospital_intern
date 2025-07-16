@@ -57,7 +57,7 @@ class StudentAttendanceController extends Controller
 
         // Check if certificate is available
         $certificate = Certificate::where('student_id', $student->id)->first();
-        $allStagesCompleted = $certificate ? true : false;
+        $allStagesCompleted = $student->is_finished; // atau field kelulusan yang benar
 
         return view('pages.student.attendance.index', compact(
             'presences',
@@ -67,44 +67,52 @@ class StudentAttendanceController extends Controller
             'absent',
             'attendanceStats',
             'stases',
-            'allStagesCompleted'
+            'allStagesCompleted',
+            'certificate'
         ));
 
     }
 
     private function getStaseAttendanceData($studentId)
     {
-        // Get all stases that the student has attended
-        $staseAttendance = Presence::where('student_id', $studentId)
-            ->with(['presenceSession.schedule.stase'])
-            ->get()
-            ->groupBy(function($presence) {
-                return $presence->presenceSession->schedule->stase->id ?? 'unknown';
-            });
+        $student = \App\Models\Student::with('internshipClass.schedules.stase')->findOrFail($studentId);
+
+        // Ambil semua jadwal stase dari kelas magang mahasiswa
+        $schedules = $student->internshipClass
+            ? $student->internshipClass->schedules()->with('stase')->get()
+            : collect();
 
         $stases = [];
-        
-        foreach ($staseAttendance as $staseId => $attendances) {
-            if ($staseId === 'unknown') continue;
-            
-            $stase = $attendances->first()->presenceSession->schedule->stase;
-            $totalAttendances = $attendances->count();
-            $presentCount = $attendances->where('status', 'present')->count();
-            $sickCount = $attendances->where('status', 'sick')->count();
-            $absentCount = $attendances->where('status', 'absent')->count();
-            
-            // Calculate percentage (present attendance rate)
+
+        foreach ($schedules as $schedule) {
+            $stase = $schedule->stase;
+            if (!$stase) continue;
+
+            // Ambil semua presensi mahasiswa di stase ini (berdasarkan schedule_id)
+            $presences = \App\Models\Presence::where('student_id', $studentId)
+                ->whereHas('presenceSession.schedule', function($q) use ($schedule) {
+                    $q->where('stase_id', $schedule->stase_id);
+                })
+                ->get();
+
+            $totalAttendances = $presences->count();
+            $presentCount = $presences->where('status', 'present')->count();
+            $sickCount = $presences->where('status', 'sick')->count();
+            $absentCount = $presences->where('status', 'absent')->count();
+
             $percentage = $totalAttendances > 0 ? round(($presentCount / $totalAttendances) * 100, 1) : 0;
-            
-            // Get date range for this stase
-            $firstDate = $attendances->min('date_entry');
-            $lastDate = $attendances->max('date_entry');
-            $dateRange = Carbon::parse($firstDate)->format('d M') . ' - ' . Carbon::parse($lastDate)->format('d M Y');
-            
-            $stases[] = [
+
+            // Ambil tanggal rotasi stase dari schedule
+            $dateRange = $schedule->start_date && $schedule->end_date
+                ? \Carbon\Carbon::parse($schedule->start_date)->format('d M') . ' - ' . \Carbon\Carbon::parse($schedule->end_date)->format('d M Y')
+                : '-';
+
+            $stases[$stase->id] = [
                 'name' => $stase->name,
                 'department' => 'Departemen ' . $stase->name,
                 'date' => $dateRange,
+                'start_date' => $schedule->start_date,
+                'end_date' => $schedule->end_date,
                 'percentage' => $percentage,
                 'attendance' => [
                     'present' => $totalAttendances > 0 ? round(($presentCount / $totalAttendances) * 100, 1) : 0,
@@ -113,8 +121,9 @@ class StudentAttendanceController extends Controller
                 ]
             ];
         }
-        
-        return $stases;
+
+        // Jika ada stase yang sama di beberapa jadwal, hanya tampilkan satu (pakai key $stase->id)
+        return array_values($stases);
     }
     
     public function submitToken(Request $request)
@@ -257,7 +266,6 @@ class StudentAttendanceController extends Controller
 
         // Dapatkan data mahasiswa
         $student = Student::where('user_id', Auth::id())->first();
-        
         if (!$student) {
             return response()->json([
                 'status' => false,
@@ -325,15 +333,16 @@ class StudentAttendanceController extends Controller
     public function downloadCertificate($id)
     {
         $student = \App\Models\Student::findOrFail($id);
-        $certificate = Certificate::where('student_id', $student->id)->first();
 
-        // Ganti sesuai field kelulusan yang benar
-        if ($student->status_magang !== 'completed') {
-            return response()->json(['message' => 'Belum menyelesaikan magang'], 403);
+        // Cek kelulusan dan sertifikat
+        if (!$student->is_finished) {
+            abort(403, 'Sertifikat hanya bisa diunduh jika sudah lulus magang.');
         }
 
+        $certificate = Certificate::where('student_id', $student->id)->first();
+
         if (!$certificate) {
-            abort(404, 'Sertifikat tidak ditemukan untuk mahasiswa ini.');
+            abort(403, 'Sertifikat belum tersedia.');
         }
 
         $data = [
@@ -347,33 +356,6 @@ class StudentAttendanceController extends Controller
         $filename = "{$certificate->kode}.pdf";
 
         return $pdf->download($filename);
-    }
-    
-    public function downloadDemoCertificate()
-    {
-        $student = Auth::user()->student;
-        $certificate = \App\Models\Certificate::where('student_id', $student->id)->first();
-
-        if (!$certificate || !$certificate->certificate_url) {
-            return redirect()->back()->with('error', 'Sertifikat belum tersedia.');
-        }
-
-        // Path ke file sertifikat
-        $filePath = public_path($certificate->certificate_url);
-
-        // Jika file tidak ada di public, coba di storage
-        if (!file_exists($filePath)) {
-            $filePath = storage_path('app/public/' . $certificate->certificate_url);
-        }
-
-        if (!file_exists($filePath)) {
-            return redirect()->back()->with('error', 'File sertifikat tidak ditemukan di server.');
-        }
-
-        $filename = 'Sertifikat_Magang_'.$student->name.'.pdf';
-        return response()->download($filePath, $filename, [
-            'Content-Type' => 'application/pdf',
-        ]);
     }
     
     public function viewCertificate($id)

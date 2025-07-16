@@ -17,25 +17,25 @@
             @endphp            
             @if($total > 0)
                 <div class="text-lg font-medium mb-4">{{ $total }} Kehadiran</div>
-                <div class="flex justify-between items-center">
-                    <div class="chart-container">
-                        <canvas id="donutChart" class="w-10 h-14"></canvas>
+                <div class="flex justify-start items-center gap-12" style="min-height: 160px;">
+                    <div class="chart-container flex-shrink-0" style="width:120px; height:120px;">
+                        <canvas id="donutChart" class="w-[120px] h-[120px]"></canvas>
                     </div>
-                    <div class="flex flex-col space-y-2">
+                    <div class="flex flex-col space-y-2 items-start w-full">
                         <div class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-[#22c55e] mr-2"></span>
-                            <span class="text-sm">Hadir</span>
-                            <span class="text-sm ml-4">{{ number_format($total > 0 ? ($present / $total * 100) : 0, 1) }}%</span>
+                            <span class="w-4 h-4 rounded-full bg-[#22c55e] mr-2"></span>
+                            <span class="text-base font-medium">Hadir</span>
+                            <span class="text-base font-semibold ml-4">{{ number_format($total > 0 ? ($present / $total * 100) : 0, 1) }}%</span>
                         </div>
                         <div class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-[#f59e0b] mr-2"></span>
-                            <span class="text-sm">Izin</span>
-                            <span class="text-sm ml-4">{{ number_format($total > 0 ? ($sick / $total * 100) : 0, 1) }}%</span>
+                            <span class="w-4 h-4 rounded-full bg-[#f59e0b] mr-2"></span>
+                            <span class="text-base font-medium">Izin</span>
+                            <span class="text-base font-semibold ml-4">{{ number_format($total > 0 ? ($sick / $total * 100) : 0, 1) }}%</span>
                         </div>
                         <div class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-[#ef4444] mr-2"></span>
-                            <span class="text-sm">Alpha</span>
-                            <span class="text-sm ml-4">{{ number_format($total > 0 ? ($absent / $total * 100) : 0, 1) }}%</span>
+                            <span class="w-4 h-4 rounded-full bg-[#ef4444] mr-2"></span>
+                            <span class="text-base font-medium">Alpha</span>
+                            <span class="text-base font-semibold ml-4">{{ number_format($total > 0 ? ($absent / $total * 100) : 0, 1) }}%</span>
                         </div>
                     </div>
                 </div>
@@ -63,8 +63,9 @@
             </p>
             <div class="flex justify-end">
                 <button 
-                    onclick="downloadCertificate({{ auth()->user()->student->id }})"
-                    class="bg-[#96D67F] hover:bg-[#85c070] px-6 py-2 rounded-lg text-sm text-gray-700">
+                    onclick="downloadCertificate({{ auth()->user()->student->id }}, {{ $allStagesCompleted && $certificate ? 'true' : 'false' }})"
+                    class="{{ $allStagesCompleted && $certificate ? 'bg-[#96D67F] hover:bg-[#85c070] text-gray-700' : 'bg-gray-300 text-gray-500 cursor-pointer' }} px-6 py-2 rounded-lg text-sm"
+                    style="transition: background 0.2s;">
                     Unduh Sertifikat
                 </button>
             </div>
@@ -149,64 +150,68 @@
     <!-- Stase Attendance Section -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-4">
         <h5 class="text-lg font-bold mb-6">Presensi Setiap Stase</h5>
-        
         @if(count($stases) > 0)
-            <div class="space-y-4">
-                @foreach($stases as $stase)
-                <div class="p-4 rounded-lg {{ $stase['percentage'] >= 80 ? 'bg-[#F5F7F0]' : 'bg-white' }} border border-gray-100">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h6 class="font-medium">{{ $stase['name'] }}</h6>
-                            <p class="text-sm text-gray-500">{{ $stase['department'] }}</p>
-                            <p class="text-xs text-gray-400">{{ $stase['date'] }}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xl font-bold {{ $stase['percentage'] >= 80 ? 'text-[#637F26]' : 'text-gray-900' }}">
-                                {{ number_format($stase['percentage']) }}%
-                            </span>
-                        </div>
-                    </div>
+            <div id="stase-list">
+                @php
+                    // Urutkan berdasarkan start_date DESC (terbaru di atas)
+                    $sortedStases = collect($stases)->sortByDesc(function($stase) {
+                        return $stase['start_date'] ?? '';
+                    })->values();
+                @endphp
+                @foreach($sortedStases as $idx => $stase)
+                    @php
+                        $start = \Carbon\Carbon::parse($stase['start_date'] ?? null);
+                        $end = \Carbon\Carbon::parse($stase['end_date'] ?? null);
+                        $today = \Carbon\Carbon::today();
+                        $isCurrent = $start && $end && $today->between($start, $end);
+                        $isFinished = $end && $today->gt($end);
+                        $isUpcoming = $start && $today->lt($start);
 
-                    <div class="mt-4">
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-[#637F26] h-2 rounded-full transition-all duration-300" 
-                                 style="width: {{ $stase['percentage'] }}%">
+                        $cardClass = $isCurrent ? 'border-green-500 bg-white'
+                            : ($isFinished ? 'border-green-500 bg-green-100'
+                            : 'border-gray-300 bg-gray-200');
+                    @endphp
+                    <div class="rounded-lg border {{ $cardClass }} p-4 mb-4 relative cursor-pointer transition-all"
+                         onclick="toggleStaseDetail({{ $idx }})">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-semibold text-base">{{ $stase['name'] }}</div>
+                                <div class="text-gray-500 text-sm">{{ $stase['department'] }}</div>
+                                <div class="text-gray-400 text-xs">{{ $stase['date'] }}</div>
+                            </div>
+                            <div>
+                                <span class="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white shadow"
+                                      style="width: 64px; height: 64px;">
+                                    <span class="text-lg font-bold">{{ $stase['percentage'] }}%</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div id="stase-detail-{{ $idx }}" class="hidden mt-3">
+                            <div class="flex gap-6 text-sm">
+                                <div class="flex items-center gap-1">
+                                    <span class="inline-block w-3 h-3 rounded-full bg-green-600"></span>
+                                    Hadir: <b>{{ $stase['attendance']['present'] }}%</b>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="inline-block w-3 h-3 rounded-full bg-yellow-500"></span>
+                                    Izin: <b>{{ $stase['attendance']['sick'] }}%</b>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="inline-block w-3 h-3 rounded-full bg-red-500"></span>
+                                    Alpha: <b>{{ $stase['attendance']['absent'] }}%</b>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="mt-4 grid grid-cols-3 gap-4">
-                        <div class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-[#22c55e] mr-2"></span>
-                            <span class="text-sm text-gray-600">Hadir</span>
-                            <span class="text-sm ml-auto">{{ $stase['attendance']['present'] }}%</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-[#f59e0b] mr-2"></span>
-                            <span class="text-sm text-gray-600">Izin</span>
-                            <span class="text-sm ml-auto">{{ $stase['attendance']['sick'] }}%</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-[#ef4444] mr-2"></span>
-                            <span class="text-sm text-gray-600">Alpha</span>
-                            <span class="text-sm ml-auto">{{ $stase['attendance']['absent'] }}%</span>
-                        </div>
-                    </div>
-                </div>
                 @endforeach
             </div>
         @else
-            <div class="text-center py-8">
-                <div class="mb-4">
-                    <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Belum Ada Stase</h3>
-                <p class="text-gray-500 mb-4">Anda belum memiliki stase yang aktif saat ini.</p>
-            </div>
+            <div class="text-gray-400">Belum ada stase yang dijadwalkan.</div>
         @endif
     </div>
+
+    
+  
 </div>
 
 <!-- Notification Popup -->
@@ -250,14 +255,13 @@
     }
 
     #donutChart {
-        max-width: 80px;
-        max-height: 80px;
+        max-width: 120px !important;
+        max-height: 120px !important;
     }
 
     .chart-container {
-        position: relative;
-        width: 80px !important;
-        height: 80px !important;
+        width: 120px !important;
+        height: 120px !important;
     }
 
     /* DataTables custom styles */
@@ -385,7 +389,12 @@
         }, 3000);
     }
 
-    function downloadCertificate(studentId) {
+    function downloadCertificate(studentId, isCompleted) {
+        if (!isCompleted) {
+            // Tampilkan popup error seperti gambar 2
+            handleDownload(false);
+            return;
+        }
         fetch(`{{ url('/student/certificate/download') }}/${studentId}`, {
             method: 'GET',
             headers: {
@@ -395,16 +404,12 @@
         .then(response => {
             if (response.status === 200) {
                 return response.blob();
-            } else if (response.status === 403) {
-                handleDownload(false);
-                throw new Error('Belum menyelesaikan magang');
             } else {
                 handleDownload(false);
                 throw new Error('Gagal mengunduh sertifikat');
             }
         })
         .then(blob => {
-            // Download file
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -417,6 +422,11 @@
         .catch(error => {
             // Sudah ditangani di atas
         });
+    }
+
+    function toggleStaseDetail(idx) {
+        const el = document.getElementById('stase-detail-' + idx);
+        if (el) el.classList.toggle('hidden');
     }
 </script>
 @endpush
