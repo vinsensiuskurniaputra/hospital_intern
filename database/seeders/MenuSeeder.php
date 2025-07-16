@@ -16,7 +16,7 @@ class MenuSeeder extends Seeder
     {
         // General
         $dashboard = Menu::create([
-            'name' => 'Dashboard',
+            'name' => 'Beranda',
             'url' => '/home',
             'icon' => 'bi bi-house-door', // Bootstrap Icons
             'parent_id' => null,
@@ -25,32 +25,33 @@ class MenuSeeder extends Seeder
 
         // --- Menu Admin ---
         // Menu utama
-        $userManagement = Menu::create([
-            'name' => 'User Management',
-            'url' => '/users',
-            'icon' => 'bi bi-people', // Bootstrap Icons
+
+        $academicManagement = Menu::create([
+            'name' => 'Manajemen Akademik',
+            'url' => '/academics',
+            'icon' => 'bi bi-mortarboard',
             'parent_id' => null,
             'order' => 2,
         ]);
 
-        $permissionManagement = Menu::create([
-            'name' => 'Permission',
-            'url' => '/permissions',
-            'icon' => 'bi bi-shield-lock',
+        $userManagement = Menu::create([
+            'name' => 'Manajemen Pengguna',
+            'url' => '/users',
+            'icon' => 'bi bi-people', // Bootstrap Icons
             'parent_id' => null,
             'order' => 3,
         ]);
 
-        $academicManagement = Menu::create([
-            'name' => 'Academic Management',
-            'url' => '/academics',
-            'icon' => 'bi bi-mortarboard',
+        $permissionManagement = Menu::create([
+            'name' => 'Izin',
+            'url' => '/permissions',
+            'icon' => 'bi bi-shield-lock',
             'parent_id' => null,
             'order' => 4,
         ]);
 
         $internshipManagement = Menu::create([
-            'name' => 'Internship Management',
+            'name' => 'Manajemen Magang',
             'url' => '/internships',
             'icon' => 'bi bi-person-workspace',
             'parent_id' => null,
@@ -58,7 +59,7 @@ class MenuSeeder extends Seeder
         ]);
 
         $presenceManagement = Menu::create([
-            'name' => 'Presence Management',
+            'name' => 'Manajemen Presensi',
             'url' => '/presences',
             'icon' => 'bi bi-calendar-check',
             'parent_id' => null,
@@ -67,21 +68,21 @@ class MenuSeeder extends Seeder
 
         // Submenu
         $adminManagement = Menu::create([
-            'name' => 'Admins',
+            'name' => 'Admin',
             'url' => '/users/admins',
             'icon' => 'bi bi-person-badge', // Ikon lebih sesuai untuk admin
             'parent_id' => $userManagement->id,
             'order' => 1,
         ]);
         $resposibleManagement = Menu::create([
-            'name' => 'PIC',
+            'name' => 'Penanggung Jawab',
             'url' => '/users/responsibles',
             'icon' => 'bi bi-person-check', // Ikon untuk pengguna yang bertanggung jawab
             'parent_id' => $userManagement->id,
             'order' => 2,
         ]);
         $studentManagement = Menu::create([
-            'name' => 'Students',
+            'name' => 'Mahasiswa',
             'url' => '/users/students',
             'icon' => 'bi bi-mortarboard', // Ikon yang lebih cocok untuk mahasiswa/pelajar
             'parent_id' => $userManagement->id,
@@ -89,7 +90,7 @@ class MenuSeeder extends Seeder
         ]);
 
         $roleManagement = Menu::create([
-            'name' => 'Roles',
+            'name' => 'Peran',
             'url' => '/permissions/roles',
             'icon' => 'bi bi-person-gear', // Lebih cocok untuk peran/role
             'parent_id' => $permissionManagement->id,
@@ -97,14 +98,14 @@ class MenuSeeder extends Seeder
         ]);
 
         $userAuthManagement = Menu::create([
-            'name' => 'User Authorization ',
+            'name' => 'Otorisasi Pengguna',
             'url' => '/permissions/users',
             'icon' => 'bi bi-person-lock', // Ikon lebih sesuai untuk admin
             'parent_id' => $permissionManagement->id,
             'order' => 2,
         ]);
         $menuManagement = Menu::create([
-            'name' => 'Menus',
+            'name' => 'Menu',
             'url' => '/permissions/menus',
             'icon' => 'bi bi-list', // Lebih cocok untuk menu
             'parent_id' => $permissionManagement->id,
@@ -113,23 +114,30 @@ class MenuSeeder extends Seeder
 
 
         $campusManagement = Menu::create([
-            'name' => 'Campuses',
+            'name' => 'Kampus',
             'url' => '/academics/campuses',
             'icon' => 'bi bi-buildings', // Lebih cocok untuk menu
             'parent_id' => $academicManagement->id,
             'order' => 1,
         ]);
         $studyProgramManagement = Menu::create([
-            'name' => 'Study Programs',
+            'name' => 'Program Studi',
             'url' => '/academics/studyPrograms',
             'icon' => 'bi bi-book', // Lebih cocok untuk menu
             'parent_id' => $academicManagement->id,
             'order' => 2,
         ]);
+        $classYearManagement = Menu::create([
+            'name' => 'Tahun Ajaran',
+            'url' => '/academics/classYears',
+            'icon' => 'bi bi-calendar3', // Lebih cocok untuk menu
+            'parent_id' => $academicManagement->id,
+            'order' => 3,
+        ]);
 
 
         $departementManagement = Menu::create([
-            'name' => 'Departement',
+            'name' => 'Departemen',
             'url' => '/internships/departements',
             'icon' => 'bi bi-diagram-3', 
             'parent_id' => $internshipManagement->id,
@@ -143,7 +151,7 @@ class MenuSeeder extends Seeder
             'order' => 2,
         ]);
         $internshipClassManagement = Menu::create([
-            'name' => 'Internship Classes',
+            'name' => 'Kelas Magang',
             'url' => '/internships/internshipClasses',
             'icon' => 'bi bi-easel', 
             'parent_id' => $internshipManagement->id,
@@ -152,39 +160,48 @@ class MenuSeeder extends Seeder
 
 
         $scheduleManagement = Menu::create([
-            'name' => 'Schedules',
+            'name' => 'Jadwal',
             'url' => '/presences/schedules',
             'icon' => 'bi bi-clock', 
             'parent_id' => $presenceManagement->id,
             'order' => 1,
         ]);
         $studentPresenceManagement = Menu::create([
-            'name' => 'Student Presences',
+            'name' => 'Presensi Mahasiswa',
             'url' => '/presences/studentPresences',
             'icon' => 'bi bi-person-check', 
             'parent_id' => $presenceManagement->id,
             'order' => 2,
         ]);
         $studentScoreManagement = Menu::create([
-            'name' => 'Student Scores',
+            'name' => 'Nilai Mahasiswa',
             'url' => '/presences/studentScores',
             'icon' => 'bi bi-graph-up', 
             'parent_id' => $presenceManagement->id,
             'order' => 3,
         ]);
-        $certificateManagement = Menu::create([
-            'name' => 'Certificates',
-            'url' => '/presences/certificates',
-            'icon' => 'bi bi-award', 
+
+        $scoreComponentManagement = Menu::create([
+            'name' => 'Komponen Nilai',
+            'url' => '/presences/gradeComponent',
+            'icon' => 'bi bi-list-check', 
             'parent_id' => $presenceManagement->id,
             'order' => 4,
         ]);
+        
+        $certificateManagement = Menu::create([
+            'name' => 'Sertifikat',
+            'url' => '/presences/certificates',
+            'icon' => 'bi bi-award', 
+            'parent_id' => $presenceManagement->id,
+            'order' => 5,
+        ]);
         $reportAndMonitoringManagement = Menu::create([
-            'name' => 'Report and Monitorings',
+            'name' => 'Laporan & Monitoring',
             'url' => '/presences/reportAndMonitorings',
             'icon' => 'bi bi-bar-chart-line', 
             'parent_id' => $presenceManagement->id,
-            'order' => 5,
+            'order' => 6,
         ]);
 
         // gift role

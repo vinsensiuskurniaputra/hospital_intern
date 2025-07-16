@@ -11,6 +11,10 @@ class Presence extends Model
     use HasFactory;
     
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'date_entry' => 'date', // Ensure date_entry is cast to a date
+    ];
     
     /**
      * Get the student that owns this presence record
@@ -26,5 +30,20 @@ class Presence extends Model
     public function presenceSession(): BelongsTo
     {
         return $this->belongsTo(PresenceSession::class, 'presence_sessions_id');
+    }
+
+    /**
+     * Get the user associated with this presence record through the student.
+     */
+    public function user()
+    {
+        return $this->hasOneThrough(
+            User::class,
+            Student::class,
+            'id', // Foreign key on students table
+            'id', // Foreign key on users table
+            'student_id', // Local key on presences table
+            'user_id' // Local key on students table
+        );
     }
 }
