@@ -23,7 +23,7 @@ class AdminStudentGradeController extends Controller
         $defaultDepartementId = $request->get('departement', 1); // Default to departement ID 1
         $perPage = $request->get('per_page', 10); // Default to 10 students per page
 
-        $query = Student::with(['user', 'grades.stase.departement']);
+        $query = Student::with(['user', 'grades.stase.departement', 'internshipClass.schedules.stase.departement']);
 
         if ($request->has('study_program') && $request->study_program != '') {
             $query->whereHas('studyProgram', function ($q) use ($request) {
@@ -32,7 +32,7 @@ class AdminStudentGradeController extends Controller
         }
 
         if ($defaultDepartementId != '') {
-            $query->whereHas('grades.stase.departement', function ($q) use ($defaultDepartementId) {
+            $query->whereHas('internshipClass.schedules.stase.departement', function ($q) use ($defaultDepartementId) {
                 $q->where('id', $defaultDepartementId);
             });
         }
