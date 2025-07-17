@@ -24,7 +24,7 @@
         <aside :class="{ 'w-72': sidebarOpen, 'w-20': !sidebarOpen }"
             class="w-72 flex flex-col h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300">
             <div class="flex items-center p-4 border-b border-gray-200 min-h-[72px]">
-                <img src="{{ asset('images/logo.png') }}" :class="{ 'm-auto': !sidebarOpen }" alt="Medical Illustration"
+                <img src="{{ asset('images/logorevisi.png') }}" :class="{ 'm-auto': !sidebarOpen }" alt="Medical Illustration"
                     class="drop-shadow-xl w-8">
                 <h2 class="text-lg font-bold text-[#637F26] ml-2" :class="{ 'hidden': !sidebarOpen }">Hospital Intern
                 </h2>

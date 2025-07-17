@@ -163,7 +163,7 @@
     <div class="certificate-container">
         <div class="content">
             <div>
-                <img src="{{ public_path('images/logo.png') }}" alt="Hospital Logo" class="logo">
+                <img src="{{ public_path('images/logorevisi.png') }}" alt="Hospital Logo" class="logo">
                 <div class="certificate-title">Sertifikat</div>
                 <div class="certificate-subtitle">Program Magang Rumah Sakit</div>
 
