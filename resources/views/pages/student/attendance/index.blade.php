@@ -167,12 +167,11 @@
                         $isFinished = $end && $today->gt($end);
                         $isUpcoming = $start && $today->lt($start);
 
-                        $cardClass = $isCurrent ? 'border-green-500 bg-white'
-                            : ($isFinished ? 'border-green-500 bg-green-100'
-                            : 'border-gray-300 bg-gray-200');
+                        $cardClass = $isCurrent ? 'border-green-500 bg-green-100'
+                            : ($isFinished ? 'border-gray-500 bg-gray-100'
+                            : 'border-gray-300 bg-white');
                     @endphp
-                    <div class="rounded-lg border {{ $cardClass }} p-4 mb-4 relative cursor-pointer transition-all"
-                         onclick="toggleStaseDetail({{ $idx }})">
+                    <div class="rounded-lg border {{ $cardClass }} p-4 mb-4 relative transition-all">
                         <div class="flex justify-between items-center">
                             <div>
                                 <div class="font-semibold text-base">{{ $stase['name'] }}</div>
@@ -186,7 +185,7 @@
                                 </span>
                             </div>
                         </div>
-                        <div id="stase-detail-{{ $idx }}" class="hidden mt-3">
+                        <div id="stase-detail-{{ $idx }}" class="mt-3">
                             <div class="flex gap-6 text-sm">
                                 <div class="flex items-center gap-1">
                                     <span class="inline-block w-3 h-3 rounded-full bg-green-600"></span>
